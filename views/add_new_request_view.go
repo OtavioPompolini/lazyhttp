@@ -16,9 +16,9 @@ type AddRequestWindow struct {
 }
 
 func OpenAddNewRequestView(g *gocui.Gui) error {
- 	a, b := g.Size()
+	a, b := g.Size()
 	arw := &AddRequestWindow{
-		Name: AddNewRequestName,
+		Name:   AddNewRequestName,
 		Title:  "puidm",
 		X:      a / 2,
 		Y:      b / 2,
