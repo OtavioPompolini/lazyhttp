@@ -19,6 +19,7 @@ var (
 		types.NewRequest("pudim"),
 	}
 	SelectedRequest = 0
+	LastViewId = "requests"
 )
 
 // TODO: Move this outside
@@ -65,16 +66,13 @@ func (w *RequestsView) Layout(g *gocui.Gui) error {
 
 	v.Clear()
 
-	for _, request := range Requests {
+	for i, request := range Requests {
+		if i == len(Requests)-1 {
+			fmt.Fprint(v, request.Name)
+			continue
+		}
 		fmt.Fprintln(v, request.Name)
 	}
-
-	// if err := g.SetKeybinding("", '1', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
-	// 	_, err = g.SetCurrentView(w.Name)
-	// 	return err
-	// }); err != nil {
-	// 	log.Panicln(err)
-	// }
 
 	return nil
 }
@@ -82,6 +80,8 @@ func (w *RequestsView) Layout(g *gocui.Gui) error {
 func (w *RequestsView) setKeybindings(g *gocui.Gui) {
 	if err := g.SetKeybinding(RequestViewName, 'j', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
 		v.MoveCursor(0, 1, false)
+		_, y := v.Cursor()
+		SelectedRequest = y
 		// debuggerContent = fmt.Sprintln(v.Cursor())
 		return nil
 	}); err != nil {
@@ -90,23 +90,22 @@ func (w *RequestsView) setKeybindings(g *gocui.Gui) {
 
 	if err := g.SetKeybinding(RequestViewName, 'k', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
 		v.MoveCursor(0, -1, false)
+		_, y := v.Cursor()
+		SelectedRequest = y
 		return nil
 	}); err != nil {
 		log.Panicln(err)
 	}
 
 	if err := g.SetKeybinding(RequestViewName, gocui.KeyEnter, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
-		_, y := v.Cursor()
-		SelectedRequest = y
-		g.SetCurrentView(RequestDetailViewName)
-
+		ChangeView(g, RequestDetailViewName)
 		return nil
 	}); err != nil {
 		log.Panicln(err)
 	}
 
 	if err := g.SetKeybinding("", '1', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
-		g.SetCurrentView(w.Name)
+		ChangeView(g, w.Name)
 		return nil
 	}); err != nil {
 		log.Panicln(err)
@@ -124,58 +123,36 @@ type RequestDetailView struct {
 
 func NewRequestDetailView(g *gocui.Gui) *RequestDetailView {
 	return &RequestDetailView{
-		Name:      RequestViewName,
-		X:         0,
+		Name:      RequestDetailViewName,
+		X:         20,
 		Y:         0,
-		Width:     14,
-		Height:    20,
-		Title:     "Requests",
+		Width:     40,
+		Height:    40,
 	}
 }
 
 func (w *RequestDetailView) Layout(g *gocui.Gui) error {
+
 	v, err := g.SetView(w.Name, w.X, w.Y, w.X+w.Width, w.Y+w.Height)
-	if err != nil && err != gocui.ErrUnknownView {
-		return err
+	if err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
 	}
 
-	if err == gocui.ErrUnknownView {
-		_, err := g.SetCurrentView(w.Name)
-
-		v.Title = w.Title
-		v.SelBgColor = gocui.ColorRed
-		v.Highlight = true
-
-		// w.setKeybindings(g);
-
-		return err
+	if g.CurrentView().Name() == w.Name {
+		v.Editable = true
+		Requests[SelectedRequest].Body = v.Buffer()
+		return nil
 	}
+
 
 	v.Clear()
-
-	for _, request := range Requests {
-		fmt.Fprintln(v, request.Name)
-	}
-
-	// if err := g.SetKeybinding("", '1', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
-	// 	_, err = g.SetCurrentView(w.Name)
-	// 	return err
-	// }); err != nil {
-	// 	log.Panicln(err)
-	// }
-
+	fmt.Fprint(v, Requests[SelectedRequest].Body)
+	//
+	// fmt.Fprintln(v, SelectedRequest)
 	return nil
 }
-
-// func SelectRequestsWindow(g *gocui.Gui) (*gocui.View, error) {
-// 	v, err := g.SetCurrentView(RequestViewName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	v.SetCursor(0, 0)
-// 	return v, nil
-// }
 
 func main() {
 	g, err := gocui.NewGui(gocui.OutputNormal)
@@ -210,15 +187,22 @@ func main() {
 		read_line = strings.TrimSuffix(read_line, "\n")
 		Requests = append(Requests, types.NewRequest(read_line))
 		g.DeleteView("addNewRequest")
-		g.SetCurrentView("requests")
+		ChangeView(g, "requests")
 		return nil
 	}); err != nil {
 		log.Panicln(err)
 	}
 
 	if err := g.SetKeybinding("addNewRequest", gocui.KeyF1, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
-		g.SetCurrentView("requests")
+		ChangeView(g, "requests")
 		g.DeleteView("addNewRequest")
+		return nil
+	}); err != nil {
+		log.Panicln(err)
+	}
+
+	if err := g.SetKeybinding("addNewRequest", gocui.KeyEsc, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		ChangeView(g, LastViewId)
 		return nil
 	}); err != nil {
 		log.Panicln(err)
@@ -231,6 +215,13 @@ func main() {
 
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
+}
+
+func ChangeView(g *gocui.Gui, viewId string) error {
+	LastViewId = g.CurrentView().Name()
+	_, err := g.SetCurrentView(viewId)
+
+	return err
 }
 
 
@@ -270,6 +261,7 @@ func (w *DebuggerView) Layout(g *gocui.Gui) error {
 
 	v.Clear()
 	fmt.Fprint(v, debuggerContent)
+	fmt.Fprintln(v, Requests)
 	return nil
 }
 

@@ -12,7 +12,7 @@ type Request struct {
 	Url     string
 	Method  string
 	Headers []Header
-	Body    []string //??
+	Body    string //??
 }
 
 type Header struct {
