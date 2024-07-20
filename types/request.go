@@ -1,10 +1,10 @@
 package types
 
 const (
-	GET    string = "get"
-	POST          = "post"
-	DELETE        = "delete"
-	PUT           = "put"
+	REQUEST_GET    string = "get"
+	REQUEST_POST          = "post"
+	REQUEST_DELETE        = "delete"
+	REQUEST_PUT           = "put"
 )
 
 type Request struct {
@@ -20,6 +20,6 @@ type Header struct {
 	value string
 }
 
-func NewRequest(name string) *Request {
-	return &Request{Name: name}
+func NewRequest(name string) Request {
+	return Request{Name: name}
 }

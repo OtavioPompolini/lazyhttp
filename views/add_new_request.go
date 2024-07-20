@@ -1,6 +1,7 @@
 package views
 
 import (
+	"github.com/OtavioPompolini/project-postman/types"
 	"github.com/jroimartin/gocui"
 )
 
@@ -13,9 +14,10 @@ type AddRequestWindow struct {
 	Title         string
 	X, Y          int
 	Width, Height int
+	OnAddRequest  func(types.Request)
 }
 
-func OpenAddNewRequestView(g *gocui.Gui) error {
+func NewAddNewRequestView(g *gocui.Gui) (*AddRequestWindow, error) {
 	a, b := g.Size()
 	arw := &AddRequestWindow{
 		Name:   AddNewRequestName,
@@ -29,15 +31,15 @@ func OpenAddNewRequestView(g *gocui.Gui) error {
 	v, err := g.SetView(arw.Name, arw.X, arw.Y, arw.X+arw.Width, arw.Y+arw.Height)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
-			return err
+			return nil, err
 		}
 
 		if _, err := g.SetCurrentView(arw.Name); err != nil {
-			return err
+			return nil, err
 		}
 
 		v.Editable = true
 		v.Title = arw.Title
 	}
-	return nil
+	return arw, nil
 }
