@@ -1,12 +1,11 @@
 package views
 
-import "github.com/OtavioPompolini/project-postman/ui"
 
-type RequestDetailView = ui.View
-
-func NewRequestDetailView() *RequestDetailView {
-	return ui.NewView("request_detail")
-}
+// type RequestDetailView = ui.View
+//
+// func NewRequestDetailView() *RequestDetailView {
+// 	return ui.NewView("request_detail")
+// }
 
 // func NewRequestDetailView(g *gocui.Gui) *ui.View {
 // 	return ui.View.NewV

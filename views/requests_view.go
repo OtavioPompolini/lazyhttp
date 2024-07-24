@@ -2,47 +2,39 @@ package views
 
 import (
 	"github.com/OtavioPompolini/project-postman/ui"
+	"github.com/jroimartin/gocui"
 )
 
-type RequestsView = ui.View
-
-func NewRequestsView() *RequestsView {
-	return ui.NewView("requests")
+type RequestsWindow struct{
+	OnClick func() error
 }
 
-// func (w *RequestsView) Layout(g *gocui.Gui) error {
-// 	v, err := g.SetView(w.Name, w.X, w.Y, w.X+w.Width, w.Y+w.Height)
-// 	if err != nil && err != gocui.ErrUnknownView {
-// 		return err
-// 	}
-//
-// 	if err == gocui.ErrUnknownView {
-// 		_, err := g.SetCurrentView(w.Name)
-//
-// 		v.Title = w.Title
-// 		v.SelBgColor = gocui.ColorRed
-// 		v.Highlight = true
-//
-// 		w.setKeybindings(g)
-//
-// 		return err
-// 	}
-//
-// 	v.Clear()
-//
-// 	for i, request := range w.Requests {
-// 		if i == len(w.Requests)-1 {
-// 			fmt.Fprint(v, request.Name)
-// 			continue
-// 		}
-// 		fmt.Fprintln(v, request.Name)
-// 	}
-//
-// 	return nil
-// }
-//
-// func (w *RequestsView) setKeybindings(g *gocui.Gui) {
-// 	if err := g.SetKeybinding(RequestViewName, 'j', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+func (RequestsWindow) Name() string {
+	return "requestsWindow"
+}
+
+func NewRequestsWindow(ui *ui.UI) *RequestsWindow {
+	requestsWindow := &RequestsWindow{}
+	return requestsWindow
+}
+
+func (w *RequestsWindow) Setup(v *ui.View) {
+	v.SetSelectedBgColor(gocui.ColorRed)
+	v.SetHightlight(true)
+	for i:=0;i<10;i++ {
+		v.WriteLn("PUDIM")
+	}
+}
+
+func (w *RequestsWindow) Update(v *ui.View) {
+}
+
+func (w *RequestsWindow) Size() (x, y, width, height int) {
+	return 0, 0, 20, 20
+}
+
+// func (w *RequestsWindow) setKeybindings(ui *ui.UI) {
+// 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
 // 		v.MoveCursor(0, 1, false)
 // 		_, y := v.Cursor()
 // 		SelectedRequest = y
@@ -52,7 +44,7 @@ func NewRequestsView() *RequestsView {
 // 		log.Panicln(err)
 // 	}
 //
-// 	if err := g.SetKeybinding(RequestViewName, 'k', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+// 	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
 // 		v.MoveCursor(0, -1, false)
 // 		_, y := v.Cursor()
 // 		SelectedRequest = y
@@ -61,21 +53,21 @@ func NewRequestsView() *RequestsView {
 // 		log.Panicln(err)
 // 	}
 //
-// 	if err := g.SetKeybinding(RequestViewName, gocui.KeyEnter, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+// 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
 // 		ChangeView(g, RequestDetailViewName)
 // 		return nil
 // 	}); err != nil {
 // 		log.Panicln(err)
 // 	}
 //
-// 	if err := g.SetKeybinding("", '1', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+// 	if err := ui.NewKeyBinding("", '1', func(g *gocui.Gui, v *gocui.View) error {
 // 		ChangeView(g, w.Name)
 // 		return nil
 // 	}); err != nil {
 // 		log.Panicln(err)
 // 	}
 //
-// 	if err := g.SetKeybinding(RequestViewName, 'n', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+// 	if err := ui.NewKeyBinding(w.Name(), 'n', func(g *gocui.Gui, v *gocui.View) error {
 // 		window, err := views.NewAddNewRequestView(g)
 // 		window.OnAddRequest = func(r types.Request) {
 // 			w.Requests = append(w.Requests, r)
