@@ -4,17 +4,11 @@ import (
 	"fmt"
 
 	"github.com/OtavioPompolini/project-postman/ui"
-	"github.com/OtavioPompolini/project-postman/views"
 	"github.com/jroimartin/gocui"
 )
 
-type Views struct {
-	RequestsWindow *ui.View
-}
-
 type App struct {
 	Gui   *ui.UI
-	Views *Views
 }
 
 func NewApp() (*App, error) {
@@ -31,33 +25,15 @@ func NewApp() (*App, error) {
 	app.Gui.SetHightlight(true)
 	app.Gui.SetFgColor(gocui.ColorBlue)
 
-	if err := app.StartViews(); err != nil {
+	if err := app.Gui.StartViews(); err != nil {
 		return nil, err
 	}
 
-	if err := app.Gui.SetCloseKeybinding(); err != nil {
+	if err := app.Gui.SetKeybindings(); err != nil {
 		return nil, err
 	}
 
 	return app, nil
-}
-
-func (app *App) StartViews() error {
-	view, err := ui.NewView(
-		&views.RequestsWindow{},
-		"requests",
-	)
-	if err != nil {
-		return err
-	}
-	app.Views = &Views{
-		RequestsWindow: view,
-	}
-
-	app.Gui.SetWindows(
-		app.Views.RequestsWindow,
-	)
-	return nil
 }
 
 func (app *App) Run() error {

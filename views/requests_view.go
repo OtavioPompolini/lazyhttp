@@ -1,7 +1,6 @@
-package views
+package ui
 
 import (
-	"github.com/OtavioPompolini/project-postman/ui"
 	"github.com/jroimartin/gocui"
 )
 

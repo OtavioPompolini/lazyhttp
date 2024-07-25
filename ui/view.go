@@ -11,6 +11,7 @@ type IView interface {
 	Update(v *View)
 	Size() (x, y, w, h int)
 	Name() string
+	SetKeybindings(ui *UI) error
 }
 
 type View struct {

@@ -4,8 +4,13 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+type Views struct {
+	RequestsWindow *View
+}
+
 type UI struct {
-	g *gocui.Gui
+	g     *gocui.Gui
+	Views *Views
 }
 
 func NewUI() (*UI, error) {
@@ -22,8 +27,28 @@ func NewUI() (*UI, error) {
 	}, nil
 }
 
+func (ui *UI) StartViews() error {
+	view, err := NewView(
+		&RequestsWindow{},
+		"requests",
+	)
+	if err != nil {
+		return err
+	}
+	ui.Views = &Views{
+		RequestsWindow: view,
+	}
+
+	ui.SetWindows()
+	return nil
+}
+
 func (ui *UI) SetHightlight(e bool) {
 	ui.g.Highlight = e
+}
+
+func (ui *UI) SetKeybindings() error {
+	return ui.Views.RequestsWindow.Window.SetKeybindings(ui)
 }
 
 func (ui *UI) SetCloseKeybinding() error {
@@ -46,18 +71,23 @@ func (ui *UI) SetFgColor(color gocui.Attribute) {
 	ui.g.FgColor = color
 }
 
-func (ui *UI) SetWindows(views ...gocui.Manager) {
-	ui.g.SetManager(views...)
+func (ui *UI) SetWindows() {
+	ui.g.SetManager(
+		ui.Views.RequestsWindow,
+	)
 }
 
 func (ui *UI) MainLoop() error {
 	return ui.g.MainLoop()
 }
 
-func (ui *UI) NewKeyBinding(name string, key gocui.Modifier, callback func() error) {
-	ui.g.SetKeybinding(name, gocui.ModNone, key, func(g *gocui.Gui, v *gocui.View) error {
-		return callback()
-	})
+func (ui *UI) NewKeyBinding(name string, key gocui.Modifier, callback func(g *gocui.Gui, v *gocui.View) error) error {
+	if err := ui.g.SetKeybinding(name, gocui.ModNone, key, func(g *gocui.Gui, v *gocui.View) error {
+		return callback(g, v)
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ui *UI) Close() {
