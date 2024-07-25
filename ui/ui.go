@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"errors"
+	"log"
+
 	"github.com/jroimartin/gocui"
 )
 
@@ -19,24 +22,14 @@ func NewUI() (*UI, error) {
 		return nil, err
 	}
 
-	g.Highlight = true
-	g.FgColor = gocui.ColorCyan
-
 	return &UI{
 		g: g,
 	}, nil
 }
 
 func (ui *UI) StartViews() error {
-	view, err := NewView(
-		&RequestsWindow{},
-		"requests",
-	)
-	if err != nil {
-		return err
-	}
 	ui.Views = &Views{
-		RequestsWindow: view,
+		RequestsWindow: NewRequestsWindow(ui),
 	}
 
 	ui.SetWindows()
@@ -48,27 +41,42 @@ func (ui *UI) SetHightlight(e bool) {
 }
 
 func (ui *UI) SetKeybindings() error {
-	return ui.Views.RequestsWindow.Window.SetKeybindings(ui)
+	if err := ui.Views.RequestsWindow.Window.SetKeybindings(*ui); err != nil {
+		return errors.Join(err)
+	}
+	return nil
 }
 
-func (ui *UI) SetCloseKeybinding() error {
+func (ui *UI) SetGlobalKeybindings() error {
 	if err := ui.g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
 		return gocui.ErrQuit
 	}); err != nil {
 		return err
 	}
+
+	if err := ui.g.SetKeybinding("", gocui.KeyCtrl2, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		g.SetCurrentView("requestsWindow")
+		return nil
+	}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (ui *UI) SelectWindow(viewName string) error {
 	if _, err := ui.g.SetCurrentView(viewName); err != nil {
-		return err
+		log.Panicln(err)
 	}
 	return nil
 }
 
 func (ui *UI) SetFgColor(color gocui.Attribute) {
 	ui.g.FgColor = color
+}
+
+func (ui *UI) SetSelectedFgColor(color gocui.Attribute) {
+	ui.g.SelFgColor = color
 }
 
 func (ui *UI) SetWindows() {
@@ -81,10 +89,8 @@ func (ui *UI) MainLoop() error {
 	return ui.g.MainLoop()
 }
 
-func (ui *UI) NewKeyBinding(name string, key gocui.Modifier, callback func(g *gocui.Gui, v *gocui.View) error) error {
-	if err := ui.g.SetKeybinding(name, gocui.ModNone, key, func(g *gocui.Gui, v *gocui.View) error {
-		return callback(g, v)
-	}); err != nil {
+func (ui *UI) NewKeyBinding(name string, key interface{}, callback func(g *gocui.Gui, v *gocui.View) error) error {
+	if err := ui.g.SetKeybinding(name, key, gocui.ModNone, callback); err != nil {
 		return err
 	}
 	return nil

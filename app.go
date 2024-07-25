@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/OtavioPompolini/project-postman/ui"
 	"github.com/jroimartin/gocui"
@@ -23,13 +23,18 @@ func NewApp() (*App, error) {
 	}
 
 	app.Gui.SetHightlight(true)
-	app.Gui.SetFgColor(gocui.ColorBlue)
+	app.Gui.SetFgColor(gocui.ColorGreen)
+	app.Gui.SetSelectedFgColor(gocui.ColorYellow)
 
 	if err := app.Gui.StartViews(); err != nil {
 		return nil, err
 	}
 
 	if err := app.Gui.SetKeybindings(); err != nil {
+		return nil, errors.Join(err)
+	}
+
+	if err := app.Gui.SetGlobalKeybindings(); err != nil {
 		return nil, err
 	}
 
@@ -46,41 +51,41 @@ func (app *App) Run() error {
 }
 
 // DEBUGGER
-var debuggerContent = "PUDIM"
-
-type DebuggerView struct {
-	Title         string
-	Name          string
-	X, Y          int
-	Width, Height int
-}
-
-func (*DebuggerView) NewDebuggerView() {
-
-}
-
-func NewDebuggerView(g *gocui.Gui) *DebuggerView {
-	x, y := g.Size()
-	return &DebuggerView{
-		Name:   "debugger",
-		X:      0,
-		Y:      y - 5,
-		Width:  x - 1,
-		Height: 4,
-		Title:  "Debugger",
-	}
-}
-
-func (w *DebuggerView) Layout(g *gocui.Gui) error {
-	v, err := g.SetView(w.Name, w.X, w.Y, w.X+w.Width, w.Y+w.Height)
-	if err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-	}
-
-	v.Clear()
-	fmt.Fprint(v, debuggerContent)
-	// fmt.Fprintln(v, Requests)
-	return nil
-}
+// var debuggerContent = "PUDIM"
+//
+// type DebuggerView struct {
+// 	Title         string
+// 	Name          string
+// 	X, Y          int
+// 	Width, Height int
+// }
+//
+// func (*DebuggerView) NewDebuggerView() {
+//
+// }
+//
+// func NewDebuggerView(g *gocui.Gui) *DebuggerView {
+// 	x, y := g.Size()
+// 	return &DebuggerView{
+// 		Name:   "debugger",
+// 		X:      0,
+// 		Y:      y - 5,
+// 		Width:  x - 1,
+// 		Height: 4,
+// 		Title:  "Debugger",
+// 	}
+// }
+//
+// func (w *DebuggerView) Layout(g *gocui.Gui) error {
+// 	v, err := g.SetView(w.Name, w.X, w.Y, w.X+w.Width, w.Y+w.Height)
+// 	if err != nil {
+// 		if err != gocui.ErrUnknownView {
+// 			return err
+// 		}
+// 	}
+//
+// 	v.Clear()
+// 	fmt.Fprint(v, debuggerContent)
+// 	// fmt.Fprintln(v, Requests)
+// 	return nil
+// }

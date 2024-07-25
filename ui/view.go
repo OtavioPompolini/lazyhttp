@@ -11,7 +11,7 @@ type IView interface {
 	Update(v *View)
 	Size() (x, y, w, h int)
 	Name() string
-	SetKeybindings(ui *UI) error
+	SetKeybindings(ui UI) error
 }
 
 type View struct {
@@ -19,7 +19,7 @@ type View struct {
 	view *gocui.View
 }
 
-func NewView(v IView, name string) (*View, error) {
+func NewView(v IView) (*View, error) {
 	view := &View{
 		Window: v,
 	}
