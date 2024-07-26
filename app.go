@@ -25,6 +25,7 @@ func NewApp() (*App, error) {
 	app.Gui.SetHightlight(true)
 	app.Gui.SetFgColor(gocui.ColorGreen)
 	app.Gui.SetSelectedFgColor(gocui.ColorYellow)
+	app.Gui.SetCursor(true)
 
 	if err := app.Gui.StartViews(); err != nil {
 		return nil, err

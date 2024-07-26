@@ -7,8 +7,8 @@ import (
 )
 
 type IView interface {
-	Setup(v *View)
-	Update(v *View)
+	Setup(g *gocui.Gui, v *gocui.View)
+	Update(g *gocui.Gui, v *gocui.View)
 	Size() (x, y, w, h int)
 	Name() string
 	SetKeybindings(ui UI) error
@@ -16,7 +16,7 @@ type IView interface {
 
 type View struct {
 	Window IView
-	view *gocui.View
+	view   *gocui.View
 }
 
 func NewView(v IView) (*View, error) {
@@ -33,17 +33,16 @@ func (v *View) Layout(g *gocui.Gui) error {
 	if err != nil {
 		if err == gocui.ErrUnknownView {
 			v.setView(newView)
-			v.Window.Setup(v)
+			v.Window.Setup(g, newView)
 			return nil
 		}
 		return err
 	}
 
-	v.Window.Update(v)
+	v.Window.Update(g, newView)
 
 	return nil
 }
-
 
 func (v *View) SetSelectedBgColor(col gocui.Attribute) {
 	v.view.SelBgColor = col
@@ -60,6 +59,3 @@ func (v *View) WriteLn(text string) {
 func (v *View) setView(newView *gocui.View) {
 	v.view = newView
 }
-
-
-

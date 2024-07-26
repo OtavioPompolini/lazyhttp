@@ -8,7 +8,8 @@ import (
 )
 
 type Views struct {
-	RequestsWindow *View
+	RequestsWindow       *View
+	RequestDetailsWindow *View
 }
 
 type UI struct {
@@ -29,7 +30,8 @@ func NewUI() (*UI, error) {
 
 func (ui *UI) StartViews() error {
 	ui.Views = &Views{
-		RequestsWindow: NewRequestsWindow(ui),
+		RequestsWindow:       NewRequestsWindow(ui),
+		RequestDetailsWindow: NewRequestDetailsWindow(ui),
 	}
 
 	ui.SetWindows()
@@ -82,6 +84,7 @@ func (ui *UI) SetSelectedFgColor(color gocui.Attribute) {
 func (ui *UI) SetWindows() {
 	ui.g.SetManager(
 		ui.Views.RequestsWindow,
+		ui.Views.RequestDetailsWindow,
 	)
 }
 
@@ -98,6 +101,10 @@ func (ui *UI) NewKeyBinding(name string, key interface{}, callback func(g *gocui
 
 func (ui *UI) Close() {
 	ui.g.Close()
+}
+
+func (ui *UI) SetCursor(b bool) {
+	ui.g.Cursor = b
 }
 
 func (ui *UI) ActiveViewName() string {
