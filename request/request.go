@@ -1,4 +1,4 @@
-package types
+package request
 
 const (
 	REQUEST_GET    string = "get"
@@ -22,4 +22,14 @@ type Header struct {
 
 func NewRequest(name string) Request {
 	return Request{Name: name}
+}
+
+func (a *Request) GetRequests() []Request {
+	return []Request{
+		{Name: "COMINI VIADO"},
+		{Name: "COMINI VIADO"},
+		{Name: "COMINI VIADO"},
+		{Name: "COMINI VIADO"},
+		{Name: "COMINI VIADO"},
+	}
 }

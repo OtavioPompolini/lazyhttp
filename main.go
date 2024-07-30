@@ -2,11 +2,13 @@ package main
 
 import (
 	"log"
+
+	"github.com/OtavioPompolini/project-postman/app"
 )
 
 func main() {
 
-	app, err := NewApp();
+	app, err := app.NewApp();
 	if err != nil {
 		log.Panicln(err)
 	}

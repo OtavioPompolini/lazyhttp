@@ -1,24 +1,18 @@
 package ui
 
 import (
-	"errors"
+	"fmt"
 	"log"
 
 	"github.com/jroimartin/gocui"
 )
 
-type Views struct {
-	RequestsWindow       *View
-	RequestDetailsWindow *View
-}
-
 type UI struct {
 	g     *gocui.Gui
-	Views *Views
 }
 
 func NewUI() (*UI, error) {
-	g, err := gocui.NewGui(gocui.OutputNormal)
+	g, err := gocui.NewGui(gocui.Output256)
 	if err != nil {
 		return nil, err
 	}
@@ -28,25 +22,8 @@ func NewUI() (*UI, error) {
 	}, nil
 }
 
-func (ui *UI) StartViews() error {
-	ui.Views = &Views{
-		RequestsWindow:       NewRequestsWindow(ui),
-		RequestDetailsWindow: NewRequestDetailsWindow(ui),
-	}
-
-	ui.SetWindows()
-	return nil
-}
-
 func (ui *UI) SetHightlight(e bool) {
 	ui.g.Highlight = e
-}
-
-func (ui *UI) SetKeybindings() error {
-	if err := ui.Views.RequestsWindow.Window.SetKeybindings(*ui); err != nil {
-		return errors.Join(err)
-	}
-	return nil
 }
 
 func (ui *UI) SetGlobalKeybindings() error {
@@ -81,14 +58,29 @@ func (ui *UI) SetSelectedFgColor(color gocui.Attribute) {
 	ui.g.SelFgColor = color
 }
 
-func (ui *UI) SetWindows() {
-	ui.g.SetManager(
-		ui.Views.RequestsWindow,
-		ui.Views.RequestDetailsWindow,
-	)
+func (ui *UI) SetManagerFunc(f func() error) {
+	ui.g.SetManagerFunc(func(*gocui.Gui) error {
+		return f()
+	})
 }
 
-func (ui *UI) MainLoop() error {
+func (ui *UI) RenderWindow(window *Window) error {
+	x, y, w, h := window.Window.Size()
+	name := window.Window.Name()
+	v, err := ui.g.SetView(name, x, y, w, h)
+	if err != nil {
+		if err == gocui.ErrUnknownView {
+			window.setView(v)
+			window.Window.Setup(window)
+			return nil
+		}
+		return fmt.Errorf("Error rendering window=%s : %w", name, err)
+	}
+	window.Window.Update(window)
+	return nil
+}
+
+func (ui *UI) Start() error {
 	return ui.g.MainLoop()
 }
 

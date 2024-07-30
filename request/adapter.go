@@ -1,7 +1,8 @@
 package request
 
-type Adpter interface {
+type Adapter interface {
 	GetRequests() []Request
 }
+
 
 
