@@ -7,6 +7,7 @@ type RequestDetailsWindow struct {
 	x, y int
 	w, h int
 	body string
+	toggleCursor func(b bool)
 }
 
 func NewRequestDetailsWindow(GUI *ui.UI) *ui.Window {
@@ -18,6 +19,7 @@ func NewRequestDetailsWindow(GUI *ui.UI) *ui.Window {
 			y:    0,
 			h:    40,
 			w:    40,
+			toggleCursor: GUI.SetCursor,
 		})
 }
 
@@ -27,6 +29,7 @@ func (w RequestDetailsWindow) Name() string {
 
 func (w *RequestDetailsWindow) Setup(v *ui.Window) {
 	// v.SelBgColor = gocui.ColorYellow
+	// v.SetVimEditor()
 	v.SetHightlight(true)
 	v.SetEditable(true)
 }
@@ -45,6 +48,16 @@ func (w *RequestDetailsWindow) Size() (x, y, width, height int) {
 }
 
 func (w *RequestDetailsWindow) SetKeybindings(ui ui.UI) error {
+	return nil
+}
+
+func (w *RequestDetailsWindow) OnDeselect() error {
+	w.toggleCursor(false)
+	return nil
+}
+
+func (w *RequestDetailsWindow) OnSelect() error {
+	w.toggleCursor(true)
 	return nil
 }
 

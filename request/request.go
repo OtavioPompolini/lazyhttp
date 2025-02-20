@@ -1,5 +1,12 @@
 package request
 
+import (
+	"database/sql"
+	"log"
+
+	_ "github.com/mattn/go-sqlite3"
+)
+
 const (
 	REQUEST_GET    string = "get"
 	REQUEST_POST          = "post"
@@ -7,12 +14,14 @@ const (
 	REQUEST_PUT           = "put"
 )
 
+// V1 = Only name and body
 type Request struct {
-	Name    string
-	Url     string
-	Method  string
-	Headers []Header
-	Body    string //??
+	Id uint
+	Name string
+	// Url     string
+	// Method  string
+	// Headers []Header
+	Body string
 }
 
 type Header struct {
@@ -20,16 +29,60 @@ type Header struct {
 	value string
 }
 
-func NewRequest(name string) Request {
-	return Request{Name: name}
+type SqliteDB struct {
+	db *sql.DB
 }
 
-func (a *Request) GetRequests() []Request {
-	return []Request{
-		{Name: "COMINI VIADO"},
-		{Name: "COMINI VIADO"},
-		{Name: "COMINI VIADO"},
-		{Name: "COMINI VIADO"},
-		{Name: "COMINI VIADO"},
+func InitDatabase() (Adapter, error) {
+	db, err := sql.Open("sqlite3", "./lazycurl.db")
+	if err != nil {
+		return nil, err
 	}
+
+	sqldb := SqliteDB{
+		db: db,
+	}
+
+	db.Exec(`
+		CREATE TABLE IF NOT EXISTS requests (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			body TEXT NOT NULL DEFAULT ""
+		);
+	`)
+
+	return sqldb, nil
+}
+
+func (a SqliteDB) GetRequests() []Request {
+	var requests []Request
+
+	row, err := a.db.Query(`
+		SELECT * FROM requests
+		`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer row.Close()
+	for row.Next() {
+		request := Request{}
+
+		err := row.Scan(&request.Id, &request.Name, &request.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		requests = append(requests, request)
+	}
+
+	return requests
+}
+
+func (a SqliteDB) CreateRequest(name string) Request {
+	_, err := a.db.Exec("INSERT INTO requests(name) values (?)", name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return Request{Name: name}
 }

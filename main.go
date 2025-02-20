@@ -1,14 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/OtavioPompolini/project-postman/app"
 )
 
 func main() {
+	fmt.Println("PUDIM")
 
-	app, err := app.NewApp();
+	app, err := app.NewApp()
 	if err != nil {
 		log.Panicln(err)
 	}

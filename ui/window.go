@@ -3,12 +3,15 @@ package ui
 import (
 	"fmt"
 
+	Editor "github.com/OtavioPompolini/project-postman/editor"
 	"github.com/jroimartin/gocui"
 )
 
 type IWindow interface {
 	Setup(w *Window)
 	Update(w *Window)
+	OnSelect() error
+	OnDeselect() error
 	Size() (x, y, w, h int)
 	Name() string
 }
@@ -26,6 +29,10 @@ func NewWindow(iw IWindow) *Window {
 	}
 }
 
+func (v *Window) SetVimEditor() {
+	v.view.Editor = &Editor.VimEditor{}
+}
+
 func (v *Window) SetSelectedBgColor(col gocui.Attribute) {
 	v.view.SelBgColor = col
 }
@@ -36,6 +43,16 @@ func (v *Window) SetHightlight(b bool) {
 
 func (v *Window) WriteLn(text string) {
 	fmt.Fprintln(v.view, text)
+}
+
+func (v *Window) WriteLines(text []string) {
+	for i, t := range text {
+		if (i < len(text)-1) {
+			fmt.Fprintln(v.view, t)
+		} else {
+			fmt.Fprint(v.view, t)
+		}
+	}
 }
 
 func (v *Window) ClearWindow() {

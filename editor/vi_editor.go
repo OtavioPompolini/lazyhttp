@@ -40,6 +40,8 @@ func (ve *VimEditor) InsertMode(v *gocui.View, key gocui.Key, ch rune, mod gocui
 		v.Overwrite = !v.Overwrite
 	case key == gocui.KeyEnter:
 		v.EditNewLine()
+
+	//// THIS SHOULD BE BANNED FOR VIMOTION USERS XD
 	case key == gocui.KeyArrowDown:
 		v.MoveCursor(0, 1, false)
 	case key == gocui.KeyArrowUp:
@@ -49,6 +51,8 @@ func (ve *VimEditor) InsertMode(v *gocui.View, key gocui.Key, ch rune, mod gocui
 	case key == gocui.KeyArrowRight:
 		v.MoveCursor(1, 0, false)
 	}
+	////
+
 	// TODO: handle other keybindings...
 }
 

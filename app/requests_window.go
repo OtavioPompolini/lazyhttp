@@ -1,22 +1,28 @@
 package app
 
 import (
+	"strconv"
+
+	"github.com/OtavioPompolini/project-postman/request"
 	"github.com/OtavioPompolini/project-postman/ui"
 	"github.com/jroimartin/gocui"
 )
 
 type RequestsWindow struct {
-	name                string
-	x, y                int
+	name     string
+	x, y     int
+	requests *[]request.Request
+	loadRequests func() error
 	// OnOpenAddNewRequest func() error
 }
 
-func NewRequestsWindow(GUI *ui.UI) *ui.Window {
+func NewRequestsWindow(GUI *ui.UI, requests *[]request.Request) *ui.Window {
 	return ui.NewWindow(
 		&RequestsWindow{
 			name: "RequestsWindow",
 			x:    0,
 			y:    0,
+			requests: requests,
 		})
 }
 
@@ -27,17 +33,30 @@ func (w RequestsWindow) Name() string {
 func (w *RequestsWindow) Setup(v *ui.Window) {
 	v.SetSelectedBgColor(gocui.ColorRed)
 	v.SetHightlight(true)
+	// w.loadRequests()
 }
 
 func (w *RequestsWindow) Update(v *ui.Window) {
 	v.ClearWindow()
-	for i:=0;i<10;i++ {
-		v.WriteLn("PUDIM")
+	lines := []string{}
+
+	for _, val := range *w.requests {
+		lines = append(lines, strconv.FormatUint(uint64(val.Id), 10) + val.Name)
 	}
+
+	v.WriteLines(lines)
 }
 
 func (w *RequestsWindow) Size() (x, y, width, height int) {
 	return w.x, w.y, 20, 20
+}
+
+func (w *RequestsWindow) OnDeselect() error {
+	return nil
+}
+
+func (w *RequestsWindow) OnSelect() error {
+	return nil
 }
 
 // func (w *RequestsWindow) SetKeybindings(ui ui.UI) error {

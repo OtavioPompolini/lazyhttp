@@ -11,12 +11,16 @@ import (
 type Windows struct {
 	RequestsWindow       *ui.Window
 	RequestDetailsWindow *ui.Window
+	CreateRequestWindow  *ui.Window
+	DebuggerView         *ui.Window
 }
 
 type App struct {
-	GUI     *ui.UI
-	adapter *request.Adapter
-	Windows *Windows
+	GUI          *ui.UI
+	db           request.Adapter
+	Windows      *Windows
+	debuggerMode bool
+	requests     *[]request.Request
 }
 
 func NewApp() (*App, error) {
@@ -26,19 +30,32 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
+	db, err := request.InitDatabase()
+	if err != nil {
+		return nil, err
+	}
+
+	requests := db.GetRequests()
+
 	app := &App{
-		GUI: userInteface,
+		GUI:      userInteface,
+		db:       db,
+		requests: &requests, //RENAME MEMORY AND CREATE STRUCT
 		Windows: &Windows{
-			RequestsWindow:       NewRequestsWindow(userInteface),
+			RequestsWindow:       NewRequestsWindow(userInteface, &requests),
 			RequestDetailsWindow: NewRequestDetailsWindow(userInteface),
+			CreateRequestWindow: NewCreateRequestWindow(userInteface, func(reqName string) {
+				db.CreateRequest(reqName)
+			}),
+			DebuggerView: NewDebuggerView(userInteface),
 		},
+		debuggerMode: true, //TODO: run argument --debug=true
 	}
 
 	app.GUI.SetManagerFunc(app.layout)
 	app.GUI.SetHightlight(true)
 	app.GUI.SetFgColor(gocui.ColorGreen)
 	app.GUI.SetSelectedFgColor(gocui.ColorYellow)
-	app.GUI.SetCursor(true)
 
 	if err := app.SetKeybindings(); err != nil {
 		return nil, errors.Join(err)
@@ -69,9 +86,20 @@ func (app *App) layout() error {
 		return err
 	}
 
+	if app.debuggerMode == true {
+		if err := app.GUI.RenderWindow(app.Windows.DebuggerView); err != nil {
+			return err
+		}
+	}
+
+	// if app.isCreatingRequest == true {
+	// if err := app.GUI.RenderWindow(app.Windows.CreateRequestWindow); err != nil {
+	// 	return err
+	// }
+	// }
+
 	return nil
 }
-
 
 // TODO: move this to other file and abstract func(g *gocui.Gui, v *gocui.View)
 func (app *App) SetKeybindings() error {
@@ -90,11 +118,49 @@ func (app *App) SetKeybindings() error {
 		errors.Join(err)
 	}
 
-	if err := app.GUI.NewKeyBinding("", '1', func(g *gocui.Gui, v *gocui.View) error {
-		_, err := g.SetCurrentView(app.Windows.RequestsWindow.Window.Name())
+	if err := app.GUI.NewKeyBinding(app.Windows.RequestsWindow.Window.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
+		_, err := app.GUI.SelectWindow(app.Windows.RequestDetailsWindow)
 		if err != nil {
 			return err
 		}
+		return nil
+	}); err != nil {
+		errors.Join(err)
+	}
+
+	if err := app.GUI.NewKeyBinding(app.Windows.RequestDetailsWindow.Window.Name(), gocui.KeyEsc, func(g *gocui.Gui, v *gocui.View) error {
+		_, err := app.GUI.SelectWindow(app.Windows.RequestsWindow)
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		errors.Join(err)
+	}
+
+	if err := app.GUI.NewKeyBinding("", '1', func(g *gocui.Gui, v *gocui.View) error {
+		_, err := app.GUI.SelectWindow(app.Windows.RequestsWindow)
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := app.GUI.NewKeyBinding("", '2', func(g *gocui.Gui, v *gocui.View) error {
+		_, err := app.GUI.SelectWindow(app.Windows.RequestsWindow)
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := app.GUI.NewKeyBinding("", '3', func(g *gocui.Gui, v *gocui.View) error {
+		saved := app.db.CreateRequest("PUDIM")
+		*app.requests = append(*app.requests, saved)
 		return nil
 	}); err != nil {
 		return err
@@ -104,41 +170,49 @@ func (app *App) SetKeybindings() error {
 }
 
 // DEBUGGER
-// var debuggerContent = "PUDIM"
-//
-// type DebuggerView struct {
-// 	Title         string
-// 	Name          string
-// 	X, Y          int
-// 	Width, Height int
-// }
-//
-// func (*DebuggerView) NewDebuggerView() {
-//
-// }
-//
-// func NewDebuggerView(g *gocui.Gui) *DebuggerView {
-// 	x, y := g.Size()
-// 	return &DebuggerView{
-// 		Name:   "debugger",
-// 		X:      0,
-// 		Y:      y - 5,
-// 		Width:  x - 1,
-// 		Height: 4,
-// 		Title:  "Debugger",
-// 	}
-// }
-//
-// func (w *DebuggerView) Layout(g *gocui.Gui) error {
-// 	v, err := g.SetView(w.Name, w.X, w.Y, w.X+w.Width, w.Y+w.Height)
-// 	if err != nil {
-// 		if err != gocui.ErrUnknownView {
-// 			return err
-// 		}
-// 	}
-//
-// 	v.Clear()
-// 	fmt.Fprint(v, debuggerContent)
-// 	// fmt.Fprintln(v, Requests)
-// 	return nil
-// }
+var debuggerContent = "PUDIM"
+
+type DebuggerView struct {
+	Title string
+	x, y  int
+	w, h  int
+}
+
+func NewDebuggerView(GUI *ui.UI) *ui.Window {
+	x, y := GUI.Size()
+
+	return ui.NewWindow(
+		&DebuggerView{
+			Title: "debugger",
+			x:     0,
+			y:     y - 5,
+			h:     4,
+			w:     x - 1,
+		})
+}
+
+func (w *DebuggerView) Setup(v *ui.Window) {
+	v.SetSelectedBgColor(gocui.ColorRed)
+	v.SetHightlight(true)
+}
+
+func (w *DebuggerView) Update(v *ui.Window) {
+	v.ClearWindow()
+	v.WriteLn(debuggerContent)
+}
+
+func (w *DebuggerView) Name() string {
+	return "DebuggerView"
+}
+
+func (w *DebuggerView) Size() (x, y, wid, hei int) {
+	return w.x, w.y, w.x + w.w, w.y + w.h
+}
+
+func (w *DebuggerView) OnDeselect() error {
+	return nil
+}
+
+func (w *DebuggerView) OnSelect() error {
+	return nil
+}

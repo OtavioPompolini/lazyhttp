@@ -2,13 +2,13 @@ package ui
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jroimartin/gocui"
 )
 
 type UI struct {
-	g     *gocui.Gui
+	g             *gocui.Gui
+	currentWindow *Window
 }
 
 func NewUI() (*UI, error) {
@@ -43,11 +43,19 @@ func (ui *UI) SetGlobalKeybindings() error {
 	return nil
 }
 
-func (ui *UI) SelectWindow(viewName string) error {
-	if _, err := ui.g.SetCurrentView(viewName); err != nil {
-		log.Panicln(err)
+func (ui *UI) SelectWindow(window *Window) (*Window, error) {
+	if ui.currentWindow != nil {
+		ui.currentWindow.Window.OnDeselect()
 	}
-	return nil
+
+	if _, err := ui.g.SetCurrentView(window.Window.Name()); err != nil {
+		return nil, err
+	}
+
+	window.Window.OnSelect()
+
+	ui.currentWindow = window
+	return window, nil
 }
 
 func (ui *UI) SetFgColor(color gocui.Attribute) {
@@ -101,4 +109,8 @@ func (ui *UI) SetCursor(b bool) {
 
 func (ui *UI) ActiveViewName() string {
 	return ui.g.CurrentView().Name()
+}
+
+func (ui *UI) Size() (int, int) {
+	return ui.g.Size()
 }

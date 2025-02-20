@@ -1,7 +1,6 @@
 package views
 
 import (
-	"github.com/OtavioPompolini/project-postman/types"
 	"github.com/jroimartin/gocui"
 )
 
