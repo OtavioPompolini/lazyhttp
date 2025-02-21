@@ -1,7 +1,7 @@
 package request
 
 type Adapter interface {
-	GetRequests() []Request
-	CreateRequest(name string) Request
+	GetRequests() *map[int64]Request
+	CreateRequest(name string) *Request
 }
 

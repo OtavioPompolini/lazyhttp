@@ -16,7 +16,7 @@ const (
 
 // V1 = Only name and body
 type Request struct {
-	Id uint
+	Id int64
 	Name string
 	// Url     string
 	// Method  string
@@ -54,8 +54,8 @@ func InitDatabase() (Adapter, error) {
 	return sqldb, nil
 }
 
-func (a SqliteDB) GetRequests() []Request {
-	var requests []Request
+func (a SqliteDB) GetRequests() *map[int64]Request {
+	requests := make(map[int64]Request)
 
 	row, err := a.db.Query(`
 		SELECT * FROM requests
@@ -72,17 +72,26 @@ func (a SqliteDB) GetRequests() []Request {
 		if err != nil {
 			log.Fatal(err)
 		}
-		requests = append(requests, request)
+		requests[request.Id] = request
 	}
 
-	return requests
+	return &requests
 }
 
-func (a SqliteDB) CreateRequest(name string) Request {
-	_, err := a.db.Exec("INSERT INTO requests(name) values (?)", name)
+func (a SqliteDB) CreateRequest(name string) *Request {
+	res, err := a.db.Exec("INSERT INTO requests(name) values (?)", name)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return Request{Name: name}
+	id, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &Request{
+		Id: id,
+		Name: name,
+		Body: "",
+	}
 }

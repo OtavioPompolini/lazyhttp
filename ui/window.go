@@ -8,24 +8,25 @@ import (
 )
 
 type IWindow interface {
-	Setup(w *Window)
-	Update(w *Window)
+	Setup(w Window)
+	Update(w Window)
 	OnSelect() error
 	OnDeselect() error
 	Size() (x, y, w, h int)
 	Name() string
+	IsActive() bool
+	SetKeybindings(ui UI) error
 }
 
 type Window struct {
 	view   *gocui.View
 	Window IWindow
-	IsActive bool
 }
 
+//TODO: Builder pattern
 func NewWindow(iw IWindow) *Window {
 	return &Window{
 		Window: iw,
-		IsActive: false,
 	}
 }
 
@@ -37,10 +38,15 @@ func (v *Window) SetSelectedBgColor(col gocui.Attribute) {
 	v.view.SelBgColor = col
 }
 
+func (v *Window) SetTitle(title string) {
+	v.view.Title = title
+}
+
 func (v *Window) SetHightlight(b bool) {
 	v.view.Highlight = b
 }
 
+//Deprecated WriteLn always put a '\n' at the end so it will have a new blank line
 func (v *Window) WriteLn(text string) {
 	fmt.Fprintln(v.view, text)
 }
