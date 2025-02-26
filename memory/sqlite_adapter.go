@@ -1,40 +1,19 @@
-package request
+package memory
 
 import (
 	"database/sql"
 	"log"
 
+	"github.com/OtavioPompolini/project-postman/model"
 	_ "github.com/mattn/go-sqlite3"
 )
-
-const (
-	REQUEST_GET    string = "get"
-	REQUEST_POST          = "post"
-	REQUEST_DELETE        = "delete"
-	REQUEST_PUT           = "put"
-)
-
-// V1 = Only name and body
-type Request struct {
-	Id int64
-	Name string
-	// Url     string
-	// Method  string
-	// Headers []Header
-	Body string
-}
-
-type Header struct {
-	key   string
-	value string
-}
 
 type SqliteDB struct {
 	db *sql.DB
 }
 
 //TODO: HEHEHE Sql in model Request XD
-func InitDatabase() (Adapter, error) {
+func initDatabase() (*SqliteDB, error) {
 	db, err := sql.Open("sqlite3", "./lazycurl.db")
 	if err != nil {
 		return nil, err
@@ -52,11 +31,11 @@ func InitDatabase() (Adapter, error) {
 		);
 	`)
 
-	return sqldb, nil
+	return &sqldb, nil
 }
 
-func (a SqliteDB) GetRequests() *map[int64]Request {
-	requests := make(map[int64]Request)
+func (a SqliteDB) GetRequests() *map[int64]model.Request {
+	requests := make(map[int64]model.Request)
 
 	row, err := a.db.Query(`
 		SELECT * FROM requests
@@ -67,7 +46,7 @@ func (a SqliteDB) GetRequests() *map[int64]Request {
 
 	defer row.Close()
 	for row.Next() {
-		request := Request{}
+		request := model.Request{}
 
 		err := row.Scan(&request.Id, &request.Name, &request.Body)
 		if err != nil {
@@ -79,7 +58,7 @@ func (a SqliteDB) GetRequests() *map[int64]Request {
 	return &requests
 }
 
-func (a SqliteDB) CreateRequest(name string) *Request {
+func (a SqliteDB) CreateRequest(name string) *model.Request {
 	res, err := a.db.Exec("INSERT INTO requests(name) values (?)", name)
 	if err != nil {
 		log.Fatal(err)
@@ -90,14 +69,14 @@ func (a SqliteDB) CreateRequest(name string) *Request {
 		log.Fatal(err)
 	}
 
-	return &Request{
+	return &model.Request{
 		Id: id,
 		Name: name,
 		Body: "",
 	}
 }
 
-func (a SqliteDB) UpdateRequest(r *Request) {
+func (a SqliteDB) UpdateRequest(r *model.Request) {
 	_, err := a.db.Exec("UPDATE requests SET body=? WHERE id=?", r.Body, r.Id)
 	if err != nil {
 		log.Fatal(err)
@@ -108,7 +87,7 @@ func (a SqliteDB) UpdateRequest(r *Request) {
 	// 	log.Fatal(err)
 	// }
 	//
-	// return &Request{
+	// return &model.Request{
 	// 	Id: id,
 	// 	Name: name,
 	// 	Body: "",

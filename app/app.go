@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/OtavioPompolini/project-postman/memory"
-	"github.com/OtavioPompolini/project-postman/request"
 	"github.com/OtavioPompolini/project-postman/ui"
 	"github.com/jroimartin/gocui"
 )
@@ -18,10 +17,9 @@ import (
 
 type App struct {
 	GUI *ui.UI
-	db  request.Adapter
 	// Windows      *Windows
-	debuggerMode bool
-	memory       *memory.Memory
+	debuggerMode  bool
+	memoryHandler *memory.Memory
 }
 
 func NewApp() (*App, error) {
@@ -31,28 +29,20 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	db, err := request.InitDatabase()
+	memory, err := memory.InitMemory()
 	if err != nil {
 		return nil, err
 	}
 
-	mem := memory.NewMemory(db)
-
 	app := &App{
-		GUI:          userInteface,
-		db:           db,
-		memory:       mem,
-		debuggerMode: true, //TODO: run argument --debug=true
+		GUI:           userInteface,
+		memoryHandler: memory,
+		debuggerMode:  true, //TODO: run argument --debug=true
 	}
 
-	app.GUI.AddWindow(NewRequestsWindow(userInteface, app.memory))
-	app.GUI.AddWindow(NewRequestDetailsWindow(userInteface, app.memory, func(req *request.Request) {
-		mem.UpdateSelectedRequest(req)
-		db.UpdateRequest(req)
-	}))
-	app.GUI.AddWindow(NewCreateRequestWindow(userInteface, func(reqName string) {
-		db.CreateRequest(reqName)
-	}))
+	app.GUI.AddWindow(NewRequestsWindow(userInteface, app.memoryHandler))
+	app.GUI.AddWindow(NewRequestDetailsWindow(userInteface, app.memoryHandler))
+	app.GUI.AddWindow(NewCreateRequestWindow(userInteface))
 
 	app.GUI.StartUI()
 
@@ -106,8 +96,7 @@ func (app *App) SetKeybindings() error {
 	}
 
 	if err := app.GUI.NewKeyBinding("", '3', func(g *gocui.Gui, v *gocui.View) error {
-		saved := app.db.CreateRequest("PUDIM")
-		app.memory.AddRequest(saved)
+		app.memoryHandler.CreateRequest("PUDIM")
 		return nil
 	}); err != nil {
 		return err

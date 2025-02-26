@@ -10,7 +10,7 @@ type CreateRequestWindow struct {
 	onCreateRequest func(reqName string)
 }
 
-func NewCreateRequestWindow(GUI *ui.UI, onCreateRequest func(reqName string)) *ui.Window {
+func NewCreateRequestWindow(GUI *ui.UI) *ui.Window {
 	a, b := GUI.Size()
 	return ui.NewWindow(
 		&CreateRequestWindow{
@@ -19,7 +19,6 @@ func NewCreateRequestWindow(GUI *ui.UI, onCreateRequest func(reqName string)) *u
 			y:            b / 2,
 			w:            20,
 			h:            2,
-			onCreateRequest: onCreateRequest,
 			isActive: false,
 		})
 }

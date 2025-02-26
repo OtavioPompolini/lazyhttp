@@ -2,36 +2,34 @@ package app
 
 import (
 	"github.com/OtavioPompolini/project-postman/memory"
-	"github.com/OtavioPompolini/project-postman/request"
+	"github.com/OtavioPompolini/project-postman/model"
 	"github.com/OtavioPompolini/project-postman/ui"
 	"github.com/jroimartin/gocui"
 )
 
 type RequestDetailsWindow struct {
-	name            string
-	x, y            int
-	w, h            int
-	body            string
-	isActive        bool
-	isSelected      bool
-	memory          *memory.Memory
-	enableCursor    func(b bool)
-	onUpdateRequest func(r *request.Request)
+	name         string
+	x, y         int
+	w, h         int
+	body         string
+	isActive     bool
+	isSelected   bool
+	memory       *memory.Memory
+	enableCursor func(b bool)
 }
 
-func NewRequestDetailsWindow(GUI *ui.UI, memory *memory.Memory, onUpdateRequest func(r *request.Request)) *ui.Window {
+func NewRequestDetailsWindow(GUI *ui.UI, memory *memory.Memory) *ui.Window {
 	return ui.NewWindow(
 		&RequestDetailsWindow{
-			name:            "RequestDetailsWindow",
-			x:               21,
-			y:               0,
-			h:               40,
-			w:               40,
-			isActive:        true,
-			isSelected:      false,
-			memory:          memory,
-			enableCursor:    GUI.SetCursor,
-			onUpdateRequest: onUpdateRequest,
+			name:         "RequestDetailsWindow",
+			x:            21,
+			y:            0,
+			h:            40,
+			w:            40,
+			isActive:     true,
+			isSelected:   false,
+			memory:       memory,
+			enableCursor: GUI.SetCursor,
 		})
 }
 
@@ -103,14 +101,19 @@ func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI) error {
 	return nil
 }
 
-//Im thinking both this functions will need to pass Window as parameter. Im wanting to set Cursor on position 0
+// Im thinking both this functions will need to pass Window and UI as parameter.
+// Im wanting to set Cursor on position 0
+// It already has a callback to handle GUI functions
 func (w *RequestDetailsWindow) OnDeselect() error {
 	// onSaveBodyContent(w.body)
 	selected := w.memory.GetSelectedRequest()
-	w.onUpdateRequest(&request.Request{
-		Id: selected.Id,
-		Body: w.body,
-	})
+	w.memory.UpdateRequest(
+		&model.Request{
+			Id:   selected.Id,
+			Body: w.body,
+		},
+	)
+
 	w.isSelected = false
 	w.enableCursor(false)
 	return nil
@@ -122,4 +125,3 @@ func (w *RequestDetailsWindow) OnSelect() error {
 	return nil
 }
 
-//Bindings
