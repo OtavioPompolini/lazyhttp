@@ -36,7 +36,17 @@ func NewMemory(adapter request.Adapter) *Memory {
 	}
 }
 
+func (m *Memory) AddRequest(r *request.Request) {
+	m.requests[r.Id] = *r
+
+	m.reloadList()
+}
+
 func (m *Memory) SelectNext() {
+	if len(m.requestsArr) == 0 {
+		return
+	}
+
 	m.selectedPos += 1
 
 	if m.selectedPos >= len(m.requestsArr) {
@@ -46,7 +56,19 @@ func (m *Memory) SelectNext() {
 	m.selectedReq = m.requestsArr[m.selectedPos].Id
 }
 
+func (m *Memory) IsEmpty() bool {
+	if len(m.requestsArr) <= 0 {
+		return true
+	}
+
+	return false
+}
+
 func (m *Memory) SelectPrev() {
+	if len(m.requestsArr) == 0 {
+		return
+	}
+
 	m.selectedPos -= 1
 
 	if m.selectedPos < 0 {

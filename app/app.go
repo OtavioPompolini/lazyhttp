@@ -105,13 +105,13 @@ func (app *App) SetKeybindings() error {
 		return err
 	}
 
-	// if err := app.GUI.NewKeyBinding("", '3', func(g *gocui.Gui, v *gocui.View) error {
-	// 	saved := app.db.CreateRequest("PUDIM")
-	// 	(*app.memory.requests)[saved.Id] = *saved
-	// 	return nil
-	// }); err != nil {
-	// 	return err
-	// }
+	if err := app.GUI.NewKeyBinding("", '3', func(g *gocui.Gui, v *gocui.View) error {
+		saved := app.db.CreateRequest("PUDIM")
+		app.memory.AddRequest(saved)
+		return nil
+	}); err != nil {
+		return err
+	}
 
 	return nil
 }

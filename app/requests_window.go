@@ -50,9 +50,13 @@ func (w *RequestsWindow) Update(v ui.Window) {
 	// v.WriteLines(lines)
 	requests := w.memory.ListRequests()
 
+	lines := []string{}
+
 	for _, r := range requests {
-		v.WriteLn(strconv.FormatInt(r.Id, 10) + r.Name)
+		lines = append(lines, strconv.FormatInt(r.Id, 10) + r.Name)
 	}
+
+	v.WriteLines(lines)
 }
 
 func (w *RequestsWindow) Size() (x, y, width, height int) {
@@ -85,6 +89,10 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 	//Handle change window with a "const" and not a string
 	// and need to abstract gocui
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
+		if w.memory.IsEmpty() {
+			return nil
+		}
+
 		toWindow, err := ui.GetWindow("RequestDetailsWindow")
 		if err != nil {
 			return err
