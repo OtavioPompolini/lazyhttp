@@ -3,29 +3,25 @@ package app
 import (
 	"errors"
 
+	"github.com/OtavioPompolini/project-postman/memory"
 	"github.com/OtavioPompolini/project-postman/request"
 	"github.com/OtavioPompolini/project-postman/ui"
 	"github.com/jroimartin/gocui"
 )
 
-type Windows struct {
-	RequestsWindow       *ui.Window
-	RequestDetailsWindow *ui.Window
-	CreateRequestWindow  *ui.Window
-	// DebuggerView         *ui.Window
-}
-
-type Memory struct {
-	requests    *map[int64](request.Request) //TODO: support collections (filesystem)
-	selectedReq int64
-}
+// type Windows struct {
+// 	RequestsWindow       *ui.IWindow
+// 	RequestDetailsWindow *ui.IWindow
+// 	CreateRequestWindow  *ui.IWindow
+// 	// DebuggerView         *ui.Window
+// }
 
 type App struct {
-	GUI          *ui.UI
-	db           request.Adapter
-	Windows      *Windows
+	GUI *ui.UI
+	db  request.Adapter
+	// Windows      *Windows
 	debuggerMode bool
-	memory       *Memory
+	memory       *memory.Memory
 }
 
 func NewApp() (*App, error) {
@@ -40,19 +36,20 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	requests := db.GetRequests()
+	mem := memory.NewMemory(db)
 
 	app := &App{
-		GUI:       userInteface,
-		db:        db,
-		memory: &Memory{
-			requests: requests,
-		},
+		GUI:          userInteface,
+		db:           db,
+		memory:       mem,
 		debuggerMode: true, //TODO: run argument --debug=true
 	}
 
-	app.GUI.AddWindow(NewRequestsWindow(userInteface, requests))
-	app.GUI.AddWindow(NewRequestDetailsWindow(userInteface))
+	app.GUI.AddWindow(NewRequestsWindow(userInteface, app.memory))
+	app.GUI.AddWindow(NewRequestDetailsWindow(userInteface, app.memory, func(req *request.Request) {
+		mem.UpdateSelectedRequest(req)
+		db.UpdateRequest(req)
+	}))
 	app.GUI.AddWindow(NewCreateRequestWindow(userInteface, func(reqName string) {
 		db.CreateRequest(reqName)
 	}))
@@ -73,7 +70,6 @@ func NewApp() (*App, error) {
 
 	return app, nil
 }
-
 
 func (app *App) Run() error {
 	defer app.GUI.Close()
@@ -109,13 +105,13 @@ func (app *App) SetKeybindings() error {
 		return err
 	}
 
-	if err := app.GUI.NewKeyBinding("", '3', func(g *gocui.Gui, v *gocui.View) error {
-		saved := app.db.CreateRequest("PUDIM")
-		(*app.memory.requests)[saved.Id] = *saved
-		return nil
-	}); err != nil {
-		return err
-	}
+	// if err := app.GUI.NewKeyBinding("", '3', func(g *gocui.Gui, v *gocui.View) error {
+	// 	saved := app.db.CreateRequest("PUDIM")
+	// 	(*app.memory.requests)[saved.Id] = *saved
+	// 	return nil
+	// }); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

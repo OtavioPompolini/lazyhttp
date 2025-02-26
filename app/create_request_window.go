@@ -46,7 +46,7 @@ func (w *CreateRequestWindow) IsActive() bool {
 	return w.isActive
 }
 
-func (w *CreateRequestWindow) SetKeybindings(ui ui.UI) error {
+func (w *CreateRequestWindow) SetKeybindings(ui *ui.UI) error {
 	return nil
 }
 

@@ -15,7 +15,7 @@ type IWindow interface {
 	Size() (x, y, w, h int)
 	Name() string
 	IsActive() bool
-	SetKeybindings(ui UI) error
+	SetKeybindings(ui *UI) error
 }
 
 type Window struct {
@@ -46,7 +46,7 @@ func (v *Window) SetHightlight(b bool) {
 	v.view.Highlight = b
 }
 
-//Deprecated WriteLn always put a '\n' at the end so it will have a new blank line
+//FIX: WriteLn always put a '\n' at the end so it will have a new blank line
 func (v *Window) WriteLn(text string) {
 	fmt.Fprintln(v.view, text)
 }
@@ -59,6 +59,10 @@ func (v *Window) WriteLines(text []string) {
 			fmt.Fprint(v.view, t)
 		}
 	}
+}
+
+func (v *Window) GetWindowContent() string {
+	return v.view.Buffer()
 }
 
 func (v *Window) ClearWindow() {

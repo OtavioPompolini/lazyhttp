@@ -33,18 +33,11 @@ func (ui *UI) SetHightlight(e bool) {
 
 func (ui *UI) SetGlobalKeybindings() error {
 	for _, win := range ui.windows {
-		win.Window.SetKeybindings(*ui)
+		win.Window.SetKeybindings(ui)
 	}
 
 	if err := ui.g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
 		return gocui.ErrQuit
-	}); err != nil {
-		return err
-	}
-
-	if err := ui.g.SetKeybinding("", gocui.KeyCtrl2, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
-		g.SetCurrentView("requestsWindow")
-		return nil
 	}); err != nil {
 		return err
 	}

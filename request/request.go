@@ -95,3 +95,21 @@ func (a SqliteDB) CreateRequest(name string) *Request {
 		Body: "",
 	}
 }
+
+func (a SqliteDB) UpdateRequest(r *Request) {
+	_, err := a.db.Exec("UPDATE requests SET body=? WHERE id=?", r.Body, r.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// id, err := res.LastInsertId()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//
+	// return &Request{
+	// 	Id: id,
+	// 	Name: name,
+	// 	Body: "",
+	// }
+}

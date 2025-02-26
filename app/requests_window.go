@@ -1,10 +1,9 @@
 package app
 
 import (
-	"sort"
 	"strconv"
 
-	"github.com/OtavioPompolini/project-postman/request"
+	"github.com/OtavioPompolini/project-postman/memory"
 	"github.com/OtavioPompolini/project-postman/ui"
 	"github.com/jroimartin/gocui"
 )
@@ -13,19 +12,19 @@ type RequestsWindow struct {
 	isActive     bool
 	name         string
 	x, y         int
-	requests     *map[int64]request.Request
+	memory       *memory.Memory
 	loadRequests func() error
 	currentLine  int
 	// OnOpenAddNewRequest func() error
 }
 
-func NewRequestsWindow(GUI *ui.UI, requests *map[int64]request.Request) *ui.Window {
+func NewRequestsWindow(GUI *ui.UI, memomry *memory.Memory) *ui.Window {
 	return ui.NewWindow(
 		&RequestsWindow{
 			name:     "RequestsWindow",
 			x:        0,
 			y:        0,
-			requests: requests,
+			memory:   memomry,
 			isActive: true,
 		})
 }
@@ -38,19 +37,22 @@ func (w *RequestsWindow) Setup(v ui.Window) {
 	v.SetTitle(v.Window.Name())
 	v.SetSelectedBgColor(gocui.ColorRed)
 	v.SetHightlight(true)
-	// w.loadRequests()
 }
 
 func (w *RequestsWindow) Update(v ui.Window) {
 	v.ClearWindow()
-	lines := []string{}
 
-	for _, val := range *w.requests {
-		lines = append(lines, strconv.FormatInt(val.Id, 10)+val.Name)
+	// for _, val := range *w.memory.GetSelectedRequest().Body {
+	// 	lines = append(lines, strconv.FormatInt(val.Id, 10)+val.Name)
+	// }
+	//
+	// sort.Strings(lines)
+	// v.WriteLines(lines)
+	requests := w.memory.ListRequests()
+
+	for _, r := range requests {
+		v.WriteLn(strconv.FormatInt(r.Id, 10) + r.Name)
 	}
-
-	sort.Strings(lines)
-	v.WriteLines(lines)
 }
 
 func (w *RequestsWindow) Size() (x, y, width, height int) {
@@ -61,9 +63,10 @@ func (w *RequestsWindow) IsActive() bool {
 	return w.isActive
 }
 
-func (w *RequestsWindow) SetKeybindings(ui ui.UI) error {
+func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
+		w.memory.SelectNext()
 		v.MoveCursor(0, 1, false)
 		return nil
 	}); err != nil {
@@ -71,6 +74,7 @@ func (w *RequestsWindow) SetKeybindings(ui ui.UI) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
+		w.memory.SelectPrev()
 		v.MoveCursor(0, -1, false)
 		return nil
 	}); err != nil {
@@ -106,29 +110,6 @@ func (w *RequestsWindow) OnSelect() error {
 }
 
 // func (w *RequestsWindow) SetKeybindings(ui ui.UI) error {
-// 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
-// 		v.MoveCursor(0, 1, false)
-// 		return nil
-// 	}); err != nil {
-// 		errors.Join(err)
-// 	}
-//
-// 	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
-// 		v.MoveCursor(0, -1, false)
-// 		return nil
-// 	}); err != nil {
-// 		errors.Join(err)
-// 	}
-//
-// 	if err := ui.NewKeyBinding("", '1', func(g *gocui.Gui, v *gocui.View) error {
-// 		_, err := g.SetCurrentView(w.Name())
-// 		if err != nil {
-// 			return err
-// 		}
-// 		return nil
-// 	}); err != nil {
-// 		return err
-// 	}
 //
 // 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
 // 		// _, err := g.SetCurrentView(ui.Views.RequestDetailsWindow.Window.Name())
