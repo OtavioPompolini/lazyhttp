@@ -33,6 +33,7 @@ type SqliteDB struct {
 	db *sql.DB
 }
 
+//TODO: HEHEHE Sql in model Request XD
 func InitDatabase() (Adapter, error) {
 	db, err := sql.Open("sqlite3", "./lazycurl.db")
 	if err != nil {
