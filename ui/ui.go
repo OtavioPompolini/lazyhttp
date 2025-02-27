@@ -8,7 +8,7 @@ import (
 
 type UI struct {
 	g             *gocui.Gui
-	windows       []*Window
+	windows       map[string]*Window
 	currentWindow *Window
 }
 
@@ -20,11 +20,12 @@ func NewUI() (*UI, error) {
 
 	return &UI{
 		g: g,
+		windows: map[string]*Window{},
 	}, nil
 }
 
 func (ui *UI) AddWindow(window *Window) {
-	ui.windows = append(ui.windows, window)
+	ui.windows[window.Window.Name()] = window
 }
 
 func (ui *UI) SetHightlight(e bool) {
@@ -45,16 +46,18 @@ func (ui *UI) SetGlobalKeybindings() error {
 	return nil
 }
 
+//This method doest need window return
+//Isnt better to pass window name string and get the actual Window inside here?
 func (ui *UI) SelectWindow(window *Window) (*Window, error) {
 	if ui.currentWindow != nil {
-		ui.currentWindow.Window.OnDeselect()
+		ui.currentWindow.Window.OnDeselect(*ui, *ui.currentWindow)
 	}
 
 	if _, err := ui.g.SetCurrentView(window.Window.Name()); err != nil {
 		return nil, err
 	}
 
-	window.Window.OnSelect()
+	window.Window.OnSelect(*ui, *window)
 
 	ui.currentWindow = window
 	return window, nil
@@ -69,10 +72,11 @@ func (ui *UI) SetSelectedFgColor(color gocui.Attribute) {
 }
 
 func (ui *UI) StartUI() {
+	ui.g.InputEsc = true
 	ui.g.SetManagerFunc(func(*gocui.Gui) error {
 		return func() error {
 			for _, win := range ui.windows {
-				if win.Window.IsActive() {
+				if win.IsActive() {
 					if err := ui.renderWindow(win); err != nil {
 						return fmt.Errorf("error rendering window")
 					}
@@ -90,16 +94,17 @@ func (ui *UI) renderWindow(window *Window) error {
 	if err != nil {
 		if err == gocui.ErrUnknownView {
 			window.setView(v)
-			window.Window.Setup(*window)
+			window.Window.Setup(*ui, *window)
 			return nil
 		}
 		return fmt.Errorf("Error rendering window=%s : %w", name, err)
 	}
-	window.Window.Update(*window)
+	window.Window.Update(*ui, *window)
 	return nil
 }
 
 func (ui *UI) DeleteWindow(window *Window) error {
+	window.isActive = false
 	if err := ui.g.DeleteView(window.Window.Name()); err != nil {
 		return err
 	}
@@ -126,14 +131,13 @@ func (ui *UI) SetCursor(b bool) {
 	ui.g.Cursor = b
 }
 
-func (ui *UI) GetWindow(vName string) (*Window, error) {
-	for _, win := range ui.windows {
-		if win.Window.Name() == vName {
-			return win, nil
-		}
+func (ui *UI) GetWindow(wName string) (*Window, error) {
+	w, ok := ui.windows[wName]
+	if ok {
+		return w, nil
 	}
 
-	return nil, fmt.Errorf("View %s does not exists", vName)
+	return nil, fmt.Errorf("View %s does not exists", wName)
 }
 
 func (ui *UI) Size() (int, int) {

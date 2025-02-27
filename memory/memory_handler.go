@@ -38,7 +38,7 @@ func (m *Memory) ListRequests() []model.Request {
 }
 
 func (m *Memory) CreateRequest(reqName string) *model.Request {
-	saved := m.CreateRequest(reqName)
+	saved := m.persistance.CreateRequest(reqName)
 	m.localStorage.AddRequest(saved)
 	return saved
 }

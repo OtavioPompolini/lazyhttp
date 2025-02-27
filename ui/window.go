@@ -7,27 +7,37 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+// Size and name should be a Window attribute not a IWindow
 type IWindow interface {
-	Setup(w Window)
-	Update(w Window)
-	OnSelect() error
-	OnDeselect() error
+	Setup(ui UI, w Window)
+	Update(ui UI, w Window)
+	OnSelect(ui UI, w Window) error
+	OnDeselect(ui UI, w Window) error
 	Size() (x, y, w, h int)
 	Name() string
-	IsActive() bool
 	SetKeybindings(ui *UI) error
 }
 
 type Window struct {
 	view   *gocui.View
 	Window IWindow
+	isActive bool
 }
 
 //TODO: Builder pattern
-func NewWindow(iw IWindow) *Window {
+func NewWindow(iw IWindow, ia bool) *Window {
 	return &Window{
 		Window: iw,
+		isActive: ia,
 	}
+}
+
+func (w *Window) IsActive() bool {
+	return w.isActive
+}
+
+func (w *Window) SwitchOnOff(b bool) {
+	w.isActive = b
 }
 
 func (v *Window) SetVimEditor() {

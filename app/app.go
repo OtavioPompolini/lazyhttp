@@ -1,8 +1,6 @@
 package app
 
 import (
-	"errors"
-
 	"github.com/OtavioPompolini/project-postman/memory"
 	"github.com/OtavioPompolini/project-postman/ui"
 	"github.com/jroimartin/gocui"
@@ -42,17 +40,13 @@ func NewApp() (*App, error) {
 
 	app.GUI.AddWindow(NewRequestsWindow(userInteface, app.memoryHandler))
 	app.GUI.AddWindow(NewRequestDetailsWindow(userInteface, app.memoryHandler))
-	app.GUI.AddWindow(NewCreateRequestWindow(userInteface))
+	app.GUI.AddWindow(NewCreateRequestWindow(userInteface, app.memoryHandler))
 
 	app.GUI.StartUI()
 
 	app.GUI.SetHightlight(true)
 	app.GUI.SetFgColor(gocui.ColorGreen)
 	app.GUI.SetSelectedFgColor(gocui.ColorYellow)
-
-	if err := app.SetKeybindings(); err != nil {
-		return nil, errors.Join(err)
-	}
 
 	if err := app.GUI.SetGlobalKeybindings(); err != nil {
 		return nil, err
@@ -64,41 +58,6 @@ func NewApp() (*App, error) {
 func (app *App) Run() error {
 	defer app.GUI.Close()
 	if err := app.GUI.Start(); err != nil && err != gocui.ErrQuit {
-		return err
-	}
-
-	return nil
-}
-
-// TODO: move this to other file and abstract func(g *gocui.Gui, v *gocui.View)
-func (app *App) SetKeybindings() error {
-
-	// if err := app.GUI.NewKeyBinding(app.Windows.RequestDetailsWindow.Window.Name(), gocui.KeyEsc, func(g *gocui.Gui, v *gocui.View) error {
-	// 	_, err := app.GUI.SelectWindow(app.Windows.RequestsWindow)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }); err != nil {
-	// 	errors.Join(err)
-	// }
-	//
-	if err := app.GUI.NewKeyBinding("", '1', func(g *gocui.Gui, v *gocui.View) error {
-
-		win, _ := app.GUI.GetWindow("RequestsWindow")
-		_, err := app.GUI.SelectWindow(win)
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-
-	if err := app.GUI.NewKeyBinding("", '3', func(g *gocui.Gui, v *gocui.View) error {
-		app.memoryHandler.CreateRequest("PUDIM")
-		return nil
-	}); err != nil {
 		return err
 	}
 

@@ -15,36 +15,36 @@ type RequestDetailsWindow struct {
 	isActive     bool
 	isSelected   bool
 	memory       *memory.Memory
-	enableCursor func(b bool)
 }
 
 func NewRequestDetailsWindow(GUI *ui.UI, memory *memory.Memory) *ui.Window {
+	_, b := GUI.Size()
 	return ui.NewWindow(
 		&RequestDetailsWindow{
 			name:         "RequestDetailsWindow",
-			x:            21,
+			x:            50,
 			y:            0,
-			h:            40,
-			w:            40,
-			isActive:     true,
+			h:            b-1,
+			w:            80,
 			isSelected:   false,
 			memory:       memory,
-			enableCursor: GUI.SetCursor,
-		})
+		},
+		true,
+	)
 }
 
 func (w RequestDetailsWindow) Name() string {
 	return w.name
 }
 
-func (w *RequestDetailsWindow) Setup(v ui.Window) {
+func (w *RequestDetailsWindow) Setup(ui ui.UI, v ui.Window) {
 	// v.SelBgColor = gocui.ColorYellow
 	// v.SetVimEditor()
 	v.SetTitle(v.Window.Name())
 	v.SetEditable(true)
 }
 
-func (w *RequestDetailsWindow) Update(v ui.Window) {
+func (w *RequestDetailsWindow) Update(ui ui.UI, v ui.Window) {
 	if !w.isSelected {
 		v.ClearWindow()
 		v.WriteLn(w.memory.GetSelectedRequest().Body)
@@ -78,13 +78,11 @@ func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI) error {
 	// }
 
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEsc, func(g *gocui.Gui, v *gocui.View) error {
-		win, err := ui.GetWindow(w.Name())
+		win, err := ui.GetWindow("RequestsWindow")
 		if err != nil {
 			return err
 		}
-
-		win.SetEditable(false)
-		win.SetTitle(w.Name())
+		ui.SelectWindow(win)
 
 		return nil
 	}); err != nil {
@@ -101,10 +99,7 @@ func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI) error {
 	return nil
 }
 
-// Im thinking both this functions will need to pass Window and UI as parameter.
-// Im wanting to set Cursor on position 0
-// It already has a callback to handle GUI functions
-func (w *RequestDetailsWindow) OnDeselect() error {
+func (w *RequestDetailsWindow) OnDeselect(ui ui.UI, v ui.Window) error {
 	// onSaveBodyContent(w.body)
 	selected := w.memory.GetSelectedRequest()
 	w.memory.UpdateRequest(
@@ -115,13 +110,12 @@ func (w *RequestDetailsWindow) OnDeselect() error {
 	)
 
 	w.isSelected = false
-	w.enableCursor(false)
+	ui.SetCursor(false)
 	return nil
 }
 
-func (w *RequestDetailsWindow) OnSelect() error {
+func (w *RequestDetailsWindow) OnSelect(ui ui.UI, v ui.Window) error {
 	w.isSelected = true
-	w.enableCursor(true)
+	ui.SetCursor(true)
 	return nil
 }
-
