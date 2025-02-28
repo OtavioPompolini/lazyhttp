@@ -41,6 +41,7 @@ func NewApp() (*App, error) {
 	app.GUI.AddWindow(NewRequestsWindow(userInteface, app.memoryHandler))
 	app.GUI.AddWindow(NewRequestDetailsWindow(userInteface, app.memoryHandler))
 	app.GUI.AddWindow(NewCreateRequestWindow(userInteface, app.memoryHandler))
+	app.GUI.AddWindow(NewResponseWindow(userInteface, app.memoryHandler))
 
 	app.GUI.StartUI()
 

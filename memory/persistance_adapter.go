@@ -5,7 +5,7 @@ import (
 )
 
 type PersistanceAdapter interface {
-	GetRequests() *map[int64]model.Request
+	GetRequests() *map[int64]*model.Request
 	CreateRequest(name string) *model.Request
 	UpdateRequest(r *model.Request)
 }

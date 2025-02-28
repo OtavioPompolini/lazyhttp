@@ -8,7 +8,7 @@ import (
 )
 
 type LocalMemory struct {
-	requests    map[int64]model.Request //TODO: support collections (filesystem)
+	requests    map[int64]*model.Request //TODO: support collections (filesystem)
 	requestsArr []model.Request
 	selectedReq int64
 	selectedPos int
@@ -16,18 +16,18 @@ type LocalMemory struct {
 
 func newLocalMemory() *LocalMemory {
 	return &LocalMemory{
-		requests: map[int64]model.Request{},
+		requests: map[int64]*model.Request{},
 		requestsArr: []model.Request{},
 	}
 }
 
 func (m *LocalMemory) AddRequest(r *model.Request) {
-	m.requests[r.Id] = *r
+	m.requests[r.Id] = r
 
 	m.reloadList()
 }
 
-func (m *LocalMemory) addRequests(r *map[int64]model.Request) {
+func (m *LocalMemory) addRequests(r *map[int64]*model.Request) {
 	m.requests = *r
 	m.reloadList()
 }
@@ -62,18 +62,18 @@ func (m *LocalMemory) IsEmpty() bool {
 	return false
 }
 
-func (m *LocalMemory) GetSelectedRequest() model.Request {
+func (m *LocalMemory) GetSelectedRequest() *model.Request {
 	req, ok := m.requests[m.selectedReq]
 	if ok {
 		return req
 	}
 
-	return model.Request{}
+	return &model.Request{}
 }
 
 func (m *LocalMemory) UpdateSelectedRequest(r *model.Request) {
 	saved, _ := m.requests[r.Id]
-	m.requests[r.Id] = model.Request{
+	m.requests[r.Id] = &model.Request{
 		Id: r.Id,
 		Name: saved.Name,
 		Body: r.Body,
@@ -86,7 +86,7 @@ func (m *LocalMemory) reloadList() {
 	requestsArr := []model.Request{}
 
 	for _, req := range m.requests {
-		requestsArr = append(requestsArr, req)
+		requestsArr = append(requestsArr, *req)
 	}
 
 	sort.Slice(requestsArr, func(i, j int) bool {

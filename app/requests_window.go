@@ -83,6 +83,13 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 		return err
 	}
 
+	if err := ui.NewKeyBinding(w.Name(), 'p', func(g *gocui.Gui, v *gocui.View) error {
+		w.memory.GetSelectedRequest().Execute()
+		return nil
+	}); err != nil {
+		return err
+	}
+
 	if err := ui.NewKeyBinding(w.Name(), 'n', func(g *gocui.Gui, v *gocui.View) error {
 		win, err := ui.GetWindow("CreateRequestWindow")
 		if err != nil {

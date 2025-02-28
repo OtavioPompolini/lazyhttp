@@ -56,6 +56,10 @@ func (v *Window) SetHightlight(b bool) {
 	v.view.Highlight = b
 }
 
+func (v *Window) SetFgColor(b bool) {
+	v.view.FgColor = gocui.ColorRed
+}
+
 //FIX: WriteLn always put a '\n' at the end so it will have a new blank line
 func (v *Window) WriteLn(text string) {
 	fmt.Fprintln(v.view, text)

@@ -34,8 +34,8 @@ func initDatabase() (*SqliteDB, error) {
 	return &sqldb, nil
 }
 
-func (a SqliteDB) GetRequests() *map[int64]model.Request {
-	requests := make(map[int64]model.Request)
+func (a SqliteDB) GetRequests() *map[int64]*model.Request {
+	requests := make(map[int64]*model.Request)
 
 	row, err := a.db.Query(`
 		SELECT * FROM requests
@@ -46,7 +46,7 @@ func (a SqliteDB) GetRequests() *map[int64]model.Request {
 
 	defer row.Close()
 	for row.Next() {
-		request := model.Request{}
+		request := &model.Request{}
 
 		err := row.Scan(&request.Id, &request.Name, &request.Body)
 		if err != nil {

@@ -4,6 +4,7 @@ import "github.com/OtavioPompolini/project-postman/model"
 
 // For now its kinda Oukay. I really don't know what will happen if the Memory
 // grows in objects and this struct maybe will have a lot of methods implemented
+// ITs starting to grow. Now we have responses to save too
 type Memory struct {
 	persistance  PersistanceAdapter
 	localStorage *LocalMemory
@@ -55,7 +56,7 @@ func (m *Memory) IsEmpty() bool {
 	return m.localStorage.IsEmpty()
 }
 
-func (m *Memory) GetSelectedRequest() model.Request {
+func (m *Memory) GetSelectedRequest() *model.Request {
 	return m.localStorage.GetSelectedRequest()
 }
 
@@ -64,3 +65,6 @@ func (m *Memory) UpdateRequest(r *model.Request) {
 	m.localStorage.UpdateSelectedRequest(r)
 }
 
+func (m *Memory) CreateResponse(r *model.Request) {
+	m.localStorage.UpdateSelectedRequest(r)
+}
