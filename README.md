@@ -4,6 +4,7 @@
     - Losing last response when editing a request
     - When saving a request its adding empty lines at the end
     - when saving a request its removing 1 empty line at the beggining
+    - Request window not refreshing
 
 ## Roadmap v0.1
     - Show more information of the response
@@ -19,6 +20,9 @@
     - Resolve all known issues
 
 ## Roadmap some day
+    - find/filter request
+    - Request navigation Ctrl+u, Crtl+d -> jump multiple
+    - Windows navigation through hjkl
     - Add support to collections
     - Add support to environments and variables
     - Add VIMOTION when editing request (THIS IS A MUST)
