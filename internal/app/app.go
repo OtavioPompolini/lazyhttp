@@ -1,9 +1,10 @@
 package app
 
 import (
-	"github.com/OtavioPompolini/project-postman/memory"
-	"github.com/OtavioPompolini/project-postman/ui"
-	"github.com/awesome-gocui/gocui"
+	"github.com/jroimartin/gocui"
+
+	"github.com/OtavioPompolini/project-postman/internal/memory"
+	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 // type Windows struct {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/OtavioPompolini/project-postman/model"
+	"github.com/OtavioPompolini/project-postman/internal/model"
 )
 
 type LocalMemory struct {
@@ -16,7 +16,7 @@ type LocalMemory struct {
 
 func newLocalMemory() *LocalMemory {
 	return &LocalMemory{
-		requests: map[int64]*model.Request{},
+		requests:    map[int64]*model.Request{},
 		requestsArr: []model.Request{},
 	}
 }
@@ -74,7 +74,7 @@ func (m *LocalMemory) GetSelectedRequest() *model.Request {
 func (m *LocalMemory) UpdateSelectedRequest(r *model.Request) {
 	saved, _ := m.requests[r.Id]
 	m.requests[r.Id] = &model.Request{
-		Id: r.Id,
+		Id:   r.Id,
 		Name: saved.Name,
 		Body: r.Body,
 	}

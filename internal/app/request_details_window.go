@@ -1,33 +1,34 @@
 package app
 
 import (
-	"github.com/OtavioPompolini/project-postman/memory"
-	"github.com/OtavioPompolini/project-postman/model"
-	"github.com/OtavioPompolini/project-postman/ui"
-	"github.com/awesome-gocui/gocui"
+	"github.com/jroimartin/gocui"
+
+	"github.com/OtavioPompolini/project-postman/internal/memory"
+	"github.com/OtavioPompolini/project-postman/internal/model"
+	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type RequestDetailsWindow struct {
-	name         string
-	x, y         int
-	w, h         int
-	body         string
-	isActive     bool
-	isSelected   bool
-	memory       *memory.Memory
+	name       string
+	x, y       int
+	w, h       int
+	body       string
+	isActive   bool
+	isSelected bool
+	memory     *memory.Memory
 }
 
 func NewRequestDetailsWindow(GUI *ui.UI, memory *memory.Memory) *ui.Window {
 	_, b := GUI.Size()
 	return ui.NewWindow(
 		&RequestDetailsWindow{
-			name:         "RequestDetailsWindow",
-			x:            50,
-			y:            0,
-			h:            b-1,
-			w:            80,
-			isSelected:   false,
-			memory:       memory,
+			name:       "RequestDetailsWindow",
+			x:          50,
+			y:          0,
+			h:          b - 1,
+			w:          80,
+			isSelected: false,
+			memory:     memory,
 		},
 		true,
 	)

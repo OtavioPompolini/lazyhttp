@@ -1,4 +1,4 @@
-package Editor
+package editor
 
 import (
 	"github.com/awesome-gocui/gocui"

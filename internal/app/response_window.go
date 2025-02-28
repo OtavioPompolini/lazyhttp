@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/OtavioPompolini/project-postman/memory"
-	"github.com/OtavioPompolini/project-postman/ui"
+	"github.com/OtavioPompolini/project-postman/internal/memory"
+	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type ResponseWindow struct {

@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"github.com/OtavioPompolini/project-postman/model"
+	"github.com/OtavioPompolini/project-postman/internal/model"
 )
 
 type PersistanceAdapter interface {
@@ -9,4 +9,3 @@ type PersistanceAdapter interface {
 	CreateRequest(name string) *model.Request
 	UpdateRequest(r *model.Request)
 }
-

@@ -1,19 +1,21 @@
 package app
+
 import (
 	"strings"
 
-	"github.com/OtavioPompolini/project-postman/memory"
-	"github.com/OtavioPompolini/project-postman/ui"
-	"github.com/awesome-gocui/gocui"
+	"github.com/jroimartin/gocui"
+
+	"github.com/OtavioPompolini/project-postman/internal/memory"
+	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type CreateRequestWindow struct {
-	name            string
-	x, y            int
-	w, h            int
-	isActive        bool
+	name       string
+	x, y       int
+	w, h       int
+	isActive   bool
 	newReqName string
-	memory          *memory.Memory
+	memory     *memory.Memory
 }
 
 func NewCreateRequestWindow(GUI *ui.UI, mem *memory.Memory) *ui.Window {

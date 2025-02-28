@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/OtavioPompolini/project-postman/model"
+import "github.com/OtavioPompolini/project-postman/internal/model"
 
 // For now its kinda Oukay. I really don't know what will happen if the Memory
 // grows in objects and this struct maybe will have a lot of methods implemented
@@ -12,7 +12,7 @@ type Memory struct {
 
 // TODO: FUUUUUUUTURE accept more than only sqlite for persistance.
 // Maybe a mysql db for shared collections?
-func InitMemory() (*Memory, error){
+func InitMemory() (*Memory, error) {
 	db, err := initDatabase()
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func InitMemory() (*Memory, error){
 	localStorage := newLocalMemory()
 
 	mem := &Memory{
-		persistance: db,
+		persistance:  db,
 		localStorage: localStorage,
 	}
 

@@ -19,7 +19,6 @@ func ParseHttpRequest(input string) (*http.Request, error) {
 	parts := strings.Fields(requestLine)
 	rawURL := parts[1]
 
-
 	headers := make(map[string]string)
 	var bodyLines []string
 	foundBlankLine := false
