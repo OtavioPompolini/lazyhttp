@@ -3,8 +3,14 @@ package ui
 import (
 	"fmt"
 
+<<<<<<< HEAD:ui/window.go
 	// Editor "github.com/OtavioPompolini/project-postman/editor"
 	"github.com/awesome-gocui/gocui"
+=======
+	"github.com/jroimartin/gocui"
+
+	"github.com/OtavioPompolini/project-postman/internal/editor"
+>>>>>>> 6ace5b7 (chore: refactor project structure):internal/ui/window.go
 )
 
 // Size and name should be a Window attribute not a IWindow
@@ -19,15 +25,15 @@ type IWindow interface {
 }
 
 type Window struct {
-	view   *gocui.View
-	Window IWindow
+	view     *gocui.View
+	Window   IWindow
 	isActive bool
 }
 
-//TODO: Builder pattern
+// TODO: Builder pattern
 func NewWindow(iw IWindow, ia bool) *Window {
 	return &Window{
-		Window: iw,
+		Window:   iw,
 		isActive: ia,
 	}
 }
@@ -40,9 +46,15 @@ func (w *Window) SwitchOnOff(b bool) {
 	w.isActive = b
 }
 
+<<<<<<< HEAD:ui/window.go
 // func (v *Window) SetVimEditor() {
 // 	v.view.Editor = &Editor.VimEditor{}
 // }
+=======
+func (v *Window) SetVimEditor() {
+	v.view.Editor = &editor.VimEditor{}
+}
+>>>>>>> 6ace5b7 (chore: refactor project structure):internal/ui/window.go
 
 func (v *Window) SetSelectedBgColor(col gocui.Attribute) {
 	v.view.SelBgColor = col
@@ -60,14 +72,14 @@ func (v *Window) SetFgColor(b bool) {
 	v.view.FgColor = gocui.ColorRed
 }
 
-//FIX: WriteLn always put a '\n' at the end so it will have a new blank line
+// FIX: WriteLn always put a '\n' at the end so it will have a new blank line
 func (v *Window) WriteLn(text string) {
 	fmt.Fprintln(v.view, text)
 }
 
 func (v *Window) WriteLines(text []string) {
 	for i, t := range text {
-		if (i < len(text)-1) {
+		if i < len(text)-1 {
 			fmt.Fprintln(v.view, t)
 		} else {
 			fmt.Fprint(v.view, t)

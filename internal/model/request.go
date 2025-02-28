@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/OtavioPompolini/project-postman/utils"
+	"github.com/OtavioPompolini/project-postman/internal/utils"
 )
 
 const (
@@ -17,7 +17,6 @@ const (
 	PUT           = "put"
 )
 
-
 // type Header struct {
 // 	key   string
 // 	value string
@@ -25,12 +24,12 @@ const (
 
 // V1 = Only name and body
 type Request struct {
-	Id int64
+	Id   int64
 	Name string
 	// Url     string
 	// Method  string
 	// Headers []Header
-	Body string
+	Body         string
 	LastResponse string
 }
 
@@ -58,7 +57,6 @@ func (r *Request) Execute() {
 	}
 
 	r.LastResponse = pretty.String()
-
 
 	// THIS WILL REMAIN IN HERE TO SHOW HOW DUMB I'AM
 	// for _, v := range s {
@@ -92,41 +90,41 @@ func (r *Request) Execute() {
 	// 	}
 	// }
 
-// 	for i := range len(s) {
-// 	 	final += strings.Repeat(spaces, ident)
-//
-// 		for s[i] != "{" &&
-// 		s[i] != "}" &&
-// 		s[i] != "[" &&
-// 		s[i] != "]" &&
-// 		s[i] != "," {
-// 			final += s[i]
-// 		}
-//
-// 		if s[i] == "," {
-// 			final += s[i]
-// 			i += 1
-// 		}
-// 		final += "\n"
-//
-// 		if s[i] == "}" ||
-// 		s[i] == "]" {
-// 			ident -= 1
-// 			final += strings.Repeat(spaces, ident)
-// 			final += s[i]
-// 			final += "\n"
-// 			i+=1
-// 		}
-//
-// 		if s[i] == "{" ||
-// 		s[i] == "[" {
-// 			ident += 1
-// 			final += strings.Repeat(spaces, ident)
-// 			final += s[i]
-// 			final += "\n"
-// 			i+=1
-// 		}
-// 	}
+	// 	for i := range len(s) {
+	// 	 	final += strings.Repeat(spaces, ident)
+	//
+	// 		for s[i] != "{" &&
+	// 		s[i] != "}" &&
+	// 		s[i] != "[" &&
+	// 		s[i] != "]" &&
+	// 		s[i] != "," {
+	// 			final += s[i]
+	// 		}
+	//
+	// 		if s[i] == "," {
+	// 			final += s[i]
+	// 			i += 1
+	// 		}
+	// 		final += "\n"
+	//
+	// 		if s[i] == "}" ||
+	// 		s[i] == "]" {
+	// 			ident -= 1
+	// 			final += strings.Repeat(spaces, ident)
+	// 			final += s[i]
+	// 			final += "\n"
+	// 			i+=1
+	// 		}
+	//
+	// 		if s[i] == "{" ||
+	// 		s[i] == "[" {
+	// 			ident += 1
+	// 			final += strings.Repeat(spaces, ident)
+	// 			final += s[i]
+	// 			final += "\n"
+	// 			i+=1
+	// 		}
+	// 	}
 
 	// for i, v := range s {
 	// 	if v != '{' &&

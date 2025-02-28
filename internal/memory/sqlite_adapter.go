@@ -4,15 +4,16 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/OtavioPompolini/project-postman/model"
 	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/OtavioPompolini/project-postman/internal/model"
 )
 
 type SqliteDB struct {
 	db *sql.DB
 }
 
-//TODO: HEHEHE Sql in model Request XD
+// TODO: HEHEHE Sql in model Request XD
 func initDatabase() (*SqliteDB, error) {
 	db, err := sql.Open("sqlite3", "./lazycurl.db")
 	if err != nil {
@@ -70,7 +71,7 @@ func (a SqliteDB) CreateRequest(name string) *model.Request {
 	}
 
 	return &model.Request{
-		Id: id,
+		Id:   id,
 		Name: name,
 		Body: "",
 	}

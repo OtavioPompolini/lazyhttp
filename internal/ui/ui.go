@@ -19,7 +19,7 @@ func NewUI() (*UI, error) {
 	}
 
 	return &UI{
-		g: g,
+		g:       g,
 		windows: map[string]*Window{},
 	}, nil
 }
@@ -46,8 +46,8 @@ func (ui *UI) SetGlobalKeybindings() error {
 	return nil
 }
 
-//This method doest need window return
-//Isnt better to pass window name string and get the actual Window inside here?
+// This method doest need window return
+// Isnt better to pass window name string and get the actual Window inside here?
 func (ui *UI) SelectWindow(window *Window) (*Window, error) {
 	if ui.currentWindow != nil {
 		ui.currentWindow.Window.OnDeselect(*ui, *ui.currentWindow)
