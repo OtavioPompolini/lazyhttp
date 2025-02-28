@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/jroimartin/gocui"
+	"github.com/awesome-gocui/gocui"
 
 	"github.com/OtavioPompolini/project-postman/internal/memory"
 	"github.com/OtavioPompolini/project-postman/internal/ui"

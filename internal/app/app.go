@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/jroimartin/gocui"
+	"github.com/awesome-gocui/gocui"
 
 	"github.com/OtavioPompolini/project-postman/internal/memory"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
@@ -22,7 +22,6 @@ type App struct {
 }
 
 func NewApp() (*App, error) {
-
 	userInteface, err := ui.NewUI()
 	if err != nil {
 		return nil, err
@@ -36,7 +35,7 @@ func NewApp() (*App, error) {
 	app := &App{
 		GUI:           userInteface,
 		memoryHandler: memory,
-		debuggerMode:  true, //TODO: run argument --debug=true
+		debuggerMode:  true, // TODO: run argument --debug=true
 	}
 
 	app.GUI.AddWindow(NewRequestsWindow(userInteface, app.memoryHandler))
