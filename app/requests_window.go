@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/OtavioPompolini/project-postman/memory"
 	"github.com/OtavioPompolini/project-postman/ui"
-	"github.com/jroimartin/gocui"
+	"github.com/awesome-gocui/gocui"
 )
 
 type RequestsWindow struct {
@@ -69,7 +69,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
 		w.memory.SelectNext()
-		v.MoveCursor(0, 1, false)
+		v.MoveCursor(0, 1)
 		return nil
 	}); err != nil {
 		return err
@@ -77,7 +77,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 
 	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
 		w.memory.SelectPrev()
-		v.MoveCursor(0, -1, false)
+		v.MoveCursor(0, -1)
 		return nil
 	}); err != nil {
 		return err

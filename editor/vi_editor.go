@@ -1,7 +1,7 @@
 package Editor
 
 import (
-	"github.com/jroimartin/gocui"
+	"github.com/awesome-gocui/gocui"
 )
 
 const (
@@ -42,14 +42,14 @@ func (ve *VimEditor) InsertMode(v *gocui.View, key gocui.Key, ch rune, mod gocui
 		v.EditNewLine()
 
 	//// THIS SHOULD BE BANNED FOR VIMOTION USERS XD
-	case key == gocui.KeyArrowDown:
-		v.MoveCursor(0, 1, false)
-	case key == gocui.KeyArrowUp:
-		v.MoveCursor(0, -1, false)
-	case key == gocui.KeyArrowLeft:
-		v.MoveCursor(-1, 0, false)
-	case key == gocui.KeyArrowRight:
-		v.MoveCursor(1, 0, false)
+	// case key == gocui.KeyArrowDown:
+	// 	v.MoveCursor(0, 1, false)
+	// case key == gocui.KeyArrowUp:
+	// 	v.MoveCursor(0, -1, false)
+	// case key == gocui.KeyArrowLeft:
+	// 	v.MoveCursor(-1, 0, false)
+	// case key == gocui.KeyArrowRight:
+	// 	v.MoveCursor(1, 0, false)
 	}
 	////
 

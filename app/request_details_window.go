@@ -4,7 +4,7 @@ import (
 	"github.com/OtavioPompolini/project-postman/memory"
 	"github.com/OtavioPompolini/project-postman/model"
 	"github.com/OtavioPompolini/project-postman/ui"
-	"github.com/jroimartin/gocui"
+	"github.com/awesome-gocui/gocui"
 )
 
 type RequestDetailsWindow struct {

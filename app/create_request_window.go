@@ -1,11 +1,10 @@
 package app
-
 import (
 	"strings"
 
 	"github.com/OtavioPompolini/project-postman/memory"
 	"github.com/OtavioPompolini/project-postman/ui"
-	"github.com/jroimartin/gocui"
+	"github.com/awesome-gocui/gocui"
 )
 
 type CreateRequestWindow struct {

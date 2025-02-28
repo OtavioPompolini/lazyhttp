@@ -3,8 +3,8 @@ package ui
 import (
 	"fmt"
 
-	Editor "github.com/OtavioPompolini/project-postman/editor"
-	"github.com/jroimartin/gocui"
+	// Editor "github.com/OtavioPompolini/project-postman/editor"
+	"github.com/awesome-gocui/gocui"
 )
 
 // Size and name should be a Window attribute not a IWindow
@@ -40,9 +40,9 @@ func (w *Window) SwitchOnOff(b bool) {
 	w.isActive = b
 }
 
-func (v *Window) SetVimEditor() {
-	v.view.Editor = &Editor.VimEditor{}
-}
+// func (v *Window) SetVimEditor() {
+// 	v.view.Editor = &Editor.VimEditor{}
+// }
 
 func (v *Window) SetSelectedBgColor(col gocui.Attribute) {
 	v.view.SelBgColor = col

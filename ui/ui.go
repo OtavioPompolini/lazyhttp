@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 
-	"github.com/jroimartin/gocui"
+	"github.com/awesome-gocui/gocui"
 )
 
 type UI struct {
@@ -13,7 +13,7 @@ type UI struct {
 }
 
 func NewUI() (*UI, error) {
-	g, err := gocui.NewGui(gocui.Output256)
+	g, err := gocui.NewGui(gocui.Output256, true)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (ui *UI) StartUI() {
 func (ui *UI) renderWindow(window *Window) error {
 	x, y, w, h := window.Window.Size()
 	name := window.Window.Name()
-	v, err := ui.g.SetView(name, x, y, w, h)
+	v, err := ui.g.SetView(name, x, y, w, h, 1)
 	if err != nil {
 		if err == gocui.ErrUnknownView {
 			window.setView(v)
