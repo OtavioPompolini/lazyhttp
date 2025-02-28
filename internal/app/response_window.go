@@ -34,9 +34,6 @@ func (w ResponseWindow) Name() string {
 }
 
 func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
-	// v.SelBgColor = gocui.ColorYellow
-	// v.SetVimEditor()
-	// v.SetHightlight(true)
 	v.SetFgColor(true)
 	v.SetEditable(true)
 	v.SetTitle("RESPONSES CARAI")

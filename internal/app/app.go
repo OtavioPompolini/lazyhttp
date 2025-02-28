@@ -6,17 +6,8 @@ import (
 	"github.com/OtavioPompolini/project-postman/internal/memory"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
-
-// type Windows struct {
-// 	RequestsWindow       *ui.IWindow
-// 	RequestDetailsWindow *ui.IWindow
-// 	CreateRequestWindow  *ui.IWindow
-// 	// DebuggerView         *ui.Window
-// }
-
 type App struct {
 	GUI *ui.UI
-	// Windows      *Windows
 	debuggerMode  bool
 	memoryHandler *memory.Memory
 }

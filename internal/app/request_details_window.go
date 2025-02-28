@@ -39,8 +39,6 @@ func (w RequestDetailsWindow) Name() string {
 }
 
 func (w *RequestDetailsWindow) Setup(ui ui.UI, v ui.Window) {
-	// v.SelBgColor = gocui.ColorYellow
-	// v.SetVimEditor()
 	v.SetTitle(v.Window.Name())
 	v.SetEditable(true)
 }
@@ -64,20 +62,6 @@ func (w *RequestDetailsWindow) IsActive() bool {
 
 func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI) error {
 
-	// if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-	// 	win, err := ui.GetWindow(w.Name())
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	//
-	// 	win.SetEditable(true)
-	// 	win.SetTitle("EDITING")
-	//
-	// 	return nil
-	// }); err != nil {
-	// 	return err
-	// }
-
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEsc, func(g *gocui.Gui, v *gocui.View) error {
 		win, err := ui.GetWindow("RequestsWindow")
 		if err != nil {
@@ -90,18 +74,10 @@ func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI) error {
 		return err
 	}
 
-	// if err := g.SetKeybinding(w.Name, gocui.KeyEsc, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
-	// 	ChangeView(g, LastViewId)
-	// 	return nil
-	// }); err != nil {
-	// 	log.Panicln(err)
-	// }
-
 	return nil
 }
 
 func (w *RequestDetailsWindow) OnDeselect(ui ui.UI, v ui.Window) error {
-	// onSaveBodyContent(w.body)
 	selected := w.memory.GetSelectedRequest()
 	w.memory.UpdateRequest(
 		&model.Request{

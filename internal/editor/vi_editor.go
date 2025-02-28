@@ -12,6 +12,7 @@ const (
 	VISUAL_BLOCK_MODE string = "visual_block"
 )
 
+// This probably will be replaced with bubbletea TextArea as already supports vimotions
 type VimEditor struct {
 	Mode string
 }
@@ -60,14 +61,14 @@ func (ve *VimEditor) NormalMode(v *gocui.View, key gocui.Key, ch rune, mod gocui
 	switch {
 	case ch == 'i':
 		ve.Mode = INSERT_MODE
-	case ch == 'j':
-		v.MoveCursor(0, 1, false)
-	case ch == 'k':
-		v.MoveCursor(0, -1, false)
-	case ch == 'h':
-		v.MoveCursor(-1, 0, false)
-	case ch == 'l':
-		v.MoveCursor(1, 0, false)
+	// case ch == 'j':
+	// 	v.MoveCursor(0, 1, false)
+	// case ch == 'k':
+	// 	v.MoveCursor(0, -1, false)
+	// case ch == 'h':
+	// 	v.MoveCursor(-1, 0, false)
+	// case ch == 'l':
+	// 	v.MoveCursor(1, 0, false)
 	}
 	// TODO: handle other keybindings...
 }

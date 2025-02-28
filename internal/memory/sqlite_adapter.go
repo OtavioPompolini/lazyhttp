@@ -13,7 +13,6 @@ type SqliteDB struct {
 	db *sql.DB
 }
 
-// TODO: HEHEHE Sql in model Request XD
 func initDatabase() (*SqliteDB, error) {
 	db, err := sql.Open("sqlite3", "./lazycurl.db")
 	if err != nil {
@@ -42,7 +41,7 @@ func (a SqliteDB) GetRequests() *map[int64]*model.Request {
 		SELECT * FROM requests
 		`)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	defer row.Close()
@@ -62,12 +61,12 @@ func (a SqliteDB) GetRequests() *map[int64]*model.Request {
 func (a SqliteDB) CreateRequest(name string) *model.Request {
 	res, err := a.db.Exec("INSERT INTO requests(name) values (?)", name)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	return &model.Request{
@@ -80,17 +79,6 @@ func (a SqliteDB) CreateRequest(name string) *model.Request {
 func (a SqliteDB) UpdateRequest(r *model.Request) {
 	_, err := a.db.Exec("UPDATE requests SET body=? WHERE id=?", r.Body, r.Id)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
-
-	// id, err := res.LastInsertId()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	//
-	// return &model.Request{
-	// 	Id: id,
-	// 	Name: name,
-	// 	Body: "",
-	// }
 }

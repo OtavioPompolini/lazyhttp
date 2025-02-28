@@ -39,8 +39,6 @@ func (w CreateRequestWindow) Name() string {
 }
 
 func (w *CreateRequestWindow) Setup(ui ui.UI, v ui.Window) {
-	// v.SelBgColor = gocui.ColorYellow
-	// v.SetVimEditor()
 	ui.SelectWindow(&v)
 	v.SetHightlight(true)
 	v.SetEditable(true)
