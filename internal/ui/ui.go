@@ -90,7 +90,7 @@ func (ui *UI) StartUI() {
 func (ui *UI) renderWindow(window *Window) error {
 	x, y, w, h := window.Window.Size()
 	name := window.Window.Name()
-	v, err := ui.g.SetView(name, x, y, w, h, 1)
+	v, err := ui.g.SetView(name, x, y, w, h, 0)
 	if err != nil {
 		if err == gocui.ErrUnknownView {
 			window.setView(v)

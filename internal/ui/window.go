@@ -89,3 +89,11 @@ func (v *Window) SetEditable(b bool) {
 func (v *Window) setView(newView *gocui.View) {
 	v.view = newView
 }
+
+func (v *Window) IsTained() bool {
+	return v.view.IsTainted()
+}
+
+func (v *Window) SetCursor(x, y int) error {
+	return v.view.SetCursor(x, y)
+}

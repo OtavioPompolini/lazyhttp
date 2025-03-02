@@ -1,6 +1,7 @@
 # Project Postman
 
 ## Known issues
+    - Stop closing aplication when fail to parse request or request fail
     - Losing last response when editing a request
     - When saving a request its adding empty lines at the end
     - when saving a request its removing 1 empty line at the beggining
@@ -20,6 +21,7 @@
     - Resolve all known issues
 
 ## Roadmap some day
+    - Add error whindow: "Parsing failed", "request failed"...
     - find/filter request
     - Request navigation Ctrl+u, Crtl+d -> jump multiple
     - Windows navigation through hjkl

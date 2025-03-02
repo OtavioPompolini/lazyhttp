@@ -1,6 +1,9 @@
 package app
 
 import (
+	"errors"
+	"log"
+
 	"github.com/awesome-gocui/gocui"
 
 	"github.com/OtavioPompolini/project-postman/internal/memory"
@@ -27,6 +30,7 @@ func NewRequestsWindow(GUI *ui.UI, memomry *memory.Memory) *ui.Window {
 			w:        49,
 			memory:   memomry,
 			isActive: true,
+			currentLine: 0,
 		},
 		true,
 	)
@@ -44,8 +48,6 @@ func (w *RequestsWindow) Setup(ui ui.UI, v ui.Window) {
 }
 
 func (w *RequestsWindow) Update(ui ui.UI, v ui.Window) {
-	v.ClearWindow()
-
 	requests := w.memory.ListRequests()
 
 	lines := []string{}
@@ -54,7 +56,12 @@ func (w *RequestsWindow) Update(ui ui.UI, v ui.Window) {
 		lines = append(lines, r.Name)
 	}
 
+	v.ClearWindow()
 	v.WriteLines(lines)
+	err := v.SetCursor(0, w.currentLine)
+	if err != nil {
+		log.Panic("error. find me")
+	}
 }
 
 func (w *RequestsWindow) Size() (x, y, width, height int) {
@@ -69,6 +76,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
 		w.memory.SelectNext()
+		w.currentLine += 1
 		v.MoveCursor(0, 1)
 		return nil
 	}); err != nil {
@@ -77,6 +85,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 
 	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
 		w.memory.SelectPrev()
+		w.currentLine -= 1
 		v.MoveCursor(0, -1)
 		return nil
 	}); err != nil {
