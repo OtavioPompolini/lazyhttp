@@ -65,13 +65,17 @@ func (v *Window) WriteLn(text string) {
 }
 
 func (v *Window) WriteLines(text []string) {
-	for i, t := range text {
-		if i < len(text)-1 {
-			fmt.Fprintln(v.view, t)
-		} else {
-			fmt.Fprint(v.view, t)
-		}
+	for _, t := range text {
+		fmt.Fprintln(v.view, t)
 	}
+
+	// for i, t := range text {
+	// 	if i < len(text)-1 {
+	// 		fmt.Fprintln(v.view, t)
+	// 	} else {
+	// 		fmt.Fprint(v.view, t)
+	// 	}
+	// }
 }
 
 func (v *Window) GetWindowContent() string {

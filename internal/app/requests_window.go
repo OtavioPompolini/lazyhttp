@@ -1,7 +1,6 @@
 package app
 
 import (
-	"errors"
 	"log"
 
 	"github.com/awesome-gocui/gocui"
@@ -45,9 +44,6 @@ func (w *RequestsWindow) Setup(ui ui.UI, v ui.Window) {
 	v.SetTitle(v.Window.Name())
 	v.SetSelectedBgColor(gocui.ColorRed)
 	v.SetHightlight(true)
-}
-
-func (w *RequestsWindow) Update(ui ui.UI, v ui.Window) {
 	requests := w.memory.ListRequests()
 
 	lines := []string{}
@@ -56,12 +52,10 @@ func (w *RequestsWindow) Update(ui ui.UI, v ui.Window) {
 		lines = append(lines, r.Name)
 	}
 
-	v.ClearWindow()
 	v.WriteLines(lines)
-	err := v.SetCursor(0, w.currentLine)
-	if err != nil {
-		log.Panic("error. find me")
-	}
+}
+
+func (w *RequestsWindow) Update(ui ui.UI, v ui.Window) {
 }
 
 func (w *RequestsWindow) Size() (x, y, width, height int) {
