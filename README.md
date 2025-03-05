@@ -3,9 +3,6 @@
 ## Known issues
     - Stop closing aplication when fail to parse request or request fail
     - Losing last response when editing a request
-    - When saving a request its adding empty lines at the end
-    - when saving a request its removing 1 empty line at the beggining
-    - Request window not refreshing
 
 ## Roadmap v0.1
     - Show more information of the response

@@ -59,23 +59,22 @@ func (v *Window) SetFgColor(b bool) {
 	v.view.FgColor = gocui.ColorRed
 }
 
-// FIX: WriteLn always put a '\n' at the end so it will have a new blank line
 func (v *Window) WriteLn(text string) {
-	fmt.Fprintln(v.view, text)
+	fmt.Fprint(v.view, "\n"+text)
+}
+
+func (v *Window) Write(text string) {
+	fmt.Fprint(v.view, text)
 }
 
 func (v *Window) WriteLines(text []string) {
-	for _, t := range text {
-		fmt.Fprintln(v.view, t)
+	for i, t := range text {
+		if i < len(text)-1 {
+			fmt.Fprintln(v.view, t)
+		} else {
+			fmt.Fprint(v.view, t)
+		}
 	}
-
-	// for i, t := range text {
-	// 	if i < len(text)-1 {
-	// 		fmt.Fprintln(v.view, t)
-	// 	} else {
-	// 		fmt.Fprint(v.view, t)
-	// 	}
-	// }
 }
 
 func (v *Window) GetWindowContent() string {

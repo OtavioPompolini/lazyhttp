@@ -1,8 +1,6 @@
 package app
 
 import (
-	"log"
-
 	"github.com/awesome-gocui/gocui"
 
 	"github.com/OtavioPompolini/project-postman/internal/memory"
