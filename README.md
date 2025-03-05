@@ -26,5 +26,5 @@
     - Add support to environments and variables
     - Add VIMOTION when editing request (THIS IS A MUST)
     - Be able to navigate through response window and copy content to clipboard
-
+    - ? keybind to open a help menu
 
