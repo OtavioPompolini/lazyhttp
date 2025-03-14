@@ -6,14 +6,12 @@
 
 ## Roadmap v0.1
     - Show more information of the response
-    - Add keybing to close create request window
     - Be able to scroll through response window
     - Refactor code for executing request
     - change db file location
     - Add bind to delete request
     - Save the last response of each request in database
     - Json highlighting
-    - Better window names
     - UI improvements based on OS window size
     - Resolve all known issues
 

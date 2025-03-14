@@ -39,7 +39,7 @@ func (w RequestsWindow) Name() string {
 
 func (w *RequestsWindow) Setup(ui ui.UI, v ui.Window) {
 	ui.SelectWindow(&v)
-	v.SetTitle(v.Window.Name())
+	v.SetTitle("Requests:")
 	v.SetSelectedBgColor(gocui.ColorRed)
 	v.SetHightlight(true)
 	requests := w.memory.ListRequests()

@@ -39,7 +39,7 @@ func (w RequestDetailsWindow) Name() string {
 }
 
 func (w *RequestDetailsWindow) Setup(ui ui.UI, v ui.Window) {
-	v.SetTitle(v.Window.Name())
+	v.SetTitle("Details")
 	v.SetEditable(true)
 }
 

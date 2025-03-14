@@ -63,6 +63,17 @@ func (ui *UI) SelectWindow(window *Window) (*Window, error) {
 	return window, nil
 }
 
+func (ui *UI) SelectWindowByName(wName string) (*Window, error) {
+	w, err := ui.GetWindow(wName)
+	if err != nil {
+		return nil, err
+	}
+
+	ui.SelectWindow(w)
+
+	return w, nil
+}
+
 func (ui *UI) SetFgColor(color gocui.Attribute) {
 	ui.g.FgColor = color
 }
@@ -108,6 +119,17 @@ func (ui *UI) DeleteWindow(window *Window) error {
 	if err := ui.g.DeleteView(window.Window.Name()); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (ui *UI) DeleteWindowByName(wName string) error {
+	w, err := ui.GetWindow(wName)
+	if err != nil {
+		return err
+	}
+
+	ui.DeleteWindow(w)
 
 	return nil
 }

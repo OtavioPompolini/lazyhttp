@@ -42,6 +42,7 @@ func (w *CreateRequestWindow) Setup(ui ui.UI, v ui.Window) {
 	ui.SelectWindow(&v)
 	v.SetHightlight(true)
 	v.SetEditable(true)
+	v.SetTitle("Create Request:")
 }
 
 func (w *CreateRequestWindow) Update(ui ui.UI, v ui.Window) {
@@ -58,28 +59,13 @@ func (w *CreateRequestWindow) IsActive() bool {
 
 func (w *CreateRequestWindow) SetKeybindings(ui *ui.UI) error {
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-		saved := w.memory.CreateRequest(w.newReqName)
+		return w.createRequest(ui)
+	}); err != nil {
+		return err
+	}
 
-		win, err := ui.GetWindow("CreateRequestWindow")
-		if err != nil {
-			return err
-		}
-
-		err = ui.DeleteWindow(win)
-		if err != nil {
-			return err
-		}
-
-		win, err = ui.GetWindow("RequestsWindow")
-		if err != nil {
-			return err
-		}
-
-		win.WriteLn(saved.Name)
-		ui.SelectWindow(win)
-		win.SetCursor(1, 0)
-
-		return nil
+	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEsc, func(g *gocui.Gui, v *gocui.View) error {
+		return w.closeWindow(ui)
 	}); err != nil {
 		return err
 	}
@@ -92,5 +78,38 @@ func (w *CreateRequestWindow) OnDeselect(ui ui.UI, v ui.Window) error {
 }
 
 func (w *CreateRequestWindow) OnSelect(ui ui.UI, v ui.Window) error {
+	return nil
+}
+
+
+//  ======= ACTIONS =======
+
+
+func (w *CreateRequestWindow) closeWindow(ui *ui.UI) error {
+	ui.DeleteWindowByName(w.name)
+
+	win, err := ui.GetWindow("RequestsWindow")
+	if err != nil {
+		return err
+	}
+
+	ui.SelectWindow(win)
+
+	return nil
+}
+
+func (w *CreateRequestWindow) createRequest(ui *ui.UI) error {
+	saved := w.memory.CreateRequest(w.newReqName)
+	win, err := ui.GetWindow("RequestsWindow")
+	if err != nil {
+		return err
+	}
+
+	ui.DeleteWindowByName(w.name)
+	ui.SelectWindow(win)
+
+	// EXTRACT THIS NOT GOOD HERE
+	win.WriteLn(saved.Name)
+
 	return nil
 }

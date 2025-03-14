@@ -19,9 +19,9 @@ func NewResponseWindow(GUI *ui.UI, mem *memory.Memory) *ui.Window {
 	return ui.NewWindow(
 		&ResponseWindow{
 			name:     "ResponseWindow",
-			x:        (a*60/100) + 1,
+			x:        (a*60/100) + 2,
 			y:        0,
-			w:        a*40/100-1,
+			w:        a*40/100-2,
 			h:        b-1,
 			isActive: true,
 			memory:   mem,
@@ -37,7 +37,7 @@ func (w ResponseWindow) Name() string {
 func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
 	v.SetFgColor(true)
 	v.SetEditable(true)
-	v.SetTitle("RESPONSES CARAI")
+	v.SetTitle("Response:")
 }
 
 func (w *ResponseWindow) Update(ui ui.UI, v ui.Window) {
