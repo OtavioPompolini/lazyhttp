@@ -15,13 +15,14 @@ type ResponseWindow struct {
 }
 
 func NewResponseWindow(GUI *ui.UI, mem *memory.Memory) *ui.Window {
+	a, b := GUI.Size()
 	return ui.NewWindow(
 		&ResponseWindow{
 			name:     "ResponseWindow",
-			x:        131,
+			x:        (a*60/100) + 1,
 			y:        0,
-			w:        200,
-			h:        50,
+			w:        a*40/100-1,
+			h:        b-1,
 			isActive: true,
 			memory:   mem,
 		},

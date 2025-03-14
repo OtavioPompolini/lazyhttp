@@ -88,7 +88,7 @@ func (ui *UI) StartUI() {
 }
 
 func (ui *UI) renderWindow(window *Window) error {
-	x, y, w, h := window.Window.Size()
+	x, y, w, h := window.Window.Size() // TODO: Resizable windows based on OS current window size
 	name := window.Window.Name()
 	v, err := ui.g.SetView(name, x, y, w, h, 0)
 	if err != nil {

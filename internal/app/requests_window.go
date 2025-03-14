@@ -17,14 +17,14 @@ type RequestsWindow struct {
 }
 
 func NewRequestsWindow(GUI *ui.UI, memomry *memory.Memory) *ui.Window {
-	_, b := GUI.Size()
+	a, b := GUI.Size()
 	return ui.NewWindow(
 		&RequestsWindow{
 			name:     "RequestsWindow",
 			x:        0,
 			y:        0,
 			h:        b - 1,
-			w:        49,
+			w:        a*20/100,
 			memory:   memomry,
 			isActive: true,
 			currentLine: 0,
