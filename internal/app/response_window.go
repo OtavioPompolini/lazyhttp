@@ -35,7 +35,6 @@ func (w ResponseWindow) Name() string {
 }
 
 func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
-	v.SetFgColor(true)
 	v.SetEditable(true)
 	v.SetTitle("Response:")
 }

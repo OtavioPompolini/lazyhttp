@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/OtavioPompolini/project-postman/internal/utils"
 )
@@ -19,10 +20,12 @@ type Request struct {
 }
 
 // Refactor this pls
+// Didnt like this Request.Execute(). Where can I set configs in my app
+// Imagine if I want to force http/1.0 instead of http/2.0
 func (r *Request) Execute() {
 	httpRequest, err := utils.ParseHttpRequest(r.Body)
 	if err != nil {
-		log.Panic("Parse error")
+		log.Panic(err)
 	}
 
 	client := http.Client{}
@@ -31,6 +34,19 @@ func (r *Request) Execute() {
 		log.Panic("req error")
 	}
 
+	responseString := ""
+
+	responseString += res.Proto + " "
+	responseString += res.Status
+	responseString += "\n"
+
+	for k, v := range res.Header {
+		responseString += k + ": "
+		responseString += strings.Join(v, "")
+		responseString += "\n"
+	}
+
+		responseString += "\n"
 	s, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Panic("XISDE")
@@ -42,5 +58,6 @@ func (r *Request) Execute() {
 		log.Panic("DUMB")
 	}
 
-	r.LastResponse = pretty.String()
+	responseString += pretty.String()
+	r.LastResponse = responseString
 }

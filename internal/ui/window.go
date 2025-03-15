@@ -55,9 +55,9 @@ func (v *Window) SetHightlight(b bool) {
 	v.view.Highlight = b
 }
 
-func (v *Window) SetFgColor(b bool) {
-	v.view.FgColor = gocui.ColorRed
-}
+// func (v *Window) SetFgColor(b bool) {
+// 	v.view.FgColor = gocui.ColorRed
+// }
 
 func (v *Window) WriteLn(text string) {
 	fmt.Fprint(v.view, "\n"+text)

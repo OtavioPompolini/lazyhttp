@@ -17,6 +17,11 @@ func ParseHttpRequest(input string) (*http.Request, error) {
 
 	requestLine := strings.TrimSpace(lines[0])
 	parts := strings.Fields(requestLine)
+
+	if len(parts) < 2 {
+		return nil, errors.New("Invalid request")
+	}
+
 	rawURL := parts[1]
 
 	headers := make(map[string]string)
