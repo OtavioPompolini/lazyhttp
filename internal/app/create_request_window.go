@@ -5,30 +5,29 @@ import (
 
 	"github.com/awesome-gocui/gocui"
 
-	"github.com/OtavioPompolini/project-postman/internal/memory"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type CreateRequestWindow struct {
-	name       string
-	x, y       int
-	w, h       int
-	isActive   bool
-	newReqName string
-	memory     *memory.Memory
+	name         string
+	x, y         int
+	w, h         int
+	isActive     bool
+	newReqName   string
+	stateService StateService
 }
 
-func NewCreateRequestWindow(GUI *ui.UI, mem *memory.Memory) *ui.Window {
+func NewCreateRequestWindow(GUI *ui.UI, stateStateService StateService) *ui.Window {
 	a, b := GUI.Size()
 	return ui.NewWindow(
 		&CreateRequestWindow{
-			name:     "CreateRequestWindow",
-			x:        (a / 2) - 25,
-			y:        b / 2,
-			w:        50,
-			h:        2,
-			isActive: false,
-			memory:   mem,
+			name:         "CreateRequestWindow",
+			x:            (a / 2) - 25,
+			y:            b / 2,
+			w:            50,
+			h:            2,
+			isActive:     false,
+			stateService: stateStateService,
 		},
 		false,
 	)
@@ -57,7 +56,7 @@ func (w *CreateRequestWindow) IsActive() bool {
 	return w.isActive
 }
 
-func (w *CreateRequestWindow) SetKeybindings(ui *ui.UI) error {
+func (w *CreateRequestWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
 		return w.createRequest(ui)
 	}); err != nil {
@@ -81,9 +80,7 @@ func (w *CreateRequestWindow) OnSelect(ui ui.UI, v ui.Window) error {
 	return nil
 }
 
-
 //  ======= ACTIONS =======
-
 
 func (w *CreateRequestWindow) closeWindow(ui *ui.UI) error {
 	ui.DeleteWindowByName(w.name)
@@ -99,7 +96,7 @@ func (w *CreateRequestWindow) closeWindow(ui *ui.UI) error {
 }
 
 func (w *CreateRequestWindow) createRequest(ui *ui.UI) error {
-	saved := w.memory.CreateRequest(w.newReqName)
+	w.stateService.CreateRequest(w.newReqName)
 	win, err := ui.GetWindow("RequestsWindow")
 	if err != nil {
 		return err
@@ -108,8 +105,11 @@ func (w *CreateRequestWindow) createRequest(ui *ui.UI) error {
 	ui.DeleteWindowByName(w.name)
 	ui.SelectWindow(win)
 
-	// EXTRACT THIS NOT GOOD HERE
-	win.WriteLn(saved.Name)
+	// I REALLY, REALLY, REALLY DONT LIKE THIS
+	win.Window.ReloadContent(ui, win)
 
 	return nil
+}
+
+func (w *CreateRequestWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 }

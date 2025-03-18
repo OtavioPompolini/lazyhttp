@@ -1,30 +1,29 @@
 package app
 
 import (
-	"github.com/OtavioPompolini/project-postman/internal/memory"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type ResponseWindow struct {
-	name       string
-	x, y       int
-	w, h       int
-	isActive   bool
-	newReqName string
-	memory     *memory.Memory
+	name         string
+	x, y         int
+	w, h         int
+	isActive     bool
+	newReqName   string
+	StateService StateService
 }
 
-func NewResponseWindow(GUI *ui.UI, mem *memory.Memory) *ui.Window {
+func NewResponseWindow(GUI *ui.UI, ss StateService) *ui.Window {
 	a, b := GUI.Size()
 	return ui.NewWindow(
 		&ResponseWindow{
-			name:     "ResponseWindow",
-			x:        (a*60/100) + 2,
-			y:        0,
-			w:        a*40/100-2,
-			h:        b-1,
-			isActive: true,
-			memory:   mem,
+			name:         "ResponseWindow",
+			x:            (a * 60 / 100) + 2,
+			y:            0,
+			w:            a*40/100 - 2,
+			h:            b - 1,
+			isActive:     true,
+			StateService: ss,
 		},
 		true,
 	)
@@ -41,7 +40,7 @@ func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
 
 func (w *ResponseWindow) Update(ui ui.UI, v ui.Window) {
 	v.ClearWindow()
-	v.WriteLn(w.memory.GetSelectedRequest().LastResponse)
+	v.Write(w.StateService.state.selectedRequest.LastResponse)
 }
 
 func (w *ResponseWindow) Size() (x, y, width, height int) {
@@ -52,7 +51,7 @@ func (w *ResponseWindow) IsActive() bool {
 	return w.isActive
 }
 
-func (w *ResponseWindow) SetKeybindings(ui *ui.UI) error {
+func (w *ResponseWindow) SetKeybindings(ui *ui.UI, v *ui.Window) error {
 	return nil
 }
 
@@ -62,4 +61,7 @@ func (w *ResponseWindow) OnDeselect(ui ui.UI, v ui.Window) error {
 
 func (w *ResponseWindow) OnSelect(ui ui.UI, v ui.Window) error {
 	return nil
+}
+
+func (w *ResponseWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 }

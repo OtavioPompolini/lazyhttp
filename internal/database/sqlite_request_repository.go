@@ -1,4 +1,4 @@
-package memory
+package database
 
 import (
 	"database/sql"
@@ -6,23 +6,14 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/OtavioPompolini/project-postman/internal/model"
+	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
-type SqliteDB struct {
+type SqliteRequestRepository struct {
 	db *sql.DB
 }
 
-func initDatabase() (*SqliteDB, error) {
-	db, err := sql.Open("sqlite3", "./lazycurl.db")
-	if err != nil {
-		return nil, err
-	}
-
-	sqldb := SqliteDB{
-		db: db,
-	}
-
+func newRequestRepository(db *sql.DB) SqliteRequestRepository {
 	db.Exec(`
 		CREATE TABLE IF NOT EXISTS requests (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,11 +22,13 @@ func initDatabase() (*SqliteDB, error) {
 		);
 	`)
 
-	return &sqldb, nil
+	return SqliteRequestRepository{
+		db: db,
+	}
 }
 
-func (a SqliteDB) GetRequests() *map[int64]*model.Request {
-	requests := make(map[int64]*model.Request)
+func (a SqliteRequestRepository) GetRequests() []*types.Request {
+	requests := []*types.Request{}
 
 	row, err := a.db.Query(`
 		SELECT * FROM requests
@@ -46,19 +39,20 @@ func (a SqliteDB) GetRequests() *map[int64]*model.Request {
 
 	defer row.Close()
 	for row.Next() {
-		request := &model.Request{}
+		request := &types.Request{}
 
 		err := row.Scan(&request.Id, &request.Name, &request.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
-		requests[request.Id] = request
+
+		requests = append(requests, request)
 	}
 
-	return &requests
+	return requests
 }
 
-func (a SqliteDB) CreateRequest(name string) *model.Request {
+func (a SqliteRequestRepository) CreateRequest(name string) *types.Request {
 	res, err := a.db.Exec("INSERT INTO requests(name) values (?)", name)
 	if err != nil {
 		log.Panic(err)
@@ -69,15 +63,22 @@ func (a SqliteDB) CreateRequest(name string) *model.Request {
 		log.Panic(err)
 	}
 
-	return &model.Request{
+	return &types.Request{
 		Id:   id,
 		Name: name,
 		Body: "",
 	}
 }
 
-func (a SqliteDB) UpdateRequest(r *model.Request) {
+func (a SqliteRequestRepository) UpdateRequest(r *types.Request) {
 	_, err := a.db.Exec("UPDATE requests SET body=? WHERE id=?", r.Body, r.Id)
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+func (a SqliteRequestRepository) DeleteRequest(id uint64) {
+	_, err := a.db.Exec("DELETE from requests where id=?", id)
 	if err != nil {
 		log.Panic(err)
 	}

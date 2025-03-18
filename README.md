@@ -5,7 +5,6 @@
     - Losing last response when editing a request
 
 ## Roadmap v0.1
-    - Show more information of the response
     - Be able to scroll through response window
     - Refactor code for executing request
     - change db file location
@@ -16,6 +15,7 @@
     - Resolve all known issues
 
 ## Roadmap some day
+    - Create a error window. (e.g Show user invalid reqest format)
     - Add error whindow: "Parsing failed", "request failed"...
     - find/filter request
     - Request navigation Ctrl+u, Crtl+d -> jump multiple

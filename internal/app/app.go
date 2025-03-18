@@ -3,38 +3,41 @@ package app
 import (
 	"github.com/awesome-gocui/gocui"
 
-	"github.com/OtavioPompolini/project-postman/internal/memory"
+	"github.com/OtavioPompolini/project-postman/internal/database"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
+
 type App struct {
-	GUI *ui.UI
-	debuggerMode  bool
-	memoryHandler *memory.Memory
+	GUI          *ui.UI
+	debuggerMode bool
+	state        State
 }
 
 func NewApp() (*App, error) {
-	userInteface, err := ui.NewUI()
+	userInterface, err := ui.NewUI()
 	if err != nil {
 		return nil, err
 	}
 
-	memory, err := memory.InitMemory()
+	db, err := database.NewPersistanceAdapter()
 	if err != nil {
 		return nil, err
 	}
+
+	stateService := NewStateService(db)
 
 	app := &App{
-		GUI:           userInteface,
-		memoryHandler: memory,
-		debuggerMode:  true, // TODO: run argument --debug=true
+		// persistanceAdapter: db,
+		GUI:   userInterface,
+		state: *stateService.state,
 	}
 
-	app.GUI.AddWindow(NewRequestsWindow(userInteface, app.memoryHandler))
-	app.GUI.AddWindow(NewRequestDetailsWindow(userInteface, app.memoryHandler))
-	app.GUI.AddWindow(NewCreateRequestWindow(userInteface, app.memoryHandler))
-	app.GUI.AddWindow(NewResponseWindow(userInteface, app.memoryHandler))
-
 	app.GUI.StartUI()
+
+	app.GUI.AddWindow(NewRequestsWindow(userInterface, *stateService))
+	app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, *stateService))
+	app.GUI.AddWindow(NewCreateRequestWindow(userInterface, *stateService))
+	app.GUI.AddWindow(NewResponseWindow(userInterface, *stateService))
 
 	app.GUI.SetHightlight(true)
 	app.GUI.SetFgColor(gocui.ColorGreen)

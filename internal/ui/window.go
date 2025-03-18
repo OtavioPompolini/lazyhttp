@@ -14,7 +14,8 @@ type IWindow interface {
 	OnDeselect(ui UI, w Window) error
 	Size() (x, y, w, h int)
 	Name() string
-	SetKeybindings(ui *UI) error
+	SetKeybindings(ui *UI, w *Window) error
+	ReloadContent(ui *UI, w *Window)
 }
 
 type Window struct {
@@ -35,8 +36,8 @@ func (w *Window) IsActive() bool {
 	return w.isActive
 }
 
-func (w *Window) SwitchOnOff(b bool) {
-	w.isActive = b
+func (w *Window) OpenWindow() {
+	w.isActive = true
 }
 
 // func (v *Window) SetVimEditor() {

@@ -1,33 +1,33 @@
-package memory
+package database
 
 import (
 	"errors"
 	"sort"
 
-	"github.com/OtavioPompolini/project-postman/internal/model"
+	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
 type LocalMemory struct {
-	requests    map[int64]*model.Request //TODO: support collections (filesystem)
-	requestsArr []model.Request
+	requests    map[int64]*types.Request // TODO: support collections (filesystem)
+	requestsArr []types.Request
 	selectedReq int64
 	selectedPos int
 }
 
 func newLocalMemory() *LocalMemory {
 	return &LocalMemory{
-		requests:    map[int64]*model.Request{},
-		requestsArr: []model.Request{},
+		requests:    map[int64]*types.Request{},
+		requestsArr: []types.Request{},
 	}
 }
 
-func (m *LocalMemory) AddRequest(r *model.Request) {
+func (m *LocalMemory) AddRequest(r *types.Request) {
 	m.requests[r.Id] = r
 
 	m.reloadList()
 }
 
-func (m *LocalMemory) addRequests(r *map[int64]*model.Request) {
+func (m *LocalMemory) addRequests(r *map[int64]*types.Request) {
 	m.requests = *r
 	m.reloadList()
 }
@@ -50,7 +50,7 @@ func (m *LocalMemory) SelectPrev() {
 	m.selectedReq = m.requestsArr[m.selectedPos].Id
 }
 
-func (m *LocalMemory) ListRequests() []model.Request {
+func (m *LocalMemory) ListRequests() []types.Request {
 	return m.requestsArr
 }
 
@@ -62,18 +62,18 @@ func (m *LocalMemory) IsEmpty() bool {
 	return false
 }
 
-func (m *LocalMemory) GetSelectedRequest() *model.Request {
+func (m *LocalMemory) GetSelectedRequest() *types.Request {
 	req, ok := m.requests[m.selectedReq]
 	if ok {
 		return req
 	}
 
-	return &model.Request{}
+	return &types.Request{}
 }
 
-func (m *LocalMemory) UpdateSelectedRequest(r *model.Request) {
+func (m *LocalMemory) UpdateSelectedRequest(r *types.Request) {
 	saved, _ := m.requests[r.Id]
-	m.requests[r.Id] = &model.Request{
+	m.requests[r.Id] = &types.Request{
 		Id:   r.Id,
 		Name: saved.Name,
 		Body: r.Body,
@@ -83,7 +83,7 @@ func (m *LocalMemory) UpdateSelectedRequest(r *model.Request) {
 }
 
 func (m *LocalMemory) reloadList() {
-	requestsArr := []model.Request{}
+	requestsArr := []types.Request{}
 
 	for _, req := range m.requests {
 		requestsArr = append(requestsArr, *req)

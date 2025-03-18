@@ -3,32 +3,31 @@ package app
 import (
 	"github.com/awesome-gocui/gocui"
 
-	"github.com/OtavioPompolini/project-postman/internal/memory"
-	"github.com/OtavioPompolini/project-postman/internal/model"
+	"github.com/OtavioPompolini/project-postman/internal/types"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type RequestDetailsWindow struct {
-	name       string
-	x, y       int
-	w, h       int
-	body       string
-	isActive   bool
-	isSelected bool
-	memory     *memory.Memory
+	name         string
+	x, y         int
+	w, h         int
+	body         string
+	isActive     bool
+	isSelected   bool
+	StateService StateService
 }
 
-func NewRequestDetailsWindow(GUI *ui.UI, memory *memory.Memory) *ui.Window {
+func NewRequestDetailsWindow(GUI *ui.UI, stateStateService StateService) *ui.Window {
 	a, b := GUI.Size()
 	return ui.NewWindow(
 		&RequestDetailsWindow{
-			name:       "RequestDetailsWindow",
-			x:          (a*20/100) + 1,
-			y:          0,
-			h:          b - 1,
-			w:          a*40/100,
-			isSelected: false,
-			memory:     memory,
+			name:         "RequestDetailsWindow",
+			x:            (a * 20 / 100) + 1,
+			y:            0,
+			h:            b - 1,
+			w:            a * 40 / 100,
+			isSelected:   false,
+			StateService: stateStateService,
 		},
 		true,
 	)
@@ -46,7 +45,7 @@ func (w *RequestDetailsWindow) Setup(ui ui.UI, v ui.Window) {
 func (w *RequestDetailsWindow) Update(ui ui.UI, v ui.Window) {
 	if !w.isSelected {
 		v.ClearWindow()
-		v.Write(w.memory.GetSelectedRequest().Body)
+		v.Write(w.StateService.state.selectedRequest.Body)
 	} else {
 		w.body = v.GetWindowContent()
 	}
@@ -60,14 +59,12 @@ func (w *RequestDetailsWindow) IsActive() bool {
 	return w.isActive
 }
 
-func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI) error {
-
+func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEsc, func(g *gocui.Gui, v *gocui.View) error {
-		win, err := ui.GetWindow("RequestsWindow")
+		_, err := ui.SelectWindowByName("RequestsWindow")
 		if err != nil {
 			return err
 		}
-		ui.SelectWindow(win)
 
 		return nil
 	}); err != nil {
@@ -78,10 +75,9 @@ func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI) error {
 }
 
 func (w *RequestDetailsWindow) OnDeselect(ui ui.UI, v ui.Window) error {
-	selected := w.memory.GetSelectedRequest()
-	w.memory.UpdateRequest(
-		&model.Request{
-			Id:   selected.Id,
+	w.StateService.UpdateRequest(
+		&types.Request{
+			Id:   w.StateService.state.selectedRequest.Id,
 			Body: w.body,
 		},
 	)
@@ -95,4 +91,7 @@ func (w *RequestDetailsWindow) OnSelect(ui ui.UI, v ui.Window) error {
 	w.isSelected = true
 	ui.SetCursor(true)
 	return nil
+}
+
+func (w *RequestDetailsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 }

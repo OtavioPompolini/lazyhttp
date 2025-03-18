@@ -1,4 +1,4 @@
-package model
+package types
 
 import (
 	"bytes"
@@ -13,10 +13,11 @@ import (
 
 // V1 = Only name and body
 type Request struct {
-	Id   int64
-	Name string
+	Id           int64
+	Name         string
 	Body         string
 	LastResponse string
+	Selected     bool
 }
 
 // Refactor this pls
@@ -46,7 +47,7 @@ func (r *Request) Execute() {
 		responseString += "\n"
 	}
 
-		responseString += "\n"
+	responseString += "\n"
 	s, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Panic("XISDE")
