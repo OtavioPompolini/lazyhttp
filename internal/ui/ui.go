@@ -168,3 +168,10 @@ func (ui *UI) GetWindow(wName string) (*Window, error) {
 func (ui *UI) Size() (int, int) {
 	return ui.g.Size()
 }
+
+func (ui *UI) Update(f func()) {
+	ui.g.Update(func(gui *gocui.Gui) error {
+		f()
+		return nil
+	})
+}

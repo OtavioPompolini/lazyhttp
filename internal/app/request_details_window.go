@@ -45,7 +45,7 @@ func (w *RequestDetailsWindow) Setup(ui ui.UI, v ui.Window) {
 func (w *RequestDetailsWindow) Update(ui ui.UI, v ui.Window) {
 	if !w.isSelected {
 		v.ClearWindow()
-		v.Write(w.StateService.state.selectedRequest.Body)
+		v.Write(w.StateService.state.collection.selected.Body)
 	} else {
 		w.body = v.GetWindowContent()
 	}
@@ -77,7 +77,7 @@ func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 func (w *RequestDetailsWindow) OnDeselect(ui ui.UI, v ui.Window) error {
 	w.StateService.UpdateRequest(
 		&types.Request{
-			Id:   w.StateService.state.selectedRequest.Id,
+			Id:   w.StateService.state.collection.selected.Id,
 			Body: w.body,
 		},
 	)

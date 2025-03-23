@@ -10,7 +10,7 @@ type ResponseWindow struct {
 	w, h         int
 	isActive     bool
 	newReqName   string
-	StateService StateService
+	stateService StateService
 }
 
 func NewResponseWindow(GUI *ui.UI, ss StateService) *ui.Window {
@@ -23,7 +23,7 @@ func NewResponseWindow(GUI *ui.UI, ss StateService) *ui.Window {
 			w:            a*40/100 - 2,
 			h:            b - 1,
 			isActive:     true,
-			StateService: ss,
+			stateService: ss,
 		},
 		true,
 	)
@@ -40,7 +40,7 @@ func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
 
 func (w *ResponseWindow) Update(ui ui.UI, v ui.Window) {
 	v.ClearWindow()
-	v.Write(w.StateService.state.selectedRequest.LastResponse)
+	v.Write(w.stateService.state.collection.selected.LastResponse)
 }
 
 func (w *ResponseWindow) Size() (x, y, width, height int) {

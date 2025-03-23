@@ -34,11 +34,14 @@ func (aw *AlertWindow) Setup(ui ui.UI, w ui.Window) {
 	thisWindow.Write(aw.stateService.state.alertMessage)
 
 	go func() {
-		time.Sleep(5 * time.Second)
-
-		ui.DeleteWindowByName(aw.name)
+		time.Sleep(2 * time.Second)
+		ui.Update(
+			func() {
+				ui.DeleteWindowByName(aw.name)
+			})
 	}()
 }
+
 func (aw *AlertWindow) Update(ui ui.UI, w ui.Window) {}
 func (aw *AlertWindow) OnSelect(ui ui.UI, w ui.Window) error {
 	return nil

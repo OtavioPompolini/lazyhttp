@@ -106,7 +106,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	// Handle change window with a "const" and not a string
 	// and need to abstract gocui
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-		if len(w.stateService.state.requests) <= 0 {
+		if w.stateService.state.collection.selected == nil {
 			return nil
 		}
 
@@ -133,21 +133,20 @@ func (w *RequestsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 	thisWindow, _ := ui.GetWindow(w.name)
 	v.ClearWindow()
 
-	cursorPosition := 0
-	cursorPositionFound := false
-	requests := w.stateService.state.requests
-
 	lines := []string{}
 
-	for _, r := range requests {
-		if !cursorPositionFound {
-			if r.Id == w.stateService.state.selectedRequest.Id {
-				cursorPositionFound = true
-			} else {
-				cursorPosition += 1
-			}
+	i := 0
+	cursorPosition := 0
+	curr := w.stateService.state.collection.head
+	for curr != nil {
+		lines = append(lines, curr.Name)
+
+		if curr.Id == w.stateService.state.collection.selected.Id {
+			cursorPosition = i
 		}
-		lines = append(lines, r.Name)
+
+		curr = curr.Next
+		i += 1
 	}
 
 	thisWindow.WriteLines(lines)
@@ -161,7 +160,7 @@ func (w *RequestsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 // =============== ACTIONS ======================
 
 func (rw *RequestsWindow) doRequest(ui *ui.UI) {
-	err := rw.stateService.state.selectedRequest.Execute()
+	err := rw.stateService.state.collection.selected.Execute()
 	if err != nil {
 		rw.stateService.state.alertMessage = err.Error()
 
