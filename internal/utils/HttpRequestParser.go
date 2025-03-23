@@ -19,7 +19,7 @@ func ParseHttpRequest(input string) (*http.Request, error) {
 	parts := strings.Fields(requestLine)
 
 	if len(parts) < 2 {
-		return nil, errors.New("Invalid request")
+		return nil, errors.New("Invalid request format")
 	}
 
 	rawURL := parts[1]

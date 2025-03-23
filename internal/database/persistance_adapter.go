@@ -15,7 +15,7 @@ type RequestRepository interface {
 	GetRequests() []*types.Request
 	CreateRequest(name string) *types.Request
 	UpdateRequest(r *types.Request)
-	DeleteRequest(id uint64)
+	DeleteRequest(id int64)
 }
 
 type ResponseRepository interface{}

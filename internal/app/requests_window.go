@@ -75,7 +75,15 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'p', func(g *gocui.Gui, v *gocui.View) error {
-		w.stateService.state.selectedRequest.Execute()
+		w.doRequest(ui)
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), 'D', func(g *gocui.Gui, v *gocui.View) error {
+		w.stateService.DeleteSelectedRequest()
+		w.ReloadContent(ui, win)
 		return nil
 	}); err != nil {
 		return err
@@ -120,8 +128,9 @@ func (w *RequestsWindow) OnSelect(ui ui.UI, v ui.Window) error {
 	return nil
 }
 
-// Make ReloadWindowContent an IWindow Interface func? so other widnows can Reload others
+// Doest make sense to pass *ui.Window in this method
 func (w *RequestsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
+	thisWindow, _ := ui.GetWindow(w.name)
 	v.ClearWindow()
 
 	cursorPosition := 0
@@ -141,10 +150,22 @@ func (w *RequestsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 		lines = append(lines, r.Name)
 	}
 
-	v.WriteLines(lines)
+	thisWindow.WriteLines(lines)
 
-	err := v.SetCursor(0, cursorPosition)
+	err := thisWindow.SetCursor(0, cursorPosition)
 	if err != nil {
 		log.Panic(err)
+	}
+}
+
+// =============== ACTIONS ======================
+
+func (rw *RequestsWindow) doRequest(ui *ui.UI) {
+	err := rw.stateService.state.selectedRequest.Execute()
+	if err != nil {
+		rw.stateService.state.alertMessage = err.Error()
+
+		alertWindow, _ := ui.GetWindow("AlertWindow")
+		alertWindow.OpenWindow()
 	}
 }

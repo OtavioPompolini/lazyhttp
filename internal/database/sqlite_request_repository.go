@@ -77,7 +77,7 @@ func (a SqliteRequestRepository) UpdateRequest(r *types.Request) {
 	}
 }
 
-func (a SqliteRequestRepository) DeleteRequest(id uint64) {
+func (a SqliteRequestRepository) DeleteRequest(id int64) {
 	_, err := a.db.Exec("DELETE from requests where id=?", id)
 	if err != nil {
 		log.Panic(err)

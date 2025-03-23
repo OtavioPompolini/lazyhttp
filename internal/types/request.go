@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 
@@ -17,22 +16,23 @@ type Request struct {
 	Name         string
 	Body         string
 	LastResponse string
-	Selected     bool
+	Next         *Request
+	Prev         *Request
 }
 
 // Refactor this pls
 // Didnt like this Request.Execute(). Where can I set configs in my app
 // Imagine if I want to force http/1.0 instead of http/2.0
-func (r *Request) Execute() {
+func (r *Request) Execute() error {
 	httpRequest, err := utils.ParseHttpRequest(r.Body)
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	client := http.Client{}
 	res, err := client.Do(httpRequest)
 	if err != nil {
-		log.Panic("req error")
+		return err
 	}
 
 	responseString := ""
@@ -50,15 +50,17 @@ func (r *Request) Execute() {
 	responseString += "\n"
 	s, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Panic("XISDE")
+		return err
 	}
 
 	var pretty bytes.Buffer
 	err = json.Indent(&pretty, s, "", "  ")
 	if err != nil {
-		log.Panic("DUMB")
+		return err
 	}
 
 	responseString += pretty.String()
 	r.LastResponse = responseString
+
+	return nil
 }

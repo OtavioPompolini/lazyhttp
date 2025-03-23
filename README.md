@@ -8,13 +8,13 @@
     - Be able to scroll through response window
     - Refactor code for executing request
     - change db file location
-    - Add bind to delete request
     - Save the last response of each request in database
     - Json highlighting
     - UI improvements based on OS window size
     - Resolve all known issues
 
 ## Roadmap some day
+    - Able to write path param in different lines
     - Create a error window. (e.g Show user invalid reqest format)
     - Add error whindow: "Parsing failed", "request failed"...
     - find/filter request

@@ -14,6 +14,7 @@ type State struct {
 	requests        []*types.Request
 	selectedRequest *types.Request
 	debuggerMode    bool
+	alertMessage    string
 	// app configs here
 }
 
@@ -41,6 +42,21 @@ func loadState(db database.PersistanceAdapter) *State {
 // func (m *Memory) ListRequests() []types.Request {
 // 	return m.localStorage.ListRequests()
 // }
+
+func (ss StateService) DeleteSelectedRequest() {
+	requests := []*types.Request{}
+	idToDelete := ss.state.selectedRequest.Id
+
+	for _, req := range ss.state.requests {
+		if req.Id != idToDelete {
+			requests = append(requests, req)
+		}
+	}
+
+	ss.SelectNext()
+	ss.state.requests = requests
+	ss.persistance.RequestRepository.DeleteRequest(idToDelete)
+}
 
 func (ss StateService) CreateRequest(reqName string) *types.Request {
 	// ss.unselectRequests()
