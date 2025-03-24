@@ -36,6 +36,7 @@ func (w ResponseWindow) Name() string {
 func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
 	v.SetEditable(true)
 	v.SetTitle("Response:")
+	v.Wrap(true)
 }
 
 func (w *ResponseWindow) Update(ui ui.UI, v ui.Window) {

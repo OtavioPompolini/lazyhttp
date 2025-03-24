@@ -32,6 +32,10 @@ func (ui *UI) SetHightlight(e bool) {
 	ui.g.Highlight = e
 }
 
+func (ui *UI) Mouse(b bool) {
+	ui.g.Mouse = b
+}
+
 func (ui *UI) SetGlobalKeybindings() error {
 	for _, win := range ui.windows {
 		err := win.Window.SetKeybindings(ui, win)

@@ -52,6 +52,10 @@ func (v *Window) SetTitle(title string) {
 	v.view.Title = title
 }
 
+func (v *Window) Wrap(b bool) {
+	v.view.Wrap = b
+}
+
 func (v *Window) SetHightlight(b bool) {
 	v.view.Highlight = b
 }
