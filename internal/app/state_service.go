@@ -94,10 +94,13 @@ func (ss StateService) DeleteSelectedRequest() {
 }
 
 func (ss StateService) CreateRequest(reqName string) *types.Request {
-	// ss.unselectRequests()
 	saved := ss.persistance.RequestRepository.CreateRequest(reqName)
-	// saved.Selected = true
-	ss.state.collection.tail.Next = saved
+
+	if ss.state.collection.tail != nil {
+		ss.state.collection.tail.Next = saved
+	} else {
+		ss.state.collection.head = saved
+	}
 	saved.Prev = ss.state.collection.tail
 	ss.state.collection.selected = saved
 	ss.state.collection.tail = saved
@@ -111,6 +114,10 @@ func (ss *StateService) UpdateRequest(r *types.Request) {
 }
 
 func (ss *StateService) SelectNext() {
+	if ss.state.collection.selected == nil {
+		return
+	}
+
 	next := ss.state.collection.selected.Next
 	if next != nil {
 		ss.state.collection.selected = next
@@ -118,6 +125,10 @@ func (ss *StateService) SelectNext() {
 }
 
 func (ss *StateService) SelectPrev() {
+	if ss.state.collection.selected == nil {
+		return
+	}
+
 	prev := ss.state.collection.selected.Prev
 	if prev != nil {
 		ss.state.collection.selected = prev

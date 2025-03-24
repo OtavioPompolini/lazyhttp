@@ -41,7 +41,9 @@ func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
 
 func (w *ResponseWindow) Update(ui ui.UI, v ui.Window) {
 	v.ClearWindow()
-	v.Write(w.stateService.state.collection.selected.LastResponse)
+	if w.stateService.state.collection.selected != nil {
+		v.Write(w.stateService.state.collection.selected.LastResponse)
+	}
 }
 
 func (w *ResponseWindow) Size() (x, y, width, height int) {

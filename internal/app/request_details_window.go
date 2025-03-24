@@ -45,7 +45,9 @@ func (w *RequestDetailsWindow) Setup(ui ui.UI, v ui.Window) {
 func (w *RequestDetailsWindow) Update(ui ui.UI, v ui.Window) {
 	if !w.isSelected {
 		v.ClearWindow()
-		v.Write(w.StateService.state.collection.selected.Body)
+		if w.StateService.state.collection.selected != nil {
+			v.Write(w.StateService.state.collection.selected.Body)
+		}
 	} else {
 		w.body = v.GetWindowContent()
 	}
