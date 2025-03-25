@@ -13,7 +13,7 @@ type UI struct {
 }
 
 func NewUI() (*UI, error) {
-	g, err := gocui.NewGui(gocui.Output256, true)
+	g, err := gocui.NewGui(gocui.OutputTrue, true)
 	if err != nil {
 		return nil, err
 	}

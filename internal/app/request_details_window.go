@@ -90,6 +90,7 @@ func (w *RequestDetailsWindow) OnDeselect(ui ui.UI, v ui.Window) error {
 }
 
 func (w *RequestDetailsWindow) OnSelect(ui ui.UI, v ui.Window) error {
+	w.isSelected = true
 	ui.SetCursor(true)
 	return nil
 }

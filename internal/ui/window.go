@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 
+	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/awesome-gocui/gocui"
 )
 
@@ -70,6 +71,13 @@ func (v *Window) WriteLn(text string) {
 
 func (v *Window) Write(text string) {
 	fmt.Fprint(v.view, text)
+}
+
+func (v *Window) WriteHighlight(text string) {
+	err := quick.Highlight(v.view, text, "json", "terminal16m", "tokyonight-night")
+	if err != nil {
+		v.Write(text)
+	}
 }
 
 func (v *Window) WriteLines(text []string) {

@@ -30,6 +30,14 @@ func NewStateService(db database.PersistanceAdapter) *StateService {
 	}
 }
 
+func loadState(db database.PersistanceAdapter) *State {
+	reqs := db.RequestRepository.GetRequests()
+
+	return &State{
+		collection: NewCollection(reqs),
+	}
+}
+
 func NewCollection(requests []*types.Request) *Collection {
 	var head *types.Request
 	var tail *types.Request
@@ -58,18 +66,6 @@ func NewCollection(requests []*types.Request) *Collection {
 		selected: head,
 	}
 }
-
-func loadState(db database.PersistanceAdapter) *State {
-	reqs := db.RequestRepository.GetRequests()
-
-	return &State{
-		collection: NewCollection(reqs),
-	}
-}
-
-// func (m *Memory) ListRequests() []types.Request {
-// 	return m.localStorage.ListRequests()
-// }
 
 func (ss StateService) DeleteSelectedRequest() {
 	selected := ss.state.collection.selected

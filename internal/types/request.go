@@ -15,9 +15,14 @@ type Request struct {
 	Id           int64
 	Name         string
 	Body         string
-	LastResponse string
+	LastResponse *Response
 	Next         *Request
 	Prev         *Request
+}
+
+type Response struct {
+	Info string
+	Body string
 }
 
 // Refactor this pls
@@ -59,8 +64,10 @@ func (r *Request) Execute() error {
 		return err
 	}
 
-	responseString += pretty.String()
-	r.LastResponse = responseString
+	r.LastResponse = &Response{
+		Info: responseString,
+		Body: pretty.String(),
+	}
 
 	return nil
 }
