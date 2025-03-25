@@ -7,7 +7,6 @@
     - Be able to scroll through response window
     - Refactor code for executing request
     - change db file location
-    - Save the last response of each request in database
     - Resolve all known issues
 
 ## Roadmap some day
