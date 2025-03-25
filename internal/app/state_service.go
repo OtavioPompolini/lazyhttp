@@ -1,8 +1,15 @@
 package app
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"net/http"
+	"strings"
+
 	"github.com/OtavioPompolini/project-postman/internal/database"
 	"github.com/OtavioPompolini/project-postman/internal/types"
+	"github.com/OtavioPompolini/project-postman/internal/utils"
 )
 
 type StateService struct {
@@ -32,9 +39,20 @@ func NewStateService(db database.PersistanceAdapter) *StateService {
 
 func loadState(db database.PersistanceAdapter) *State {
 	reqs := db.RequestRepository.GetRequests()
+	loadResponses(db, reqs)
 
 	return &State{
 		collection: NewCollection(reqs),
+	}
+}
+
+func loadResponses(db database.PersistanceAdapter, reqs []*types.Request) {
+	responses := db.ResponseRepository.GetAll()
+	for _, v := range reqs {
+		r, ok := responses[v.Id]
+		if ok {
+			v.ResponseHistory = r
+		}
 	}
 }
 
@@ -129,4 +147,53 @@ func (ss *StateService) SelectPrev() {
 	if prev != nil {
 		ss.state.collection.selected = prev
 	}
+}
+
+func (ss *StateService) ExecuteRequest() error {
+	r := ss.state.collection.selected
+
+	httpRequest, err := utils.ParseHttpRequest(r.Body)
+	if err != nil {
+		return err
+	}
+
+	client := http.Client{}
+	res, err := client.Do(httpRequest)
+	if err != nil {
+		return err
+	}
+
+	responseString := ""
+
+	responseString += res.Proto + " "
+	responseString += res.Status
+	responseString += "\n"
+
+	for k, v := range res.Header {
+		responseString += k + ": "
+		responseString += strings.Join(v, "")
+		responseString += "\n"
+	}
+
+	responseString += "\n"
+	s, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	var pretty bytes.Buffer
+	err = json.Indent(&pretty, s, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	response := ss.persistance.ResponseRepository.Save(&types.Response{
+		RequestId: ss.state.collection.selected.Id,
+		Info:      responseString,
+		Body:      pretty.String(),
+	})
+
+	r.ResponseHistory = append([]*types.Response{response}, r.ResponseHistory...)
+
+	return nil
 }

@@ -18,7 +18,10 @@ type RequestRepository interface {
 	DeleteRequest(id int64)
 }
 
-type ResponseRepository interface{}
+type ResponseRepository interface {
+	GetAll() map[int64][]*types.Response
+	Save(r *types.Response) *types.Response
+}
 
 // Only sqlite for now
 func NewPersistanceAdapter() (PersistanceAdapter, error) {
@@ -28,8 +31,10 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 	}
 
 	requestRepository := newRequestRepository(db)
+	responseRepository := newResponseRepository(db)
 
 	return PersistanceAdapter{
-		RequestRepository: requestRepository,
+		RequestRepository:  requestRepository,
+		ResponseRepository: responseRepository,
 	}, nil
 }

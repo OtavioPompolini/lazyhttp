@@ -11,6 +11,7 @@
     - Resolve all known issues
 
 ## Roadmap some day
+    - Response headers not always display in same order
     - UI improvements based on OS window size (Windows rescale)
     - DB Migrations
     - FIX THE GOD DAMN DLL (I was too dumb to do it correctly)

@@ -160,7 +160,7 @@ func (w *RequestsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 // =============== ACTIONS ======================
 
 func (rw *RequestsWindow) doRequest(ui *ui.UI) {
-	err := rw.stateService.state.collection.selected.Execute()
+	err := rw.stateService.ExecuteRequest()
 	if err != nil {
 		rw.stateService.state.alertMessage = err.Error()
 

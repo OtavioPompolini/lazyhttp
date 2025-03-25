@@ -82,4 +82,9 @@ func (a SqliteRequestRepository) DeleteRequest(id int64) {
 	if err != nil {
 		log.Panic(err)
 	}
+
+	_, err = a.db.Exec("DELETE from responses where request_id=?", id)
+	if err != nil {
+		log.Panic(err)
+	}
 }

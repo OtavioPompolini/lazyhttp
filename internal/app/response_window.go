@@ -41,9 +41,9 @@ func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
 
 func (w *ResponseWindow) Update(ui ui.UI, v ui.Window) {
 	v.ClearWindow()
-	if w.stateService.state.collection.selected != nil && w.stateService.state.collection.selected.LastResponse != nil {
-		v.Write(w.stateService.state.collection.selected.LastResponse.Info)
-		v.WriteHighlight(w.stateService.state.collection.selected.LastResponse.Body)
+	if w.stateService.state.collection.selected != nil && w.stateService.state.collection.selected.ResponseHistory != nil && len(w.stateService.state.collection.selected.ResponseHistory) > 0 {
+		v.Write(w.stateService.state.collection.selected.ResponseHistory[0].Info)
+		v.WriteHighlight(w.stateService.state.collection.selected.ResponseHistory[0].Body)
 	}
 }
 
