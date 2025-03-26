@@ -127,26 +127,32 @@ func (ss *StateService) UpdateRequest(r *types.Request) {
 	ss.state.collection.selected.Body = r.Body
 }
 
-func (ss *StateService) SelectNext() {
+func (ss *StateService) SelectNext() bool {
 	if ss.state.collection.selected == nil {
-		return
+		return false
 	}
 
 	next := ss.state.collection.selected.Next
-	if next != nil {
-		ss.state.collection.selected = next
+	if next == nil {
+		return false
 	}
+
+	ss.state.collection.selected = next
+	return true
 }
 
-func (ss *StateService) SelectPrev() {
+func (ss *StateService) SelectPrev() bool {
 	if ss.state.collection.selected == nil {
-		return
+		return false
+	}
+	prev := ss.state.collection.selected.Prev
+
+	if prev == nil {
+		return false
 	}
 
-	prev := ss.state.collection.selected.Prev
-	if prev != nil {
-		ss.state.collection.selected = prev
-	}
+	ss.state.collection.selected = prev
+	return true
 }
 
 func (ss *StateService) ExecuteRequest() error {

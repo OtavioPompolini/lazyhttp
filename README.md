@@ -1,7 +1,6 @@
 # Project Postman
 
 ## Known issues
-    - Losing last response when editing a request
 
 ## Roadmap v0.1
     - Be able to scroll through response window

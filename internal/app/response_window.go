@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/OtavioPompolini/project-postman/internal/ui"
+	"github.com/awesome-gocui/gocui"
 )
 
 type ResponseWindow struct {
@@ -33,18 +34,16 @@ func (w ResponseWindow) Name() string {
 	return w.name
 }
 
-func (w *ResponseWindow) Setup(ui ui.UI, v ui.Window) {
-	v.SetEditable(true)
+func (w *ResponseWindow) Setup(ui *ui.UI, v *ui.Window) {
 	v.SetTitle("Response:")
+	v.SetSelectedBgColor(gocui.ColorRed)
+	v.SetHightlight(true)
 	v.Wrap(true)
+	// v.SetHightlight(true)
+	w.ReloadContent(ui, v)
 }
 
 func (w *ResponseWindow) Update(ui ui.UI, v ui.Window) {
-	v.ClearWindow()
-	if w.stateService.state.collection.selected != nil && w.stateService.state.collection.selected.ResponseHistory != nil && len(w.stateService.state.collection.selected.ResponseHistory) > 0 {
-		v.Write(w.stateService.state.collection.selected.ResponseHistory[0].Info)
-		v.WriteHighlight(w.stateService.state.collection.selected.ResponseHistory[0].Body)
-	}
 }
 
 func (w *ResponseWindow) Size() (x, y, width, height int) {
@@ -68,4 +67,13 @@ func (w *ResponseWindow) OnSelect(ui ui.UI, v ui.Window) error {
 }
 
 func (w *ResponseWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
+	win, _ := ui.GetWindow(w.name)
+	win.ClearWindow()
+	_, _, _, d := win.Window.Size()
+	win.SetCursor(0, d/2)
+
+	if w.stateService.state.collection.selected != nil && w.stateService.state.collection.selected.ResponseHistory != nil && len(w.stateService.state.collection.selected.ResponseHistory) > 0 {
+		win.Write(w.stateService.state.collection.selected.ResponseHistory[0].Info)
+		win.WriteHighlight(w.stateService.state.collection.selected.ResponseHistory[0].Body)
+	}
 }

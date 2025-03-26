@@ -112,7 +112,7 @@ func (ui *UI) renderWindow(window *Window) error {
 	if err != nil {
 		if err == gocui.ErrUnknownView {
 			window.setView(v)
-			window.Window.Setup(*ui, *window)
+			window.Window.Setup(ui, window)
 			return nil
 		}
 		return fmt.Errorf("Error rendering window=%s : %w", name, err)

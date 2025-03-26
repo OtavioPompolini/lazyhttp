@@ -9,7 +9,7 @@ import (
 
 // Size and name should be a Window attribute not a IWindow
 type IWindow interface {
-	Setup(ui UI, w Window)
+	Setup(ui *UI, w *Window)
 	Update(ui UI, w Window)
 	OnSelect(ui UI, w Window) error
 	OnDeselect(ui UI, w Window) error
@@ -39,6 +39,10 @@ func (w *Window) IsActive() bool {
 
 func (w *Window) OpenWindow() {
 	w.isActive = true
+}
+
+func (w *Window) AutoScroll() {
+	w.view.Autoscroll = true
 }
 
 // func (v *Window) SetVimEditor() {
@@ -108,6 +112,16 @@ func (v *Window) setView(newView *gocui.View) {
 
 func (v *Window) IsTained() bool {
 	return v.view.IsTainted()
+}
+
+func (v *Window) MoveCursorHalfWindowDown() {
+	_, _, _, d := v.Window.Size()
+	v.view.MoveCursor(0, d/2)
+}
+
+func (v *Window) MoveCursorHalfWindowUp() {
+	_, _, _, d := v.Window.Size()
+	v.view.MoveCursor(0, -d/2)
 }
 
 func (v *Window) SetCursor(x, y int) error {

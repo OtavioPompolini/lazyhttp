@@ -28,7 +28,7 @@ func NewAlertWindow(GUI *ui.UI, stateService StateService) *ui.Window {
 	)
 }
 
-func (aw *AlertWindow) Setup(ui ui.UI, w ui.Window) {
+func (aw *AlertWindow) Setup(ui *ui.UI, w *ui.Window) {
 	thisWindow, _ := ui.GetWindow(aw.name)
 
 	thisWindow.Write(aw.stateService.state.alertMessage)

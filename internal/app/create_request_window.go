@@ -37,8 +37,8 @@ func (w CreateRequestWindow) Name() string {
 	return w.name
 }
 
-func (w *CreateRequestWindow) Setup(ui ui.UI, v ui.Window) {
-	ui.SelectWindow(&v)
+func (w *CreateRequestWindow) Setup(ui *ui.UI, v *ui.Window) {
+	ui.SelectWindow(v)
 	v.SetHightlight(true)
 	v.SetEditable(true)
 	v.SetTitle("Create Request:")

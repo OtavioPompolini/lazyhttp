@@ -38,12 +38,12 @@ func (w RequestsWindow) Name() string {
 	return w.name
 }
 
-func (w *RequestsWindow) Setup(ui ui.UI, v ui.Window) {
-	ui.SelectWindow(&v)
+func (w *RequestsWindow) Setup(ui *ui.UI, v *ui.Window) {
+	ui.SelectWindow(v)
 	v.SetTitle("Requests:")
 	v.SetSelectedBgColor(gocui.ColorRed)
 	v.SetHightlight(true)
-	w.ReloadContent(&ui, &v)
+	w.ReloadContent(ui, v)
 }
 
 func (w *RequestsWindow) Update(ui ui.UI, v ui.Window) {
@@ -59,16 +59,34 @@ func (w *RequestsWindow) IsActive() bool {
 
 func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
-		w.stateService.SelectNext()
+		ok := w.stateService.SelectNext()
+		if !ok {
+			return nil
+		}
+
 		w.ReloadContent(ui, win)
+		win, errr := ui.GetWindow("ResponseWindow")
+		if errr != nil {
+			log.Panic("Pudim")
+		}
+		win.Window.ReloadContent(ui, win)
 		return nil
 	}); err != nil {
 		return err
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
-		w.stateService.SelectPrev()
+		ok := w.stateService.SelectPrev()
+		if !ok {
+			return nil
+		}
+
 		w.ReloadContent(ui, win)
+		win, errr := ui.GetWindow("ResponseWindow")
+		if errr != nil {
+			log.Panic("Pudim")
+		}
+		win.Window.ReloadContent(ui, win)
 		return nil
 	}); err != nil {
 		return err
@@ -84,6 +102,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	if err := ui.NewKeyBinding(w.Name(), 'D', func(g *gocui.Gui, v *gocui.View) error {
 		w.stateService.DeleteSelectedRequest()
 		w.ReloadContent(ui, win)
+
 		return nil
 	}); err != nil {
 		return err
@@ -96,6 +115,32 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 		}
 
 		win.OpenWindow()
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), gocui.KeyCtrlD, func(g *gocui.Gui, v *gocui.View) error {
+		win, err := ui.GetWindow("ResponseWindow")
+		if err != nil {
+			return err
+		}
+
+		win.MoveCursorHalfWindowDown()
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), gocui.KeyCtrlU, func(g *gocui.Gui, v *gocui.View) error {
+		win, err := ui.GetWindow("ResponseWindow")
+		if err != nil {
+			return err
+		}
+
+		win.MoveCursorHalfWindowUp()
 
 		return nil
 	}); err != nil {
