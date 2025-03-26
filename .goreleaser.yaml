@@ -2,7 +2,6 @@ builds:
   -
     main: ./cmd/lazyhttp/main.go
     goos:
-      - freebsd
       - windows
       - darwin
       - linux
