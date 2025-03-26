@@ -1,0 +1,12 @@
+builds:
+  -
+    main: ./cmd/lazyhttp/main.go
+    goos:
+      - freebsd
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm
+      - arm64
