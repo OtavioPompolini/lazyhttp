@@ -1,12 +1,16 @@
 # Project Postman
 
-## Known issues
+## Commands
+    n -> create new request
+    enter -> select request to edit
+    P -> perform the request
+    D -> delete selected request
+    j -> navigate down through requests
+    k -> navigate up through requests
 
-## Roadmap v0.1
-    - Be able to scroll through response window
-    - Refactor code for executing request
-    - change db file location
-    - Resolve all known issues
+    *Capital letters = Shift + <key>
+
+## Known issues
 
 ## Roadmap some day
     - Response headers not always display in same order

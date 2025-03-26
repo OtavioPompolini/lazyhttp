@@ -59,40 +59,20 @@ func (w *RequestsWindow) IsActive() bool {
 
 func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
-		ok := w.stateService.SelectNext()
-		if !ok {
-			return nil
-		}
-
-		w.ReloadContent(ui, win)
-		win, errr := ui.GetWindow("ResponseWindow")
-		if errr != nil {
-			log.Panic("Pudim")
-		}
-		win.Window.ReloadContent(ui, win)
+		w.navigateDown(ui)
 		return nil
 	}); err != nil {
 		return err
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
-		ok := w.stateService.SelectPrev()
-		if !ok {
-			return nil
-		}
-
-		w.ReloadContent(ui, win)
-		win, errr := ui.GetWindow("ResponseWindow")
-		if errr != nil {
-			log.Panic("Pudim")
-		}
-		win.Window.ReloadContent(ui, win)
+		w.navigateUp(ui)
 		return nil
 	}); err != nil {
 		return err
 	}
 
-	if err := ui.NewKeyBinding(w.Name(), 'p', func(g *gocui.Gui, v *gocui.View) error {
+	if err := ui.NewKeyBinding(w.Name(), 'P', func(g *gocui.Gui, v *gocui.View) error {
 		w.doRequest(ui)
 		return nil
 	}); err != nil {
@@ -100,33 +80,22 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'D', func(g *gocui.Gui, v *gocui.View) error {
-		w.stateService.DeleteSelectedRequest()
-		w.ReloadContent(ui, win)
-
+		w.deleteRequest(ui)
 		return nil
 	}); err != nil {
 		return err
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'n', func(g *gocui.Gui, v *gocui.View) error {
-		win, err := ui.GetWindow("CreateRequestWindow")
-		if err != nil {
-			return err
-		}
-
+		win, _ := ui.GetWindow("CreateRequestWindow")
 		win.OpenWindow()
-
 		return nil
 	}); err != nil {
 		return err
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyCtrlD, func(g *gocui.Gui, v *gocui.View) error {
-		win, err := ui.GetWindow("ResponseWindow")
-		if err != nil {
-			return err
-		}
-
+		win, _ := ui.GetWindow("ResponseWindow")
 		win.MoveCursorHalfWindowDown()
 
 		return nil
@@ -135,11 +104,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyCtrlU, func(g *gocui.Gui, v *gocui.View) error {
-		win, err := ui.GetWindow("ResponseWindow")
-		if err != nil {
-			return err
-		}
-
+		win, _ := ui.GetWindow("ResponseWindow")
 		win.MoveCursorHalfWindowUp()
 
 		return nil
@@ -176,7 +141,7 @@ func (w *RequestsWindow) OnSelect(ui ui.UI, v ui.Window) error {
 // Doest make sense to pass *ui.Window in this method
 func (w *RequestsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 	thisWindow, _ := ui.GetWindow(w.name)
-	v.ClearWindow()
+	thisWindow.ClearWindow()
 
 	lines := []string{}
 
@@ -205,6 +170,13 @@ func (w *RequestsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 // =============== ACTIONS ======================
 
 func (rw *RequestsWindow) doRequest(ui *ui.UI) {
+	if rw.stateService.state.collection.selected == nil {
+		rw.stateService.state.alertMessage = "Create a request first"
+		win, _ := ui.GetWindow("AlertWindow")
+		win.OpenWindow()
+		return
+	}
+
 	err := rw.stateService.ExecuteRequest()
 	if err != nil {
 		rw.stateService.state.alertMessage = err.Error()
@@ -212,4 +184,48 @@ func (rw *RequestsWindow) doRequest(ui *ui.UI) {
 		alertWindow, _ := ui.GetWindow("AlertWindow")
 		alertWindow.OpenWindow()
 	}
+
+	win, _ := ui.GetWindow("ResponseWindow")
+	win.Window.ReloadContent(ui, win)
+}
+
+func (rw *RequestsWindow) navigateDown(ui *ui.UI) {
+	thisWindow, _ := ui.GetWindow(rw.name)
+
+	ok := rw.stateService.SelectNext()
+	if !ok {
+		return
+	}
+
+	rw.ReloadContent(ui, thisWindow)
+	win, _ := ui.GetWindow("ResponseWindow")
+	win.Window.ReloadContent(ui, win)
+}
+
+func (rw *RequestsWindow) navigateUp(ui *ui.UI) {
+	thisWindow, _ := ui.GetWindow(rw.name)
+
+	ok := rw.stateService.SelectPrev()
+	if !ok {
+		return
+	}
+
+	rw.ReloadContent(ui, thisWindow)
+	win, errr := ui.GetWindow("ResponseWindow")
+	if errr != nil {
+		log.Panic("Pudim")
+	}
+	win.Window.ReloadContent(ui, win)
+}
+
+func (rw *RequestsWindow) deleteRequest(ui *ui.UI) {
+	thisWindow, _ := ui.GetWindow(rw.name)
+
+	rw.stateService.DeleteSelectedRequest()
+	rw.ReloadContent(ui, thisWindow)
+
+	win, _ := ui.GetWindow("ResponseWindow")
+	win.Window.ReloadContent(ui, win)
+	win, _ = ui.GetWindow("RequestDetailsWindow")
+	win.Window.ReloadContent(ui, win)
 }

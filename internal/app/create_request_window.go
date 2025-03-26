@@ -97,10 +97,7 @@ func (w *CreateRequestWindow) closeWindow(ui *ui.UI) error {
 
 func (w *CreateRequestWindow) createRequest(ui *ui.UI) error {
 	w.stateService.CreateRequest(w.newReqName)
-	win, err := ui.GetWindow("RequestsWindow")
-	if err != nil {
-		return err
-	}
+	win, _ := ui.GetWindow("RequestsWindow")
 
 	ui.DeleteWindowByName(w.name)
 	ui.SelectWindow(win)

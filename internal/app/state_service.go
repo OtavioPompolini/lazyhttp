@@ -90,6 +90,10 @@ func (ss StateService) DeleteSelectedRequest() {
 	prev := ss.state.collection.selected.Prev
 	next := ss.state.collection.selected.Next
 
+	if prev == nil && next == nil {
+		ss.state.collection.selected = nil
+	}
+
 	if prev != nil {
 		prev.Next = selected.Next
 		ss.state.collection.selected = prev
