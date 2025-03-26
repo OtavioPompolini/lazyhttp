@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/OtavioPompolini/project-postman/internal/types"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 type SqliteResponseRepository struct {

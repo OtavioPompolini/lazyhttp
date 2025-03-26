@@ -34,7 +34,7 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 		return PersistanceAdapter{}, errors.New("Failed to create sqlite database file")
 	}
 
-	db, err := sql.Open("sqlite3", storagePath)
+	db, err := sql.Open("sqlite", storagePath)
 	if err != nil {
 		return PersistanceAdapter{}, err
 	}
