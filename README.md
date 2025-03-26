@@ -10,6 +10,16 @@
 
     *Capital letters = Shift + <key>
 
+#### REQUEST SINTAX
+    <METHOD> <URL>
+    <HeaderKey>=<headerValue>
+    <HeaderKey>=<headerValue>
+    <HeaderKey>=<headerValue>
+
+    <JsonBody>
+
+*It needs an empty line between headers and body
+
 ## Known issues
 
 ## Roadmap some day
