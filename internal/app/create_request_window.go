@@ -18,12 +18,11 @@ type CreateRequestWindow struct {
 }
 
 func NewCreateRequestWindow(GUI *ui.UI, stateStateService StateService) *ui.Window {
-	a, b := GUI.Size()
 	return ui.NewWindow(
 		&CreateRequestWindow{
 			name:         "CreateRequestWindow",
-			x:            (a / 2) - 25,
-			y:            b / 2,
+			x:            25,
+			y:            49,
 			w:            50,
 			h:            2,
 			isActive:     false,

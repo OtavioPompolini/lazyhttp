@@ -8,6 +8,7 @@ import (
 
 	"github.com/OtavioPompolini/project-postman/internal/types"
 	"github.com/adrg/xdg"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type PersistanceAdapter struct {
@@ -34,7 +35,7 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 		return PersistanceAdapter{}, errors.New("Failed to create sqlite database file")
 	}
 
-	db, err := sql.Open("sqlite", storagePath)
+	db, err := sql.Open("sqlite3", storagePath)
 	if err != nil {
 		return PersistanceAdapter{}, err
 	}

@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/OtavioPompolini/project-postman/internal/types"
-	_ "modernc.org/sqlite"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type SqliteResponseRepository struct {
@@ -70,7 +70,7 @@ func (ssr SqliteResponseRepository) GetAll() map[int64][]*types.Response {
 
 		err := row.Scan(&response.Id, &response.RequestId, &response.Info, &response.Body, &response.Created_at)
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 
 		responsesMap[response.RequestId] = append(responsesMap[response.RequestId], response)

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/OtavioPompolini/project-postman/internal/types"
 )
@@ -43,7 +43,7 @@ func (a SqliteRequestRepository) GetRequests() []*types.Request {
 
 		err := row.Scan(&request.Id, &request.Name, &request.Body)
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 
 		requests = append(requests, request)

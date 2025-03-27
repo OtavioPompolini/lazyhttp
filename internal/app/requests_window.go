@@ -15,18 +15,16 @@ type RequestsWindow struct {
 	name         string
 	x, y, h, w   int
 	stateService StateService
-	loadRequests func() error
 }
 
 func NewRequestsWindow(GUI *ui.UI, stateService StateService) *ui.Window {
-	a, b := GUI.Size()
 	return ui.NewWindow(
 		&RequestsWindow{
 			name:         "RequestsWindow",
 			x:            0,
 			y:            0,
-			h:            b - 1,
-			w:            a * 20 / 100,
+			h:            80,
+			w:            20,
 			stateService: stateService,
 			isActive:     true,
 		},

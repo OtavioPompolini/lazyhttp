@@ -14,14 +14,13 @@ type AlertWindow struct {
 }
 
 func NewAlertWindow(GUI *ui.UI, stateService StateService) *ui.Window {
-	a, b := GUI.Size()
 	return ui.NewWindow(
 		&AlertWindow{
 			name:         "AlertWindow",
-			x:            (a / 2) - 25,
-			y:            b / 2,
+			x:            25,
+			y:            49,
 			w:            50,
-			h:            2,
+			h:            10,
 			stateService: stateService,
 		},
 		false,

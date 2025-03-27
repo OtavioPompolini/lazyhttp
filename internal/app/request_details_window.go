@@ -18,14 +18,13 @@ type RequestDetailsWindow struct {
 }
 
 func NewRequestDetailsWindow(GUI *ui.UI, stateStateService StateService) *ui.Window {
-	a, b := GUI.Size()
 	return ui.NewWindow(
 		&RequestDetailsWindow{
 			name:         "RequestDetailsWindow",
-			x:            (a * 20 / 100) + 1,
+			x:            20,
 			y:            0,
-			h:            b - 1,
-			w:            a * 40 / 100,
+			h:            80,
+			w:            40,
 			isSelected:   false,
 			StateService: stateStateService,
 		},

@@ -33,6 +33,7 @@ func NewApp() (*App, error) {
 	}
 
 	app.GUI.StartUI()
+	app.GUI.AddWindow(NewDebuggerWindow(*stateService))
 	app.GUI.AddWindow(NewResponseWindow(userInterface, *stateService))
 	app.GUI.AddWindow(NewAlertWindow(userInterface, *stateService))
 	app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, *stateService))

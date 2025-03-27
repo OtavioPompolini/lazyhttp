@@ -39,7 +39,7 @@ run: ## Runs the app
 .PHONY: format
 format: FORMAT_PATH:=.
 format: ## Runs goimports to format code and organize imports on the specified path (defaults to .)
-	goimports --local "github.com/OtavioPompolini/project-postman" -w $(FORMAT_PATH)
+	goimports --local "github.com/OtavioPompolini/lazyhttp" -w $(FORMAT_PATH)
 
 .PHONY: lint
 lint: LINT_OPTIONS:=

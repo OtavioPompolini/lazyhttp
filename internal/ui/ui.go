@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/awesome-gocui/gocui"
 )
@@ -107,8 +108,9 @@ func (ui *UI) StartUI() {
 
 func (ui *UI) renderWindow(window *Window) error {
 	x, y, w, h := window.Window.Size() // TODO: Resizable windows based on OS current window size
+	uiX, uiY := ui.Size()
 	name := window.Window.Name()
-	v, err := ui.g.SetView(name, x, y, w, h, 0)
+	v, err := ui.g.SetView(name, (uiX*x)/100, (uiY*y)/100, ((uiX*w)/100)-1, ((uiY*h)/100)-1, 0)
 	if err != nil {
 		if err == gocui.ErrUnknownView {
 			window.setView(v)
@@ -178,4 +180,9 @@ func (ui *UI) Update(f func()) {
 		f()
 		return nil
 	})
+}
+
+func (ui *UI) SetDefaultOutput(wName string, f func(w io.Writer)) {
+	win, _ := ui.GetWindow(wName)
+	f(win.view)
 }
