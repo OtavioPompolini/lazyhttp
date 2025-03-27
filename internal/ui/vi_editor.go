@@ -1,4 +1,4 @@
-package editor
+package ui
 
 import (
 	"github.com/awesome-gocui/gocui"
@@ -12,20 +12,25 @@ const (
 	VISUAL_BLOCK_MODE string = "visual_block"
 )
 
-// This probably will be replaced with bubbletea TextArea as already supports vimotions
 type VimEditor struct {
 	Mode string
 }
 
-func (ve *VimEditor) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
-	if ve.Mode == INSERT_MODE {
-		ve.InsertMode(v, key, ch, mod)
-	} else if ve.Mode == NORMAL_MODE {
-		ve.NormalMode(v, key, ch, mod)
+func NewVimEditor() *VimEditor {
+	return &VimEditor{
+		Mode: NORMAL_MODE,
 	}
 }
 
-func (ve *VimEditor) InsertMode(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+func (ve *VimEditor) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+	if ve.Mode == INSERT_MODE {
+		ve.insertMode(v, key, ch, mod)
+	} else if ve.Mode == NORMAL_MODE {
+		ve.normalMode(v, key, ch, mod)
+	}
+}
+
+func (ve *VimEditor) insertMode(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case key == gocui.KeyEsc:
 		ve.Mode = NORMAL_MODE
@@ -42,33 +47,35 @@ func (ve *VimEditor) InsertMode(v *gocui.View, key gocui.Key, ch rune, mod gocui
 	case key == gocui.KeyEnter:
 		v.EditNewLine()
 
-	//// THIS SHOULD BE BANNED FOR VIMOTION USERS XD
-	// case key == gocui.KeyArrowDown:
-	// 	v.MoveCursor(0, 1, false)
-	// case key == gocui.KeyArrowUp:
-	// 	v.MoveCursor(0, -1, false)
-	// case key == gocui.KeyArrowLeft:
-	// 	v.MoveCursor(-1, 0, false)
-	// case key == gocui.KeyArrowRight:
-	// 	v.MoveCursor(1, 0, false)
+		//// THIS SHOULD BE BANNED FOR VIMOTION USERS XD
+		// case key == gocui.KeyArrowDown:
+		// 	v.MoveCursor(0, 1, false)
+		// case key == gocui.KeyArrowUp:
+		// 	v.MoveCursor(0, -1, false)
+		// case key == gocui.KeyArrowLeft:
+		// 	v.MoveCursor(-1, 0, false)
+		// case key == gocui.KeyArrowRight:
+		// 	v.MoveCursor(1, 0, false)
 	}
 	////
 
 	// TODO: handle other keybindings...
 }
 
-func (ve *VimEditor) NormalMode(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+func (ve *VimEditor) normalMode(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
+	case key == gocui.KeyEsc || key == gocui.KeyCtrlC:
+		ve.Mode = NORMAL_MODE
 	case ch == 'i':
 		ve.Mode = INSERT_MODE
-	// case ch == 'j':
-	// 	v.MoveCursor(0, 1, false)
-	// case ch == 'k':
-	// 	v.MoveCursor(0, -1, false)
-	// case ch == 'h':
-	// 	v.MoveCursor(-1, 0, false)
-	// case ch == 'l':
-	// 	v.MoveCursor(1, 0, false)
+	case ch == 'j':
+		v.MoveCursor(0, 1)
+	case ch == 'k':
+		v.MoveCursor(0, -1)
+	case ch == 'h':
+		v.MoveCursor(-1, 0)
+	case ch == 'l':
+		v.MoveCursor(1, 0)
 	}
 	// TODO: handle other keybindings...
 }

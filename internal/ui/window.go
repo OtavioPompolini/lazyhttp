@@ -2,8 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"io"
 
-	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/awesome-gocui/gocui"
 )
 
@@ -45,9 +45,13 @@ func (w *Window) AutoScroll() {
 	w.view.Autoscroll = true
 }
 
-// func (v *Window) SetVimEditor() {
-// 	v.view.Editor = &Editor.VimEditor{}
-// }
+func (v *Window) SetVimEditor() {
+	v.view.Editor = NewVimEditor()
+}
+
+func (v *Window) SetEditor(e gocui.Editor) {
+	v.view.Editor = e
+}
 
 func (v *Window) SetSelectedBgColor(col gocui.Attribute) {
 	v.view.SelBgColor = col
@@ -78,10 +82,10 @@ func (v *Window) Write(text string) {
 }
 
 func (v *Window) WriteHighlight(text string) {
-	err := quick.Highlight(v.view, text, "json", "terminal16m", "tokyonight-night")
-	if err != nil {
-		v.Write(text)
-	}
+	v.Write(text)
+}
+func (v *Window) WriteFunc(f func(wr io.Writer) error) error {
+	return f(v.view)
 }
 
 func (v *Window) WriteLines(text []string) {

@@ -1,7 +1,10 @@
 package app
 
 import (
+	"log"
+
 	"github.com/OtavioPompolini/project-postman/internal/ui"
+	"github.com/OtavioPompolini/project-postman/internal/utils"
 	"github.com/awesome-gocui/gocui"
 )
 
@@ -10,7 +13,6 @@ type ResponseWindow struct {
 	x, y         int
 	w, h         int
 	isActive     bool
-	newReqName   string
 	stateService StateService
 }
 
@@ -34,9 +36,9 @@ func (w ResponseWindow) Name() string {
 }
 
 func (w *ResponseWindow) Setup(ui *ui.UI, v *ui.Window) {
-	v.SetTitle("Response:")
+	v.SetTitle("Response")
 	v.SetSelectedBgColor(gocui.ColorRed)
-	v.SetHightlight(true)
+	// v.SetHightlight(true)
 	v.Wrap(true)
 	// v.SetHightlight(true)
 	w.ReloadContent(ui, v)
@@ -71,8 +73,17 @@ func (w *ResponseWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 	_, _, _, d := win.Window.Size()
 	win.SetCursor(0, d/2)
 
-	if w.stateService.state.collection.selected != nil && w.stateService.state.collection.selected.ResponseHistory != nil && len(w.stateService.state.collection.selected.ResponseHistory) > 0 {
-		win.Write(w.stateService.state.collection.selected.ResponseHistory[0].Info)
-		win.WriteHighlight(w.stateService.state.collection.selected.ResponseHistory[0].Body)
+	if w.stateService.state.collection.selected == nil || w.stateService.state.collection.selected.ResponseHistory == nil || len(w.stateService.state.collection.selected.ResponseHistory) <= 0 {
+		return
+	}
+
+	win.Write(w.stateService.state.collection.selected.ResponseHistory[0].Info)
+	err := win.WriteFunc(utils.StringBeautify(w.stateService.state.collection.selected.ResponseHistory[0].Body))
+	if err != nil {
+		log.Print("Error while highlighting response body", err)
+		w.stateService.state.alertMessage = "Error while highlighting response body"
+		alertWindow, _ := ui.GetWindow("AlertWindow")
+		alertWindow.OpenWindow()
+		return
 	}
 }

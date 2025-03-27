@@ -1,9 +1,8 @@
 package app
 
 import (
-	"bytes"
-	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 
@@ -167,9 +166,14 @@ func (ss *StateService) ExecuteRequest() error {
 		return err
 	}
 
+	log.Printf("Method = %s", httpRequest.Method)
+	log.Printf("Url = %s", httpRequest.URL)
+	log.Printf("Body = %s", httpRequest.Body)
+
 	client := http.Client{}
 	res, err := client.Do(httpRequest)
 	if err != nil {
+		log.Print("Error while performing the request", err)
 		return err
 	}
 
@@ -188,19 +192,16 @@ func (ss *StateService) ExecuteRequest() error {
 	responseString += "\n"
 	s, err := io.ReadAll(res.Body)
 	if err != nil {
+		log.Print("Error while reading response body", err)
 		return err
 	}
 
-	var pretty bytes.Buffer
-	err = json.Indent(&pretty, s, "", "  ")
-	if err != nil {
-		return err
-	}
+	log.Printf("Response body = %s", string(s))
 
 	response := ss.persistance.ResponseRepository.Save(&types.Response{
 		RequestId: ss.state.collection.selected.Id,
 		Info:      responseString,
-		Body:      pretty.String(),
+		Body:      string(s),
 	})
 
 	r.ResponseHistory = append([]*types.Response{response}, r.ResponseHistory...)
