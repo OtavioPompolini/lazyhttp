@@ -39,4 +39,5 @@
     - Be able to navigate through response window and copy content to clipboard
     - ? keybind to open a help menu
     - Support other formats url-encoded, responses as XML/HTML
+    - Delete request confirmation
 

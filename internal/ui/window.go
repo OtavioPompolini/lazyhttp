@@ -7,30 +7,78 @@ import (
 	"github.com/awesome-gocui/gocui"
 )
 
+const (
+	FIXED    = "FIXED"
+	RELATIVE = "RELATIVE"
+)
+
+type position string
+
+type windowCoord struct {
+	position position
+	coord    int
+}
+
+func newWindowCoord(c int, pos position) windowCoord {
+	return windowCoord{
+		position: pos,
+		coord:    c,
+	}
+}
+
+type WindowPosition struct {
+	x windowCoord
+	y windowCoord
+	h windowCoord
+	w windowCoord
+}
+
+func NewWindowPosition(
+	x, y, w, h int,
+	posXa, posYa, posXb, posYb string,
+) WindowPosition {
+	return WindowPosition{
+		x: newWindowCoord(x, position(posXa)),
+		y: newWindowCoord(y, position(posYa)),
+		w: newWindowCoord(w, position(posXb)),
+		h: newWindowCoord(h, position(posYb)),
+	}
+}
+
 // Size and name should be a Window attribute not a IWindow
 type IWindow interface {
 	Setup(ui *UI, w *Window)
 	Update(ui UI, w Window)
 	OnSelect(ui UI, w Window) error
 	OnDeselect(ui UI, w Window) error
-	Size() (x, y, w, h int)
+	Size() WindowPosition
 	Name() string
 	SetKeybindings(ui *UI, w *Window) error
 	ReloadContent(ui *UI, w *Window)
 }
 
 type Window struct {
-	view     *gocui.View
-	Window   IWindow
+	view   *gocui.View
+	Window IWindow
+	// name           string
 	isActive bool
 }
 
 // TODO: Builder pattern
 func NewWindow(iw IWindow, ia bool) *Window {
 	return &Window{
+		// name:           name,
 		Window:   iw,
 		isActive: ia,
 	}
+}
+
+// func (w *Window) Name() string {
+// 	return w.name
+// }
+
+func (w *Window) EnableKeybindingOnEdit(b bool) {
+	w.view.KeybindOnEdit = b
 }
 
 func (w *Window) IsActive() bool {
@@ -119,12 +167,14 @@ func (v *Window) IsTained() bool {
 }
 
 func (v *Window) MoveCursorHalfWindowDown() {
-	_, _, _, d := v.Window.Size()
+	// _, _, _, d := v.Window.Size()
+	d := 10
 	v.view.MoveCursor(0, d/2)
 }
 
 func (v *Window) MoveCursorHalfWindowUp() {
-	_, _, _, d := v.Window.Size()
+	d := 10
+	// _, _, _, d := v.Window.Size()
 	v.view.MoveCursor(0, -d/2)
 }
 

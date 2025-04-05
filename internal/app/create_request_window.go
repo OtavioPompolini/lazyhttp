@@ -9,24 +9,24 @@ import (
 )
 
 type CreateRequestWindow struct {
-	name         string
-	x, y         int
-	w, h         int
-	isActive     bool
-	newReqName   string
-	stateService StateService
+	name           string
+	newReqName     string
+	stateService   StateService
+	windowPosition ui.WindowPosition
 }
 
 func NewCreateRequestWindow(GUI *ui.UI, stateStateService StateService) *ui.Window {
 	return ui.NewWindow(
 		&CreateRequestWindow{
 			name:         "CreateRequestWindow",
-			x:            25,
-			y:            49,
-			w:            50,
-			h:            2,
-			isActive:     false,
 			stateService: stateStateService,
+			windowPosition: ui.NewWindowPosition(
+				25, 49, 50, 2,
+				ui.RELATIVE,
+				ui.RELATIVE,
+				ui.RELATIVE,
+				ui.FIXED,
+			),
 		},
 		false,
 	)
@@ -40,19 +40,15 @@ func (w *CreateRequestWindow) Setup(ui *ui.UI, v *ui.Window) {
 	ui.SelectWindow(v)
 	v.SetHightlight(true)
 	v.SetEditable(true)
-	v.SetTitle("Create Request:")
+	v.SetTitle("New request name:")
 }
 
 func (w *CreateRequestWindow) Update(ui ui.UI, v ui.Window) {
 	w.newReqName = strings.TrimSpace(v.GetWindowContent())
 }
 
-func (w *CreateRequestWindow) Size() (x, y, width, height int) {
-	return w.x, w.y, w.x + w.w, w.y + w.h
-}
-
-func (w *CreateRequestWindow) IsActive() bool {
-	return w.isActive
+func (w *CreateRequestWindow) Size() ui.WindowPosition {
+	return w.windowPosition
 }
 
 func (w *CreateRequestWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {

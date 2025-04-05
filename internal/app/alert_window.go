@@ -7,21 +7,20 @@ import (
 )
 
 type AlertWindow struct {
-	name         string
-	x, y         int
-	w, h         int
-	stateService StateService
+	name           string
+	stateService   StateService
+	windowPosition ui.WindowPosition
 }
 
 func NewAlertWindow(GUI *ui.UI, stateService StateService) *ui.Window {
 	return ui.NewWindow(
 		&AlertWindow{
 			name:         "AlertWindow",
-			x:            25,
-			y:            49,
-			w:            50,
-			h:            10,
 			stateService: stateService,
+			windowPosition: ui.NewWindowPosition(
+				25, 49, 50, 10,
+				ui.RELATIVE, ui.RELATIVE, ui.RELATIVE, ui.FIXED,
+			),
 		},
 		false,
 	)
@@ -50,8 +49,8 @@ func (aw *AlertWindow) OnDeselect(ui ui.UI, w ui.Window) error {
 	return nil
 }
 
-func (aw *AlertWindow) Size() (x, y, w, h int) {
-	return aw.x, aw.y, aw.x + aw.w, aw.y + aw.h
+func (aw *AlertWindow) Size() ui.WindowPosition {
+	return aw.windowPosition
 }
 
 func (aw *AlertWindow) Name() string {

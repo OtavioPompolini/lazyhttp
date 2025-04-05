@@ -8,21 +8,23 @@ import (
 )
 
 type DebuggerWindow struct {
-	name         string
-	x, y         int
-	w, h         int
-	stateService StateService
+	name           string
+	stateService   StateService
+	windowPosition ui.WindowPosition
 }
 
 func NewDebuggerWindow(stateService StateService) *ui.Window {
 	return ui.NewWindow(
 		&DebuggerWindow{
 			name:         "DebuggerWindow",
-			x:            0,
-			y:            80,
-			w:            100,
-			h:            20,
 			stateService: stateService,
+			windowPosition: ui.NewWindowPosition(
+				0, 80, 100, 20,
+				ui.RELATIVE,
+				ui.RELATIVE,
+				ui.RELATIVE,
+				ui.RELATIVE,
+			),
 		},
 		true,
 	)
@@ -48,8 +50,8 @@ func (aw *DebuggerWindow) OnDeselect(ui ui.UI, w ui.Window) error {
 	return nil
 }
 
-func (aw *DebuggerWindow) Size() (x, y, w, h int) {
-	return aw.x, aw.y, aw.x + aw.w, aw.y + aw.h
+func (aw *DebuggerWindow) Size() ui.WindowPosition {
+	return aw.windowPosition
 }
 
 func (aw *DebuggerWindow) Name() string {

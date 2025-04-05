@@ -11,28 +11,26 @@ import (
 // Why not to save a ref to ui.GUI and ui.Window on every Window implementation?????
 // Since every F method needs both params...
 type RequestsWindow struct {
-	isActive     bool
-	name         string
-	x, y, h, w   int
-	stateService StateService
+	stateService   StateService
+	name           string
+	windowPosition ui.WindowPosition
 }
 
 func NewRequestsWindow(GUI *ui.UI, stateService StateService) *ui.Window {
 	return ui.NewWindow(
 		&RequestsWindow{
-			name:         "RequestsWindow",
-			x:            0,
-			y:            0,
-			h:            80,
-			w:            20,
 			stateService: stateService,
-			isActive:     true,
+			name:         "RequestsWindow",
+			windowPosition: ui.NewWindowPosition(
+				0, 0, 20, 80,
+				ui.RELATIVE, ui.RELATIVE, ui.RELATIVE, ui.RELATIVE,
+			),
 		},
 		true,
 	)
 }
 
-func (w RequestsWindow) Name() string {
+func (w *RequestsWindow) Name() string {
 	return w.name
 }
 
@@ -47,12 +45,8 @@ func (w *RequestsWindow) Setup(ui *ui.UI, v *ui.Window) {
 func (w *RequestsWindow) Update(ui ui.UI, v ui.Window) {
 }
 
-func (w *RequestsWindow) Size() (x, y, width, height int) {
-	return w.x, w.y, w.x + w.w, w.y + w.h
-}
-
-func (w *RequestsWindow) IsActive() bool {
-	return w.isActive
+func (w *RequestsWindow) Size() ui.WindowPosition {
+	return w.windowPosition
 }
 
 func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {

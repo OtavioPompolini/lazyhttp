@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"io"
+	"math"
 
 	"github.com/awesome-gocui/gocui"
 )
@@ -97,7 +98,7 @@ func (ui *UI) StartUI() {
 			for _, win := range ui.windows {
 				if win.IsActive() {
 					if err := ui.renderWindow(win); err != nil {
-						return fmt.Errorf("error rendering window")
+						return fmt.Errorf("error rendering window", err)
 					}
 				}
 			}
@@ -107,10 +108,9 @@ func (ui *UI) StartUI() {
 }
 
 func (ui *UI) renderWindow(window *Window) error {
-	x, y, w, h := window.Window.Size() // TODO: Resizable windows based on OS current window size
-	uiX, uiY := ui.Size()
+	x, y, w, h := ui.calculateWindowSize(window)
 	name := window.Window.Name()
-	v, err := ui.g.SetView(name, (uiX*x)/100, (uiY*y)/100, ((uiX*w)/100)-1, ((uiY*h)/100)-1, 0)
+	v, err := ui.g.SetView(name, x, y, w, h, 0)
 	if err != nil {
 		if err == gocui.ErrUnknownView {
 			window.setView(v)
@@ -121,6 +121,48 @@ func (ui *UI) renderWindow(window *Window) error {
 	}
 	window.Window.Update(*ui, *window)
 	return nil
+}
+
+func (ui *UI) calculateWindowSize(window *Window) (x, y, w, h int) {
+	wp := window.Window.Size()
+	a, b := ui.Size()
+
+	x = ui.windowSize(wp.x.position, wp.x.coord, a, 0)
+	y = ui.windowSize(wp.y.position, wp.y.coord, b, 0)
+	w = ui.windowSize(wp.w.position, wp.w.coord+wp.x.coord, a, 1)
+
+	//FIX THIS
+	if wp.h.position == FIXED {
+		h = ui.windowSize(wp.h.position, wp.h.coord+y, b, 1)
+	} else {
+		h = ui.windowSize(wp.h.position, wp.h.coord+wp.y.coord, b, 1)
+	}
+
+	return x, y, w, h
+}
+
+func (ui *UI) windowSize(position position, coord int, windowSize int, off int) int {
+	switch position {
+	case FIXED:
+		return coord
+	case RELATIVE:
+		v := (float64(coord) * float64(windowSize)) / 100
+
+		//FIX THIS TOO
+		if v != math.Trunc(v) {
+			if off == 0 {
+				v = math.Ceil(v)
+			} else {
+				v = math.Floor(v)
+			}
+		} else if off == 1 {
+			v -= 1
+		}
+
+		return int(v)
+	default:
+		return coord
+	}
 }
 
 func (ui *UI) DeleteWindow(window *Window) error {
