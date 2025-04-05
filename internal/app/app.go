@@ -39,6 +39,7 @@ func NewApp() (*App, error) {
 	app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, *stateService))
 	app.GUI.AddWindow(NewCreateRequestWindow(userInterface, *stateService))
 	app.GUI.AddWindow(NewRequestsWindow(userInterface, *stateService))
+	app.GUI.AddWindow(NewVariablesWindow(userInterface, *stateService))
 
 	app.GUI.SetHightlight(true)
 	app.GUI.SetFgColor(gocui.ColorGreen)

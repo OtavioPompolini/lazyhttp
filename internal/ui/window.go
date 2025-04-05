@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/awesome-gocui/gocui"
 )
@@ -180,4 +181,38 @@ func (v *Window) MoveCursorHalfWindowUp() {
 
 func (v *Window) SetCursor(x, y int) error {
 	return v.view.SetCursor(x, y)
+}
+
+func (v *Window) Cursor() (x, y int) {
+	return v.view.Cursor()
+}
+
+func (v *Window) CursorDown() {
+	v.view.MoveCursor(0, 1)
+}
+
+func (v *Window) CursorUp() {
+	v.view.MoveCursor(0, -1)
+}
+
+func (v *Window) CursorLeft() {
+	v.view.MoveCursor(-1, 0)
+}
+
+func (v *Window) CursorRight() {
+	v.view.MoveCursor(1, 0)
+}
+
+func (v *Window) HighlightLine(y int, b bool) {
+	v.view.SetHighlight(y, b)
+}
+
+func (v *Window) Line(y int) string {
+	s, err := v.view.Line(y)
+	if err != nil {
+		log.Println("Error getting line content from view buffer")
+		return ""
+	}
+
+	return s
 }

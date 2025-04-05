@@ -80,13 +80,13 @@ func (w *RequestDetailsWindow) OnDeselect(ui ui.UI, v ui.Window) error {
 	)
 
 	w.isSelected = false
-	ui.SetCursor(false)
+	ui.CursorVisible(false)
 	return nil
 }
 
 func (w *RequestDetailsWindow) OnSelect(ui ui.UI, v ui.Window) error {
 	w.isSelected = true
-	ui.SetCursor(true)
+	ui.CursorVisible(true)
 	return nil
 }
 

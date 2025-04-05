@@ -3,15 +3,31 @@ package app
 import (
 	"log"
 
+	"golang.design/x/clipboard"
+
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 	"github.com/OtavioPompolini/project-postman/internal/utils"
 	"github.com/awesome-gocui/gocui"
 )
 
+type selectType string
+
+type cursorPosition struct {
+	x int
+	y int
+}
+
+type selectContent struct {
+	sType         selectType
+	startPosition cursorPosition
+}
+
 type ResponseWindow struct {
-	name           string
-	stateService   StateService
-	windowPosition ui.WindowPosition
+	name             string
+	stateService     StateService
+	windowPosition   ui.WindowPosition
+	selectContent    *selectContent
+	highlightedLines []int
 }
 
 func NewResponseWindow(GUI *ui.UI, ss StateService) *ui.Window {
@@ -49,14 +65,72 @@ func (w *ResponseWindow) Update(ui ui.UI, v ui.Window) {
 }
 
 func (w *ResponseWindow) SetKeybindings(ui *ui.UI, v *ui.Window) error {
+	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
+		w.navigateDown(ui)
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
+		w.navigateUp(ui)
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), 'V', func(g *gocui.Gui, v *gocui.View) error {
+		win, _ := ui.GetWindow(w.name)
+		win.SetSelectedBgColor(gocui.ColorRed)
+		x, y := win.Cursor()
+		win.HighlightLine(y, true)
+		w.highlightedLines = append(w.highlightedLines, y)
+		w.selectContent = &selectContent{
+			sType: "LINE",
+			startPosition: cursorPosition{
+				x: x,
+				y: y,
+			},
+		}
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), 'y', func(g *gocui.Gui, v *gocui.View) error {
+		w.copySelectedToClipboard(ui)
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEsc, func(g *gocui.Gui, v *gocui.View) error {
+		w.deselectContent(ui)
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), gocui.KeyF1, func(g *gocui.Gui, v *gocui.View) error {
+		ui.SelectWindowByName("RequestsWindow")
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (w *ResponseWindow) OnDeselect(ui ui.UI, v ui.Window) error {
+	ui.CursorVisible(false)
 	return nil
 }
 
 func (w *ResponseWindow) OnSelect(ui ui.UI, v ui.Window) error {
+	ui.CursorVisible(true)
 	return nil
 }
 
@@ -77,4 +151,85 @@ func (w *ResponseWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 		alertWindow.OpenWindow()
 		return
 	}
+}
+
+// ACTIONS
+
+func (rw *ResponseWindow) navigateDown(ui *ui.UI) {
+	thisWindow, _ := ui.GetWindow(rw.name)
+
+	if rw.selectContent != nil {
+		_, y := thisWindow.Cursor()
+		if y < rw.selectContent.startPosition.y {
+			thisWindow.HighlightLine(y, false)
+			rw.highlightedLines = append(rw.highlightedLines, y)
+		}
+	}
+
+	thisWindow.CursorDown()
+
+	if rw.selectContent != nil {
+		_, y := thisWindow.Cursor()
+		if y > rw.selectContent.startPosition.y {
+			thisWindow.HighlightLine(y, true)
+			rw.highlightedLines = append(rw.highlightedLines, y)
+		}
+	}
+}
+
+func (rw *ResponseWindow) navigateUp(ui *ui.UI) {
+	thisWindow, _ := ui.GetWindow(rw.name)
+
+	if rw.selectContent != nil {
+		_, y := thisWindow.Cursor()
+		if y > rw.selectContent.startPosition.y {
+			thisWindow.HighlightLine(y, false)
+			rw.highlightedLines = append(rw.highlightedLines, y)
+		}
+
+	}
+
+	thisWindow.CursorUp()
+
+	if rw.selectContent != nil {
+		_, y := thisWindow.Cursor()
+		if y < rw.selectContent.startPosition.y {
+			thisWindow.HighlightLine(y, true)
+			rw.highlightedLines = append(rw.highlightedLines, y)
+		}
+	}
+}
+
+func (rw *ResponseWindow) deselectContent(ui *ui.UI) {
+	thisWindow, _ := ui.GetWindow(rw.name)
+
+	for _, line := range rw.highlightedLines {
+		thisWindow.HighlightLine(line, false)
+	}
+
+	rw.selectContent = nil
+	rw.highlightedLines = []int{}
+}
+
+func (rw *ResponseWindow) copySelectedToClipboard(ui *ui.UI) {
+	thisWindow, _ := ui.GetWindow(rw.name)
+	err := clipboard.Init()
+	if err != nil {
+		log.Println("Failed to access clipboard")
+		// Alert screen
+	}
+
+	_, cy := thisWindow.Cursor()
+
+	startLine := min(rw.selectContent.startPosition.y, cy)
+	endLine := max(rw.selectContent.startPosition.y, cy)
+	copyContent := ""
+
+	for i := startLine; i <= endLine; i++ {
+		copyContent += thisWindow.Line(i) + "\n"
+	}
+
+	clipboard.Write(clipboard.FmtText, []byte(copyContent))
+	rw.deselectContent(ui)
+	rw.ReloadContent(ui, thisWindow)
 }

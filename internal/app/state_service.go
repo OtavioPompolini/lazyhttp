@@ -18,6 +18,7 @@ type StateService struct {
 
 type State struct {
 	collection   *Collection
+	variables    map[string]types.Variable
 	debuggerMode bool
 	alertMessage string
 	// app configs here
@@ -42,6 +43,7 @@ func loadState(db database.PersistanceAdapter) *State {
 
 	return &State{
 		collection: NewCollection(reqs),
+		variables:  map[string]types.Variable{},
 	}
 }
 

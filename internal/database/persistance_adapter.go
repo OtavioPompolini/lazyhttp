@@ -28,6 +28,12 @@ type ResponseRepository interface {
 	Save(r *types.Response) *types.Response
 }
 
+type VariablesRepository interface {
+	GetAll() []types.Variable
+	Save(v *types.Variable) *types.Variable
+	Delete(id int64) *types.Variable
+}
+
 // Only sqlite for now
 func NewPersistanceAdapter() (PersistanceAdapter, error) {
 	storagePath, err := getDBPath()

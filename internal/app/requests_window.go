@@ -22,7 +22,7 @@ func NewRequestsWindow(GUI *ui.UI, stateService StateService) *ui.Window {
 			stateService: stateService,
 			name:         "RequestsWindow",
 			windowPosition: ui.NewWindowPosition(
-				0, 0, 20, 80,
+				0, 0, 20, 40,
 				ui.RELATIVE, ui.RELATIVE, ui.RELATIVE, ui.RELATIVE,
 			),
 		},
@@ -81,6 +81,13 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	if err := ui.NewKeyBinding(w.Name(), 'n', func(g *gocui.Gui, v *gocui.View) error {
 		win, _ := ui.GetWindow("CreateRequestWindow")
 		win.OpenWindow()
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := ui.NewKeyBinding(w.Name(), 'r', func(g *gocui.Gui, v *gocui.View) error {
+		ui.SelectWindowByName("ResponseWindow")
 		return nil
 	}); err != nil {
 		return err
@@ -203,10 +210,7 @@ func (rw *RequestsWindow) navigateUp(ui *ui.UI) {
 	}
 
 	rw.ReloadContent(ui, thisWindow)
-	win, errr := ui.GetWindow("ResponseWindow")
-	if errr != nil {
-		log.Panic("Pudim")
-	}
+	win, _ := ui.GetWindow("ResponseWindow")
 	win.Window.ReloadContent(ui, win)
 }
 

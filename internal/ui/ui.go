@@ -200,7 +200,7 @@ func (ui *UI) Close() {
 	ui.g.Close()
 }
 
-func (ui *UI) SetCursor(b bool) {
+func (ui *UI) CursorVisible(b bool) {
 	ui.g.Cursor = b
 }
 
