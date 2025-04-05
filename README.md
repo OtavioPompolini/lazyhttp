@@ -20,6 +20,9 @@
 
 *It needs an empty line between headers and body
 
+## OBS. v0.2
+Migrating from v0.1 will not carry database through v0.2
+
 ## Known issues
 
 ## Roadmap some day

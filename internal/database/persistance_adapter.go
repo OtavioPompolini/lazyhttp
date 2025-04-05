@@ -60,11 +60,10 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 }
 
 func getDBPath() (string, error) {
-	// Automatically handles OS-specific paths
-	appDir := filepath.Join(xdg.DataHome, "YourApp")
+	appDir := filepath.Join(xdg.DataHome, "LazyHttp")
 	if err := os.MkdirAll(appDir, 0755); err != nil {
 		return "", err
 	}
 
-	return filepath.Join(appDir, "lazycurl.db"), nil
+	return filepath.Join(appDir, "lazyhttp.db"), nil
 }
