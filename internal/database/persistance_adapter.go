@@ -12,8 +12,9 @@ import (
 )
 
 type PersistanceAdapter struct {
-	RequestRepository  RequestRepository
-	ResponseRepository ResponseRepository
+	RequestRepository   RequestRepository
+	ResponseRepository  ResponseRepository
+	VariablesRepository VariablesRepository
 }
 
 type RequestRepository interface {
@@ -29,9 +30,10 @@ type ResponseRepository interface {
 }
 
 type VariablesRepository interface {
-	GetAll() []types.Variable
-	Save(v *types.Variable) *types.Variable
-	Delete(id int64) *types.Variable
+	GetAll() []*types.Variable
+	Save(key string) *types.Variable
+	Update(*types.Variable) *types.Variable
+	Delete(id int64)
 }
 
 // Only sqlite for now
@@ -48,10 +50,12 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 
 	requestRepository := newRequestRepository(db)
 	responseRepository := newResponseRepository(db)
+	variablesRepository := newVariablesRepository(db)
 
 	return PersistanceAdapter{
-		RequestRepository:  requestRepository,
-		ResponseRepository: responseRepository,
+		RequestRepository:   requestRepository,
+		ResponseRepository:  responseRepository,
+		VariablesRepository: variablesRepository,
 	}, nil
 }
 
