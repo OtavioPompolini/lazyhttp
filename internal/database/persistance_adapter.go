@@ -15,6 +15,7 @@ type PersistanceAdapter struct {
 	RequestRepository   RequestRepository
 	ResponseRepository  ResponseRepository
 	VariablesRepository VariablesRepository
+	ConfigRepository    ConfigRepository
 }
 
 type RequestRepository interface {
@@ -27,6 +28,11 @@ type RequestRepository interface {
 type ResponseRepository interface {
 	GetAll() map[int64][]*types.Response
 	Save(r *types.Response) *types.Response
+}
+
+type ConfigRepository interface {
+	GetConfig() map[string]string
+	Save(k, v string)
 }
 
 type VariablesRepository interface {
@@ -51,11 +57,13 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 	requestRepository := newRequestRepository(db)
 	responseRepository := newResponseRepository(db)
 	variablesRepository := newVariablesRepository(db)
+	configRepository := newConfigRepository(db)
 
 	return PersistanceAdapter{
 		RequestRepository:   requestRepository,
 		ResponseRepository:  responseRepository,
 		VariablesRepository: variablesRepository,
+		ConfigRepository:    configRepository,
 	}, nil
 }
 

@@ -3,16 +3,17 @@ package app
 import (
 	"time"
 
+	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type AlertWindow struct {
 	name           string
-	stateService   StateService
+	stateService   state.StateService
 	windowPosition ui.WindowPosition
 }
 
-func NewAlertWindow(GUI *ui.UI, stateService StateService) *ui.Window {
+func NewAlertWindow(GUI *ui.UI, stateService state.StateService) *ui.Window {
 	return ui.NewWindow(
 		&AlertWindow{
 			name:         "AlertWindow",
@@ -29,7 +30,7 @@ func NewAlertWindow(GUI *ui.UI, stateService StateService) *ui.Window {
 func (aw *AlertWindow) Setup(ui *ui.UI, w *ui.Window) {
 	thisWindow, _ := ui.GetWindow(aw.name)
 
-	thisWindow.Write(aw.stateService.state.alertMessage)
+	thisWindow.Write(aw.stateService.AlertMessage())
 
 	go func() {
 		time.Sleep(2 * time.Second)
@@ -41,6 +42,7 @@ func (aw *AlertWindow) Setup(ui *ui.UI, w *ui.Window) {
 }
 
 func (aw *AlertWindow) Update(ui ui.UI, w ui.Window) {}
+
 func (aw *AlertWindow) OnSelect(ui ui.UI, w ui.Window) error {
 	return nil
 }

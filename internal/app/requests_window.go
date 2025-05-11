@@ -5,18 +5,19 @@ import (
 
 	"github.com/awesome-gocui/gocui"
 
+	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 // Why not to save a ref to ui.GUI and ui.Window on every Window implementation?????
 // Since every F method needs both params...
 type RequestsWindow struct {
-	stateService   StateService
+	stateService   *state.StateService
 	name           string
 	windowPosition ui.WindowPosition
 }
 
-func NewRequestsWindow(GUI *ui.UI, stateService StateService) *ui.Window {
+func NewRequestsWindow(GUI *ui.UI, stateService *state.StateService) *ui.Window {
 	return ui.NewWindow(
 		&RequestsWindow{
 			stateService: stateService,
@@ -115,7 +116,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	// Handle change window with a "const" and not a string
 	// and need to abstract gocui
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-		if w.stateService.state.collection.selected == nil {
+		if w.stateService.RequestsStateService.SelectedRequest() == nil {
 			return nil
 		}
 
@@ -142,21 +143,8 @@ func (w *RequestsWindow) ReloadContent(ui *ui.UI, v *ui.Window) {
 	thisWindow, _ := ui.GetWindow(w.name)
 	thisWindow.ClearWindow()
 
-	lines := []string{}
-
-	i := 0
-	cursorPosition := 0
-	curr := w.stateService.state.collection.head
-	for curr != nil {
-		lines = append(lines, curr.Name)
-
-		if curr.Id == w.stateService.state.collection.selected.Id {
-			cursorPosition = i
-		}
-
-		curr = curr.Next
-		i += 1
-	}
+	lines := w.stateService.RequestsStateService.ListNames()
+	cursorPosition := w.stateService.RequestsStateService.Index()
 
 	thisWindow.WriteLines(lines)
 
@@ -178,7 +166,7 @@ func (rw *RequestsWindow) doRequest(ui *ui.UI) {
 
 	err := rw.stateService.ExecuteRequest()
 	if err != nil {
-		rw.stateService.state.alertMessage = err.Error()
+		rw.stateService.SetAlertMessage(err.Error())
 
 		alertWindow, _ := ui.GetWindow("AlertWindow")
 		alertWindow.OpenWindow()

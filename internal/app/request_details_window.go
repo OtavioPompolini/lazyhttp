@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/awesome-gocui/gocui"
 
+	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/types"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
@@ -11,16 +12,16 @@ type RequestDetailsWindow struct {
 	name           string
 	body           string
 	isSelected     bool
-	StateService   StateService
+	StateService   *state.StateService
 	windowPosition ui.WindowPosition
 }
 
-func NewRequestDetailsWindow(GUI *ui.UI, stateStateService StateService) *ui.Window {
+func NewRequestDetailsWindow(GUI *ui.UI, stateService *state.StateService) *ui.Window {
 	return ui.NewWindow(
 		&RequestDetailsWindow{
 			name:         "RequestDetailsWindow",
 			isSelected:   false,
-			StateService: stateStateService,
+			StateService: stateService,
 			windowPosition: ui.NewWindowPosition(
 				20, 0, 40, 80,
 				ui.RELATIVE, ui.RELATIVE, ui.RELATIVE, ui.RELATIVE,
@@ -38,14 +39,14 @@ func (w *RequestDetailsWindow) Setup(ui *ui.UI, v *ui.Window) {
 	v.SetTitle("Details")
 	v.EnableKeybindingOnEdit(false)
 	v.SetEditable(true)
-	v.SetVimEditor()
+	// v.SetVimEditor()
 }
 
 func (w *RequestDetailsWindow) Update(ui ui.UI, v ui.Window) {
 	if !w.isSelected {
 		v.ClearWindow()
-		if w.StateService.state.collection.selected != nil {
-			v.Write(w.StateService.state.collection.selected.Body)
+		if w.StateService.RequestsStateService.SelectedRequest() != nil {
+			v.Write(w.StateService.RequestsStateService.SelectedRequest().Body)
 		}
 	} else {
 		w.body = v.GetWindowContent()
@@ -72,9 +73,9 @@ func (w *RequestDetailsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 }
 
 func (w *RequestDetailsWindow) OnDeselect(ui ui.UI, v ui.Window) error {
-	w.StateService.UpdateRequest(
+	w.StateService.RequestsStateService.UpdateRequest(
 		&types.Request{
-			Id:   w.StateService.state.collection.selected.Id,
+			Id:   w.StateService.RequestsStateService.SelectedRequest().Id,
 			Body: w.body,
 		},
 	)

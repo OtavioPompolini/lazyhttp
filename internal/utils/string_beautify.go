@@ -28,7 +28,7 @@ func IsXml(str string) bool {
 
 func StringBeautify(str string) func(io.Writer) error {
 	return func(wr io.Writer) error {
-		log.Printf("Beautifying string = %s", str)
+		// log.Printf("Beautifying string = %s", str)
 		isJson := IsJSON(str)
 		isXml := IsXml(str)
 		var lexer chroma.Lexer

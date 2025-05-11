@@ -4,13 +4,13 @@ import (
 	"github.com/awesome-gocui/gocui"
 
 	"github.com/OtavioPompolini/project-postman/internal/database"
+	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type App struct {
 	GUI          *ui.UI
 	debuggerMode bool
-	state        State
 }
 
 func NewApp() (*App, error) {
@@ -24,21 +24,20 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	stateService := NewStateService(db)
+	stateService := state.NewStateService(db)
 
 	app := &App{
 		// persistanceAdapter: db,
-		GUI:   userInterface,
-		state: *stateService.state,
+		GUI: userInterface,
 	}
 
 	app.GUI.StartUI()
 	app.GUI.AddWindow(NewDebuggerWindow(*stateService))
-	app.GUI.AddWindow(NewResponseWindow(userInterface, *stateService))
 	app.GUI.AddWindow(NewAlertWindow(userInterface, *stateService))
 	app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, *stateService))
-	app.GUI.AddWindow(NewCreateRequestWindow(userInterface, *stateService))
+	app.GUI.AddWindow(NewCreateRequestWindow(userInterface, stateService))
 	app.GUI.AddWindow(NewRequestsWindow(userInterface, *stateService))
+	app.GUI.AddWindow(NewResponseWindow(userInterface, *stateService))
 	app.GUI.AddWindow(NewVariablesWindow(userInterface, *stateService))
 
 	app.GUI.SetHightlight(true)

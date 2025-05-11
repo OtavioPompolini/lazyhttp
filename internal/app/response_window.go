@@ -3,11 +3,10 @@ package app
 import (
 	"log"
 
-	"golang.design/x/clipboard"
-
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 	"github.com/OtavioPompolini/project-postman/internal/utils"
 	"github.com/awesome-gocui/gocui"
+	"golang.design/x/clipboard"
 )
 
 type selectType string
@@ -211,15 +210,23 @@ func (rw *ResponseWindow) deselectContent(ui *ui.UI) {
 	rw.highlightedLines = []int{}
 }
 
+// Create utils to copy string
 func (rw *ResponseWindow) copySelectedToClipboard(ui *ui.UI) {
+	if rw.selectContent == nil {
+		log.Println("No content selected")
+		// Alert screen
+		return
+	}
+
 	thisWindow, _ := ui.GetWindow(rw.name)
 	err := clipboard.Init()
 	if err != nil {
 		log.Println("Failed to access clipboard")
 		// Alert screen
+		return
 	}
 
-	_, cy := thisWindow.Cursor()
+	cx, cy := thisWindow.Cursor()
 
 	startLine := min(rw.selectContent.startPosition.y, cy)
 	endLine := max(rw.selectContent.startPosition.y, cy)
@@ -230,6 +237,7 @@ func (rw *ResponseWindow) copySelectedToClipboard(ui *ui.UI) {
 	}
 
 	clipboard.Write(clipboard.FmtText, []byte(copyContent))
+
+	thisWindow.SetCursor(cx, min(rw.selectContent.startPosition.y, cy))
 	rw.deselectContent(ui)
-	rw.ReloadContent(ui, thisWindow)
 }

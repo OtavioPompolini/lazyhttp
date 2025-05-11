@@ -14,14 +14,6 @@ type SqliteRequestRepository struct {
 }
 
 func newRequestRepository(db *sql.DB) SqliteRequestRepository {
-	db.Exec(`
-		CREATE TABLE IF NOT EXISTS requests (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			body TEXT NOT NULL DEFAULT ""
-		);
-	`)
-
 	return SqliteRequestRepository{
 		db: db,
 	}

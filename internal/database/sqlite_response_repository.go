@@ -13,16 +13,6 @@ type SqliteResponseRepository struct {
 }
 
 func newResponseRepository(db *sql.DB) ResponseRepository {
-	db.Exec(`
-		CREATE TABLE IF NOT EXISTS responses (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			request_id INTEGER NOT NULL,
-			info TEXT NOT NULL,
-			body TEXT NOT NULL DEFAULT "",
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		);
-	`)
-
 	return SqliteResponseRepository{
 		db: db,
 	}

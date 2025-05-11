@@ -5,21 +5,22 @@ import (
 
 	"github.com/awesome-gocui/gocui"
 
+	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/ui"
 )
 
 type CreateRequestWindow struct {
 	name           string
 	newReqName     string
-	stateService   StateService
+	stateService   *state.StateService
 	windowPosition ui.WindowPosition
 }
 
-func NewCreateRequestWindow(GUI *ui.UI, stateStateService StateService) *ui.Window {
+func NewCreateRequestWindow(GUI *ui.UI, stateService *state.StateService) *ui.Window {
 	return ui.NewWindow(
 		&CreateRequestWindow{
 			name:         "CreateRequestWindow",
-			stateService: stateStateService,
+			stateService: stateService,
 			windowPosition: ui.NewWindowPosition(
 				25, 49, 50, 2,
 				ui.RELATIVE,
@@ -91,7 +92,7 @@ func (w *CreateRequestWindow) closeWindow(ui *ui.UI) error {
 }
 
 func (w *CreateRequestWindow) createRequest(ui *ui.UI) error {
-	w.stateService.CreateRequest(w.newReqName)
+	w.stateService.RequestsStateService.CreateRequest(w.newReqName)
 	win, _ := ui.GetWindow("RequestsWindow")
 
 	ui.DeleteWindowByName(w.name)

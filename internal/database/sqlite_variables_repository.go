@@ -14,14 +14,6 @@ type SqliteVariablesRepository struct {
 }
 
 func newVariablesRepository(db *sql.DB) SqliteVariablesRepository {
-	db.Exec(`
-		CREATE TABLE IF NOT EXISTS variables (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			key TEXT NOT NULL,
-			value TEXT NOT NULL DEFAULT ""
-		);
-	`)
-
 	return SqliteVariablesRepository{
 		db: db,
 	}

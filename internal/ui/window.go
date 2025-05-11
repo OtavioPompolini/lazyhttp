@@ -55,6 +55,8 @@ type IWindow interface {
 	Size() WindowPosition
 	Name() string
 	SetKeybindings(ui *UI, w *Window) error
+
+	//Remove this an replace by observer pattern in state
 	ReloadContent(ui *UI, w *Window)
 }
 
@@ -133,6 +135,7 @@ func (v *Window) Write(text string) {
 func (v *Window) WriteHighlight(text string) {
 	v.Write(text)
 }
+
 func (v *Window) WriteFunc(f func(wr io.Writer) error) error {
 	return f(v.view)
 }
