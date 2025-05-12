@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"log"
-	// _ "github.com/mattn/go-sqlite3"
 )
 
 type SqliteConfigRepository struct {
@@ -41,8 +40,8 @@ func (cr SqliteConfigRepository) GetConfig() map[string]string {
 	return config
 }
 
-func (cr SqliteConfigRepository) Save(key, value string) {
-	_, err := cr.db.Exec("UPDATE SET ?=?", key, value)
+func (cr SqliteConfigRepository) Update(key, value string) {
+	_, err := cr.db.Exec("UPDATE SET value=? where key=?", value, key)
 	if err != nil {
 		log.Printf("Error while updating config key=%s value=%s", key, value)
 	}

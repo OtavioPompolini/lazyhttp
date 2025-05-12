@@ -9,8 +9,9 @@ import (
 )
 
 type App struct {
-	GUI          *ui.UI
-	debuggerMode bool
+	GUI                *ui.UI
+	state              *state.State
+	persistanceAdapter database.PersistanceAdapter
 }
 
 func NewApp() (*App, error) {
@@ -23,12 +24,10 @@ func NewApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	stateService := state.NewStateService(db)
-
 	app := &App{
-		// persistanceAdapter: db,
-		GUI: userInterface,
+		persistanceAdapter: db,
+		GUI:                userInterface,
+		state:              state.NewState(db),
 	}
 
 	app.GUI.StartUI()

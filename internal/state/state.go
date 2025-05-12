@@ -27,7 +27,7 @@ import (
 
 type State struct {
 	CollectionSystem *CollectionSystem
-	AppConfig        AppConfig
+	AppConfig        *AppConfig
 	alertMessage     string
 
 	// I dont like the name variables, think another name
@@ -42,6 +42,7 @@ func NewState(db database.PersistanceAdapter) *State {
 
 	return &State{
 		CollectionSystem: newCollectionSystem(db),
+		AppConfig:        NewAppConfig(),
 		// variables:  map[string]types.Variable{},
 	}
 }

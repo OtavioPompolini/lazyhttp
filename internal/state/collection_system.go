@@ -10,32 +10,29 @@ type CollectionObserver interface {
 }
 
 type CollectionSystem struct {
-	collections []*Collection
+	collections     []*types.Collection
+	selectedRequest *types.Request
 
-	observers []
-	persistance database.PersistanceAdapter
-}
-
-type Collection struct {
-	name     string
-	head     *types.Request
-	tail     *types.Request
-	selected *types.Request
+	// observers []CollectionObserver
+	requestRepository    database.RequestRepository
+	collectionRepository database.CollectionRepository
 }
 
 func newCollectionSystem(db database.PersistanceAdapter) *CollectionSystem {
 	return &CollectionSystem{
-		persistance: db,
+		requestRepository:    db.RequestRepository,
+		collectionRepository: db.CollectionRepository,
 	}
 }
 
 func (c *CollectionSystem) NewCollection(collName string) {
-	// nColl := &Collection{
-	// 	name: collName,
-	// }
-	//
-	// c.collections = append(c.collections, nColl)
-	// c.persistance.CollectionRepository.Save(*nColl)
+	nColl := types.Collection{
+		Name:   collName,
+		IsOpen: false,
+	}
+
+	saved := c.collectionRepository.Save(nColl)
+	c.collections = append(c.collections, saved)
 
 }
 
@@ -43,31 +40,168 @@ func (c *CollectionSystem) loadCollection(requests []*types.Request) {
 	c.collections = append(c.collections, newCollection(requests))
 }
 
-func newCollection(requests []*types.Request) *Collection {
-	var head *types.Request
-	var tail *types.Request
-	var prev *types.Request
+func (c *CollectionSystem) DeleteSelectedRequest() {
 
-	for i, req := range requests {
-		if i == 0 {
-			head = req
-		}
+	//DEPOIS
+	selected := c.selectedRequest
 
-		if i == len(requests)-1 {
-			tail = req
-		}
+	//ANTES
+	selected := rss.state.collection.selected
 
-		req.Prev = prev
-		if prev != nil {
-			prev.Next = req
-		}
+	prev := rss.state.collection.selected.Prev
+	next := rss.state.collection.selected.Next
 
-		prev = req
+	if prev == nil && next == nil {
+		rss.state.collection.selected = nil
 	}
 
-	return &Collection{
-		head:     head,
-		tail:     tail,
-		selected: head,
+	if prev != nil {
+		prev.Next = selected.Next
+		rss.state.collection.selected = prev
+	} else {
+		rss.state.collection.head = selected.Next
 	}
+
+	if next != nil {
+		next.Prev = selected.Prev
+		rss.state.collection.selected = next
+	} else {
+		rss.state.collection.tail = selected.Prev
+	}
+
+	rss.persistance.RequestRepository.DeleteRequest(selected.Id)
+}
+
+func (rss RequestStateService) CreateRequest(reqName string) *types.Request {
+	saved := rss.persistance.RequestRepository.CreateRequest(reqName)
+
+	if rss.state.collection.tail != nil {
+		rss.state.collection.tail.Next = saved
+	} else {
+		rss.state.collection.head = saved
+	}
+	saved.Prev = rss.state.collection.tail
+	rss.state.collection.selected = saved
+	rss.state.collection.tail = saved
+
+	return saved
+}
+
+func (rss RequestStateService) UpdateRequest(r *types.Request) {
+	rss.persistance.RequestRepository.UpdateRequest(r)
+	rss.state.collection.selected.Body = r.Body
+}
+
+func (rss RequestStateService) SelectNext() bool {
+	if rss.state.collection.selected == nil {
+		return false
+	}
+
+	next := rss.state.collection.selected.Next
+	if next == nil {
+		return false
+	}
+
+	rss.state.collection.selected = next
+	return true
+}
+
+func (rss RequestStateService) SelectPrev() bool {
+	if rss.state.collection.selected == nil {
+		return false
+	}
+	prev := rss.state.collection.selected.Prev
+
+	if prev == nil {
+		return false
+	}
+
+	rss.state.collection.selected = prev
+	return true
+}
+
+func (rss RequestStateService) SelectedRequest() *types.Request {
+	return rss.state.collection.selected
+}
+
+func (rss RequestStateService) IsEmpty() bool {
+	return rss.state.collection.head == nil
+}
+
+func (rss RequestStateService) ListNames() []string {
+	curr := rss.state.collection.head
+	names := []string{}
+
+	for curr != nil {
+		names = append(names, curr.Name)
+	}
+
+	return names
+}
+
+func (rss RequestStateService) Index() int {
+	i := 0
+	curr := rss.state.collection.head
+	for curr != nil {
+		if curr.Id == rss.SelectedRequest().Id {
+			return i
+		}
+
+		curr = curr.Next
+		i += 1
+	}
+
+	return 0
+}
+
+// This might not be here. XD
+func (rss RequestStateService) ExecuteRequest() error {
+	r := rss.state.collection.selected
+
+	httpRequest, err := utils.ParseHttpRequest(r.Body)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Method = %s", httpRequest.Method)
+	log.Printf("Url = %s", httpRequest.URL)
+	log.Printf("Body = %s", httpRequest.Body)
+
+	client := http.Client{}
+	res, err := client.Do(httpRequest)
+	if err != nil {
+		log.Print("Error while performing the request", err)
+		return err
+	}
+
+	responseString := ""
+
+	responseString += res.Proto + " "
+	responseString += res.Status
+	responseString += "\n"
+
+	for k, v := range res.Header {
+		responseString += k + ": "
+		responseString += strings.Join(v, "")
+		responseString += "\n"
+	}
+
+	responseString += "\n"
+	s, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Print("Error while reading response body", err)
+		return err
+	}
+
+	// log.Printf("Response body = %s", string(s))
+
+	response := rss.persistance.ResponseRepository.Save(&types.Response{
+		RequestId: rss.state.collection.selected.Id,
+		Info:      responseString,
+		Body:      string(s),
+	})
+
+	r.ResponseHistory = append([]*types.Response{response}, r.ResponseHistory...)
+
+	return nil
 }

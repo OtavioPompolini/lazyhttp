@@ -6,16 +6,18 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/OtavioPompolini/project-postman/internal/types"
 	"github.com/adrg/xdg"
 	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
 type PersistanceAdapter struct {
-	RequestRepository   RequestRepository
-	ResponseRepository  ResponseRepository
-	VariablesRepository VariablesRepository
-	ConfigRepository    ConfigRepository
+	RequestRepository    RequestRepository
+	ResponseRepository   ResponseRepository
+	VariablesRepository  VariablesRepository
+	ConfigRepository     ConfigRepository
+	CollectionRepository CollectionRepository
 }
 
 type RequestRepository interface {
@@ -25,6 +27,12 @@ type RequestRepository interface {
 	DeleteRequest(id int64)
 }
 
+type CollectionRepository interface {
+	GetAll() []*types.Collection
+	Save(c types.Collection) *types.Collection
+	// Update(cName string) *types.Collection
+}
+
 type ResponseRepository interface {
 	GetAll() map[int64][]*types.Response
 	Save(r *types.Response) *types.Response
@@ -32,7 +40,7 @@ type ResponseRepository interface {
 
 type ConfigRepository interface {
 	GetConfig() map[string]string
-	Save(k, v string)
+	Update(k, v string)
 }
 
 type VariablesRepository interface {
@@ -54,16 +62,12 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 		return PersistanceAdapter{}, err
 	}
 
-	requestRepository := newRequestRepository(db)
-	responseRepository := newResponseRepository(db)
-	variablesRepository := newVariablesRepository(db)
-	configRepository := newConfigRepository(db)
-
 	return PersistanceAdapter{
-		RequestRepository:   requestRepository,
-		ResponseRepository:  responseRepository,
-		VariablesRepository: variablesRepository,
-		ConfigRepository:    configRepository,
+		RequestRepository:    newRequestRepository(db),
+		ResponseRepository:   newResponseRepository(db),
+		VariablesRepository:  newVariablesRepository(db),
+		ConfigRepository:     newConfigRepository(db),
+		CollectionRepository: newCollectionRepository(db),
 	}, nil
 }
 
