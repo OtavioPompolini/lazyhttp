@@ -4,12 +4,15 @@ import "time"
 
 // V1 = Only name and body
 type Request struct {
-	Id              int64
-	Name            string
-	Body            string
+	Id   int64
+	Name string
+	Body string
+
+	// Dont like this here too
 	ResponseHistory []*Response
-	Next            *Request
-	Prev            *Request
+
+	Next *Request
+	Prev *Request
 }
 
 type Response struct {

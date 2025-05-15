@@ -24,6 +24,7 @@ func NewApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	app := &App{
 		persistanceAdapter: db,
 		GUI:                userInterface,
@@ -31,13 +32,14 @@ func NewApp() (*App, error) {
 	}
 
 	app.GUI.StartUI()
-	app.GUI.AddWindow(NewDebuggerWindow(*stateService))
-	app.GUI.AddWindow(NewAlertWindow(userInterface, *stateService))
-	app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, *stateService))
-	app.GUI.AddWindow(NewCreateRequestWindow(userInterface, stateService))
-	app.GUI.AddWindow(NewRequestsWindow(userInterface, *stateService))
-	app.GUI.AddWindow(NewResponseWindow(userInterface, *stateService))
-	app.GUI.AddWindow(NewVariablesWindow(userInterface, *stateService))
+	// app.GUI.AddWindow(NewDebuggerWindow(*stateService))
+	// app.GUI.AddWindow(NewAlertWindow(userInterface, *stateService))
+	// app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, *stateService))
+	// app.GUI.AddWindow(NewCreateRequestWindow(userInterface, stateService))
+	// app.GUI.AddWindow(NewRequestsWindow(userInterface, *stateService))
+	// app.GUI.AddWindow(NewResponseWindow(userInterface, *stateService))
+	// app.GUI.AddWindow(NewVariablesWindow(userInterface, *stateService))
+	app.GUI.AddWindow(NewCollectionWindow(userInterface, app.state))
 
 	app.GUI.SetHightlight(true)
 	app.GUI.SetFgColor(gocui.ColorGreen)

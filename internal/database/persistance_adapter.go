@@ -30,6 +30,8 @@ type RequestRepository interface {
 type CollectionRepository interface {
 	GetAll() []*types.Collection
 	Save(c types.Collection) *types.Collection
+	SwapPositionDown(c *types.Collection)
+	SwapPositionUp(c *types.Collection)
 	// Update(cName string) *types.Collection
 }
 

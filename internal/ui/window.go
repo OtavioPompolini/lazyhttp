@@ -55,9 +55,6 @@ type IWindow interface {
 	Size() WindowPosition
 	Name() string
 	SetKeybindings(ui *UI, w *Window) error
-
-	//Remove this an replace by observer pattern in state
-	ReloadContent(ui *UI, w *Window)
 }
 
 type Window struct {
@@ -70,7 +67,6 @@ type Window struct {
 // TODO: Builder pattern
 func NewWindow(iw IWindow, ia bool) *Window {
 	return &Window{
-		// name:           name,
 		Window:   iw,
 		isActive: ia,
 	}

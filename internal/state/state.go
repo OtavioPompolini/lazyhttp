@@ -42,7 +42,7 @@ func NewState(db database.PersistanceAdapter) *State {
 
 	return &State{
 		CollectionSystem: newCollectionSystem(db),
-		AppConfig:        NewAppConfig(),
+		// AppConfig:        NewAppConfig(db),
 		// variables:  map[string]types.Variable{},
 	}
 }

@@ -20,8 +20,18 @@ func (cr SqliteCollectionRepository) GetAll() []*types.Collection {
 	return []*types.Collection{}
 }
 
-func (cr SqliteCollectionRepository) Save(cName string) *types.Collection {
-	return &types.Collection{}
+func (cr SqliteCollectionRepository) Save(c types.Collection) *types.Collection {
+	return &types.Collection{
+		Name: c.Name,
+	}
+}
+
+func (cr SqliteCollectionRepository) SwapPositionUp(c *types.Collection) {
+	return
+}
+
+func (cr SqliteCollectionRepository) SwapPositionDown(c *types.Collection) {
+	return
 }
 
 // func (cr SqliteConfigRepository) GetConfig() map[string]string {
