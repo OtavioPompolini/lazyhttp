@@ -89,6 +89,11 @@ func (c *CollectionSystem) SwapPosition(dir string) {
 
 		c.collectionRepository.SwapPositionUp(c.collections[c.currPos])
 		c.collections[c.currPos], c.collections[c.currPos-1] = c.collections[c.currPos-1], c.collections[c.currPos]
+		if c.currPos == c.selectedPos {
+			c.selectedPos -= 1
+		} else if c.currPos-1 == c.selectedPos {
+			c.selectedPos += 1
+		}
 		c.currPos -= 1
 		break
 	case DIRECTION_DOWN:
@@ -100,6 +105,11 @@ func (c *CollectionSystem) SwapPosition(dir string) {
 
 		c.collectionRepository.SwapPositionDown(c.collections[c.currPos])
 		c.collections[c.currPos], c.collections[c.currPos+1] = c.collections[c.currPos+1], c.collections[c.currPos]
+		if c.currPos == c.selectedPos {
+			c.selectedPos += 1
+		} else if c.currPos+1 == c.selectedPos {
+			c.selectedPos -= 1
+		}
 		c.currPos += 1
 		break
 	}
@@ -116,11 +126,20 @@ func (c *CollectionSystem) SwapPosition(dir string) {
 // 	return collectionsList
 // }
 
+func (c *CollectionSystem) SelectCurrent() {
+	c.selectedPos = c.currPos
+	c.sendEvent()
+}
+
 func (c *CollectionSystem) ListNames() []string {
 	collectionsList := []string{}
 
-	for _, v := range c.collections {
-		collectionsList = append(collectionsList, v.Name)
+	for i, v := range c.collections {
+		name := v.Name
+		if i == c.selectedPos {
+			name = "*" + name
+		}
+		collectionsList = append(collectionsList, name)
 	}
 
 	return collectionsList

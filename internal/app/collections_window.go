@@ -105,7 +105,7 @@ func (w *CollectionsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-		// w.selectCollection()
+		w.collectionSystem.SelectCurrent()
 		return nil
 	}); err != nil {
 		return err
