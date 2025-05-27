@@ -1,5 +1,7 @@
 CREATE TABLE IF NOT EXISTS requests (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  collection_id INTEGER NOT NULL,
+  position INTEGER NOT NULL,
   name TEXT NOT NULL,
   body TEXT NOT NULL DEFAULT ""
 );
@@ -23,4 +25,15 @@ CREATE TABLE IF NOT EXISTS config (
   key TEXT NOT NULL,
   value TEXT NOT NULL,
   UNIQUE (key)
+);
+
+INSERT INTO
+  config (key, value)
+values
+  ("showResponseHeader", "true");
+
+CREATE TABLE IF NOT EXISTS collections (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  position INTEGER NOT NULL,
+  name TEXT NOT NULL
 );

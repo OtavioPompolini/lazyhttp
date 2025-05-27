@@ -40,7 +40,7 @@ func (ui *UI) Mouse(b bool) {
 
 func (ui *UI) SetGlobalKeybindings() error {
 	for _, win := range ui.windows {
-		err := win.Window.SetKeybindings(ui, win)
+		err := win.Window.SetKeybindings(ui)
 		if err != nil {
 			return err
 		}
@@ -114,12 +114,12 @@ func (ui *UI) renderWindow(window *Window) error {
 	if err != nil {
 		if err == gocui.ErrUnknownView {
 			window.setView(v)
-			window.Window.Setup(ui, window)
+			window.Window.Setup(ui)
 			return nil
 		}
 		return fmt.Errorf("Error rendering window=%s : %w", name, err)
 	}
-	window.Window.Update(*ui, *window)
+	window.Window.Update(*ui)
 	return nil
 }
 

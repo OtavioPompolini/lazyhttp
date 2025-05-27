@@ -7,13 +7,12 @@ import (
 	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
-const (
-	DIRECTION_UP   = "up"
-	DIRECTION_DOWN = "down"
-)
-
-type CollectionObserver interface {
+type UpdateCollectionObserver interface {
 	OnUpdateCollection()
+}
+
+type UpdateRequestObserver interface {
+	OnChangeSelectedCollection()
 }
 
 type CollectionSystem struct {
@@ -21,16 +20,19 @@ type CollectionSystem struct {
 	currPos     int
 	selectedPos int
 
-	observers            []CollectionObserver
+	requests map[int][]*types.Request
+	currReq  int
+
+	observers            []UpdateCollectionObserver
 	collectionRepository database.CollectionRepository
-	// requestRepository    database.RequestRepository
+	requestRepository    database.RequestRepository
 	// responseRepository   database.ResponseRepository
 }
 
 func newCollectionSystem(db database.PersistanceAdapter) *CollectionSystem {
 	return &CollectionSystem{
-		// requestRepository:    db.RequestRepository,
 		// responseRepository:   db.ResponseRepository,
+		requestRepository:    db.RequestRepository,
 		collectionRepository: db.CollectionRepository,
 		collections:          db.CollectionRepository.GetAll(),
 	}
@@ -38,7 +40,8 @@ func newCollectionSystem(db database.PersistanceAdapter) *CollectionSystem {
 
 func (c *CollectionSystem) NewCollection(collName string) {
 	nColl := types.Collection{
-		Name: collName,
+		Name:     collName,
+		Position: len(c.collections),
 	}
 
 	saved := c.collectionRepository.Save(nColl)
@@ -46,7 +49,7 @@ func (c *CollectionSystem) NewCollection(collName string) {
 	c.sendEvent()
 }
 
-func (c *CollectionSystem) Subscribe(co CollectionObserver) {
+func (c *CollectionSystem) Subscribe(co UpdateCollectionObserver) {
 	c.observers = append(c.observers, co)
 }
 
@@ -59,7 +62,7 @@ func (c *CollectionSystem) sendEvent() {
 func (c *CollectionSystem) SelectNext() {
 	if len(c.collections)-1 <= c.currPos {
 		//Alert screen
-		log.Print("Unable to swap collection position")
+		log.Print("Unable to select next collection. Already at the end")
 		return
 	}
 
@@ -70,7 +73,7 @@ func (c *CollectionSystem) SelectNext() {
 func (c *CollectionSystem) SelectPrev() {
 	if c.currPos <= 0 {
 		//Alert screen
-		log.Print("Unable to swap collection position")
+		log.Print("Unable to select previous collection. Already at the beginning")
 		return
 	}
 
@@ -78,41 +81,41 @@ func (c *CollectionSystem) SelectPrev() {
 	c.sendEvent()
 }
 
-func (c *CollectionSystem) SwapPosition(dir string) {
-	switch dir {
-	case DIRECTION_UP:
-		if c.currPos <= 0 {
-			//Alert screen
-			log.Print("Unable to swap collection position")
-			return
-		}
-
-		c.collectionRepository.SwapPositionUp(c.collections[c.currPos])
-		c.collections[c.currPos], c.collections[c.currPos-1] = c.collections[c.currPos-1], c.collections[c.currPos]
-		if c.currPos == c.selectedPos {
-			c.selectedPos -= 1
-		} else if c.currPos-1 == c.selectedPos {
-			c.selectedPos += 1
-		}
-		c.currPos -= 1
-		break
-	case DIRECTION_DOWN:
-		if len(c.collections)-1 <= c.currPos {
-			//Alert screen
-			log.Print("Unable to swap collection position")
-			return
-		}
-
-		c.collectionRepository.SwapPositionDown(c.collections[c.currPos])
-		c.collections[c.currPos], c.collections[c.currPos+1] = c.collections[c.currPos+1], c.collections[c.currPos]
-		if c.currPos == c.selectedPos {
-			c.selectedPos += 1
-		} else if c.currPos+1 == c.selectedPos {
-			c.selectedPos -= 1
-		}
-		c.currPos += 1
-		break
+func (c *CollectionSystem) SwapPositionUp() {
+	if c.currPos <= 1 {
+		//Alert screen
+		log.Print("Unable to swap collection position")
+		return
 	}
+
+	c.collectionRepository.SwapPositions(c.collections[c.currPos], c.collections[c.currPos-1])
+	c.collections[c.currPos], c.collections[c.currPos-1] = c.collections[c.currPos-1], c.collections[c.currPos]
+	if c.currPos == c.selectedPos {
+		c.selectedPos -= 1
+	} else if c.currPos-1 == c.selectedPos {
+		c.selectedPos += 1
+	}
+	c.currPos -= 1
+
+	c.sendEvent()
+}
+
+func (c *CollectionSystem) SwapPositionDown() {
+	if len(c.collections)-1 <= c.currPos || c.currPos == 0 {
+		//Alert screen
+		log.Print("Unable to swap collection position")
+		return
+	}
+
+	c.collectionRepository.SwapPositions(c.collections[c.currPos], c.collections[c.currPos+1])
+	c.collections[c.currPos], c.collections[c.currPos+1] = c.collections[c.currPos+1], c.collections[c.currPos]
+	if c.currPos == c.selectedPos {
+		c.selectedPos += 1
+	} else if c.currPos+1 == c.selectedPos {
+		c.selectedPos -= 1
+	}
+	c.currPos += 1
+
 	c.sendEvent()
 }
 
@@ -132,14 +135,17 @@ func (c *CollectionSystem) SelectCurrent() {
 }
 
 func (c *CollectionSystem) ListNames() []string {
+	if len(c.collections) <= 0 {
+		return []string{}
+	}
 	collectionsList := []string{}
 
+	collectionsList = append(collectionsList, "*"+c.collections[c.selectedPos].Name)
+
 	for i, v := range c.collections {
-		name := v.Name
-		if i == c.selectedPos {
-			name = "*" + name
+		if i != c.selectedPos {
+			collectionsList = append(collectionsList, v.Name)
 		}
-		collectionsList = append(collectionsList, name)
 	}
 
 	return collectionsList

@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/adrg/xdg"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/OtavioPompolini/project-postman/internal/types"
@@ -30,8 +33,7 @@ type RequestRepository interface {
 type CollectionRepository interface {
 	GetAll() []*types.Collection
 	Save(c types.Collection) *types.Collection
-	SwapPositionDown(c *types.Collection)
-	SwapPositionUp(c *types.Collection)
+	SwapPositions(a, b *types.Collection)
 	// Update(cName string) *types.Collection
 }
 
@@ -63,6 +65,12 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 	if err != nil {
 		return PersistanceAdapter{}, err
 	}
+
+	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://internal/database/migrations",
+		"sqlite3", driver)
+	m.Up()
 
 	return PersistanceAdapter{
 		RequestRepository:    newRequestRepository(db),

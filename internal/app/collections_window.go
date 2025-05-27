@@ -25,18 +25,17 @@ func NewCollectionWindow(GUI *ui.UI, state *state.State) *ui.Window {
 		collectionSystem: state.CollectionSystem,
 		name:             "CollectionsWindow",
 		windowPosition: ui.NewWindowPosition(
-			0, 0, 20, 40,
+			0, 0, 20, 20,
 			ui.RELATIVE, ui.RELATIVE, ui.RELATIVE, ui.RELATIVE,
 		),
 	}
-
-	state.CollectionSystem.Subscribe(collectionsWindow)
 
 	windowRef := ui.NewWindow(
 		collectionsWindow,
 		true,
 	)
 
+	state.CollectionSystem.Subscribe(collectionsWindow)
 	collectionsWindow.thisWindow = windowRef
 	return windowRef
 }
@@ -45,21 +44,23 @@ func (w *CollectionsWindow) Name() string {
 	return w.name
 }
 
-func (w *CollectionsWindow) Setup(ui *ui.UI, v *ui.Window) {
-	ui.SelectWindow(v)
-	v.SetTitle("Collections")
-	v.SetSelectedBgColor(gocui.ColorRed)
-	v.SetHightlight(true)
+func (w *CollectionsWindow) Setup(ui *ui.UI) {
+	ui.SelectWindow(w.thisWindow)
+	w.thisWindow.SetTitle("Collections")
+	w.thisWindow.SetSelectedBgColor(gocui.ColorRed)
+	w.thisWindow.SetHightlight(true)
+
+	w.OnUpdateCollection()
 }
 
-func (w *CollectionsWindow) Update(ui ui.UI, v ui.Window) {
+func (w *CollectionsWindow) Update(ui ui.UI) {
 }
 
 func (w *CollectionsWindow) Size() ui.WindowPosition {
 	return w.windowPosition
 }
 
-func (w *CollectionsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
+func (w *CollectionsWindow) SetKeybindings(ui *ui.UI) error {
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
 		w.collectionSystem.SelectNext()
 		return nil
@@ -75,14 +76,14 @@ func (w *CollectionsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'J', func(g *gocui.Gui, v *gocui.View) error {
-		w.collectionSystem.SwapPosition(state.DIRECTION_DOWN)
+		w.collectionSystem.SwapPositionDown()
 		return nil
 	}); err != nil {
 		return err
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'K', func(g *gocui.Gui, v *gocui.View) error {
-		w.collectionSystem.SwapPosition(state.DIRECTION_UP)
+		w.collectionSystem.SwapPositionUp()
 		return nil
 	}); err != nil {
 		return err
@@ -97,12 +98,12 @@ func (w *CollectionsWindow) SetKeybindings(ui *ui.UI, win *ui.Window) error {
 		return err
 	}
 
-	if err := ui.NewKeyBinding(w.Name(), '2', func(g *gocui.Gui, v *gocui.View) error {
-		ui.SelectWindowByName("RequestsWindow")
-		return nil
-	}); err != nil {
-		return err
-	}
+	// if err := ui.NewKeyBinding(w.Name(), '2', func(g *gocui.Gui, v *gocui.View) error {
+	// 	ui.SelectWindowByName("RequestsWindow")
+	// 	return nil
+	// }); err != nil {
+	// 	return err
+	// }
 
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
 		w.collectionSystem.SelectCurrent()
@@ -128,46 +129,4 @@ func (cw *CollectionsWindow) OnUpdateCollection() {
 	cw.thisWindow.ClearWindow()
 	cw.thisWindow.WriteLines(cw.collectionSystem.ListNames())
 	cw.thisWindow.SetCursor(0, cw.collectionSystem.CurrentPos())
-}
-
-// =============== ACTIONS ======================
-
-func (cw *CollectionsWindow) navigateDown(ui *ui.UI) {
-	cw.collectionSystem.SelectNext()
-
-	// thisWindow, _ := ui.GetWindow(rw.name)
-	//
-	// ok := rw.stateService.SelectNext()
-	// if !ok {
-	// 	return
-	// }
-	//
-	// rw.ReloadContent(ui, thisWindow)
-	// win, _ := ui.GetWindow("ResponseWindow")
-	// win.Window.ReloadContent(ui, win)
-}
-
-func (rw *CollectionsWindow) navigateUp(ui *ui.UI) {
-	// thisWindow, _ := ui.GetWindow(rw.name)
-	//
-	// ok := rw.stateService.SelectPrev()
-	// if !ok {
-	// 	return
-	// }
-	//
-	// rw.ReloadContent(ui, thisWindow)
-	// win, _ := ui.GetWindow("ResponseWindow")
-	// win.Window.ReloadContent(ui, win)
-}
-
-func (rw *CollectionsWindow) deleteRequest(ui *ui.UI) {
-	// thisWindow, _ := ui.GetWindow(rw.name)
-	//
-	// rw.stateService.DeleteSelectedRequest()
-	// rw.ReloadContent(ui, thisWindow)
-	//
-	// win, _ := ui.GetWindow("ResponseWindow")
-	// win.Window.ReloadContent(ui, win)
-	// win, _ = ui.GetWindow("RequestDetailsWindow")
-	// win.Window.ReloadContent(ui, win)
 }

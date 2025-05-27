@@ -46,15 +46,16 @@ func NewWindowPosition(
 	}
 }
 
-// Size and name should be a Window attribute not a IWindow
 type IWindow interface {
-	Setup(ui *UI, w *Window)
-	Update(ui UI, w Window)
-	OnSelect(ui UI, w Window) error
-	OnDeselect(ui UI, w Window) error
+	Setup(ui *UI)
+	Update(ui UI)
+	SetKeybindings(ui *UI) error
 	Size() WindowPosition
 	Name() string
-	SetKeybindings(ui *UI, w *Window) error
+
+	//Still dont know if those methods are required in the interface
+	OnSelect(ui UI, w Window) error
+	OnDeselect(ui UI, w Window) error
 }
 
 type Window struct {

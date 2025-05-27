@@ -31,6 +31,7 @@ Migrating from v0.1 will not carry database through v0.2
     - Not copying to clipboard on linux
 
 ## Roadmap some day
+    - Keybinds configuration file
     - Response headers not always display in same order
     - UI improvements based on OS window size (Windows rescale)
     - DB Migrations

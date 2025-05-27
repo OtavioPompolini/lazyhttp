@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/OtavioPompolini/project-postman/internal/types"
 )
@@ -17,51 +18,51 @@ func newCollectionRepository(db *sql.DB) SqliteCollectionRepository {
 }
 
 func (cr SqliteCollectionRepository) GetAll() []*types.Collection {
-	return []*types.Collection{}
+	collections := []*types.Collection{}
+
+	row, err := cr.db.Query(`
+		SELECT * FROM collections
+		ORDER BY position ASC
+		`)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	defer row.Close()
+	for row.Next() {
+		collection := &types.Collection{}
+
+		err := row.Scan(&collection.Id, &collection.Position, &collection.Name)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		collections = append(collections, collection)
+	}
+
+	return collections
 }
 
 func (cr SqliteCollectionRepository) Save(c types.Collection) *types.Collection {
+
+	res, err := cr.db.Exec("INSERT INTO collections(name, position) values (?, ?)", c.Name, c.Position)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		log.Panic(err)
+	}
+
 	return &types.Collection{
-		Name: c.Name,
+		Id:       id,
+		Name:     c.Name,
+		Position: c.Position,
 	}
 }
 
-func (cr SqliteCollectionRepository) SwapPositionUp(c *types.Collection) {
-	return
+func (cr SqliteCollectionRepository) SwapPositions(a, b *types.Collection) {
+	cr.db.Exec("UPDATE collections set position=? WHERE id=?", b.Position, a.Id)
+	cr.db.Exec("UPDATE collections set position=? WHERE id=?", a.Position, b.Id)
 }
-
-func (cr SqliteCollectionRepository) SwapPositionDown(c *types.Collection) {
-	return
-}
-
-// func (cr SqliteConfigRepository) GetConfig() map[string]string {
-// 	row, err := cr.db.Query(`
-// 		SELECT * FROM configs
-// 	`)
-// 	if err != nil {
-// 		log.Panic("Failed to initialize configs")
-// 	}
-//
-// 	config := map[string]string{}
-//
-// 	defer row.Close()
-// 	for row.Next() {
-// 		k, v := "", ""
-//
-// 		err := row.Scan(&k, &v)
-// 		if err != nil {
-// 			log.Panic(err)
-// 		}
-//
-// 		config[k] = v
-// 	}
-//
-// 	return config
-// }
-//
-// func (cr SqliteConfigRepository) Save(key, value string) {
-// 	_, err := cr.db.Exec("UPDATE SET ?=?", key, value)
-// 	if err != nil {
-// 		log.Printf("Error while updating config key=%s value=%s", key, value)
-// 	}
-// }

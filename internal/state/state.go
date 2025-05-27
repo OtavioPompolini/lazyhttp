@@ -26,22 +26,32 @@ import (
 // }
 
 type State struct {
-	CollectionSystem *CollectionSystem
-	AppConfig        *AppConfig
-	alertMessage     string
+	CollectionSystem   *CollectionSystem
+	AppConfig          *AppConfig
+	NotificationSystem *NotificationSystem
+	// WindowsStateManager *WindowsStateManager
 
 	// I dont like the name variables, think another name
 	// variables    map[string]types.Variable
-	// app configs here
+}
 
+type NotificationSystem struct {
+	message string
+
+	alertObservers []AlertNotificationObserver
+}
+
+type AlertNotificationObserver interface {
+	SendAlertNotification(message string)
 }
 
 func NewState(db database.PersistanceAdapter) *State {
-	reqs := db.RequestRepository.GetRequests()
-	loadResponses(db, reqs)
+	// reqs := db.RequestRepository.GetRequests()
+	// loadResponses(db, reqs)
 
 	return &State{
-		CollectionSystem: newCollectionSystem(db),
+		CollectionSystem:   newCollectionSystem(db),
+		NotificationSystem: newNotificationSystem(),
 		// AppConfig:        NewAppConfig(db),
 		// variables:  map[string]types.Variable{},
 	}
@@ -57,10 +67,16 @@ func loadResponses(db database.PersistanceAdapter, reqs []*types.Request) {
 	}
 }
 
-func (ss *State) AlertMessage() string {
-	return ss.alertMessage
+func newNotificationSystem() *NotificationSystem {
+	return &NotificationSystem{}
 }
 
-func (ss *State) SetAlertMessage(am string) {
-	ss.alertMessage = am
+func (ns *NotificationSystem) createAlert(mes string) {
+	for _, v := range ns.alertObservers {
+		v.SendAlertNotification(mes)
+	}
+}
+
+func (ns *NotificationSystem) subscribeAlert(obs AlertNotificationObserver) {
+	ns.alertObservers = append(ns.alertObservers, obs)
 }
