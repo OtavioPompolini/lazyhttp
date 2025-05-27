@@ -12,18 +12,20 @@ type UpdateCollectionObserver interface {
 }
 
 type UpdateRequestObserver interface {
-	OnChangeSelectedCollection()
+	OnUpdateRequest()
 }
 
 type CollectionSystem struct {
 	collections []*types.Collection
-	currPos     int
+	currColl    int
 	selectedPos int
 
 	requests map[int][]*types.Request
 	currReq  int
 
-	observers            []UpdateCollectionObserver
+	updateCollectionObservers []UpdateCollectionObserver
+	updateRequestObservers    []UpdateRequestObserver
+
 	collectionRepository database.CollectionRepository
 	requestRepository    database.RequestRepository
 	// responseRepository   database.ResponseRepository
@@ -35,6 +37,7 @@ func newCollectionSystem(db database.PersistanceAdapter) *CollectionSystem {
 		requestRepository:    db.RequestRepository,
 		collectionRepository: db.CollectionRepository,
 		collections:          db.CollectionRepository.GetAll(),
+		requests:             make(map[int][]*types.Request),
 	}
 }
 
@@ -46,77 +49,91 @@ func (c *CollectionSystem) NewCollection(collName string) {
 
 	saved := c.collectionRepository.Save(nColl)
 	c.collections = append(c.collections, saved)
-	c.sendEvent()
+	c.sendUpdateCollectionEvent()
 }
 
-func (c *CollectionSystem) Subscribe(co UpdateCollectionObserver) {
-	c.observers = append(c.observers, co)
+func (c *CollectionSystem) SubscribeUpdateCollectionEvent(co UpdateCollectionObserver) {
+	c.updateCollectionObservers = append(c.updateCollectionObservers, co)
+	co.OnUpdateCollection()
 }
 
-func (c *CollectionSystem) sendEvent() {
-	for _, ob := range c.observers {
+func (c *CollectionSystem) sendUpdateCollectionEvent() {
+	for _, ob := range c.updateCollectionObservers {
 		ob.OnUpdateCollection()
 	}
 }
 
 func (c *CollectionSystem) SelectNext() {
-	if len(c.collections)-1 <= c.currPos {
+	if len(c.collections)-1 <= c.currColl {
 		//Alert screen
 		log.Print("Unable to select next collection. Already at the end")
 		return
 	}
 
-	c.currPos += 1
-	c.sendEvent()
+	c.currColl += 1
+	c.sendUpdateCollectionEvent()
 }
 
 func (c *CollectionSystem) SelectPrev() {
-	if c.currPos <= 0 {
+	if c.currColl <= 0 {
 		//Alert screen
 		log.Print("Unable to select previous collection. Already at the beginning")
 		return
 	}
 
-	c.currPos -= 1
-	c.sendEvent()
+	c.currColl -= 1
+	c.sendUpdateCollectionEvent()
 }
 
+// SWAP POSITIONS NOT WORKING CORRECTLY, I DONT CARE RN
 func (c *CollectionSystem) SwapPositionUp() {
-	if c.currPos <= 1 {
+	if c.currColl <= 1 {
 		//Alert screen
+		// Not here, this should return error and then whos calling this should
+		// call alert message
 		log.Print("Unable to swap collection position")
 		return
 	}
 
-	c.collectionRepository.SwapPositions(c.collections[c.currPos], c.collections[c.currPos-1])
-	c.collections[c.currPos], c.collections[c.currPos-1] = c.collections[c.currPos-1], c.collections[c.currPos]
-	if c.currPos == c.selectedPos {
+	c.collections[c.currColl].Position, c.collections[c.currColl-1].Position = c.collections[c.currColl-1].Position, c.collections[c.currColl].Position
+	c.collections[c.currColl], c.collections[c.currColl-1] = c.collections[c.currColl-1], c.collections[c.currColl]
+	c.collectionRepository.UpdatePosition(c.collections[c.currColl])
+	c.collectionRepository.UpdatePosition(c.collections[c.currColl-1])
+
+	if c.currColl == c.selectedPos {
 		c.selectedPos -= 1
-	} else if c.currPos-1 == c.selectedPos {
+	} else if c.currColl-1 == c.selectedPos {
 		c.selectedPos += 1
 	}
-	c.currPos -= 1
+	c.currColl -= 1
 
-	c.sendEvent()
+	c.sendUpdateCollectionEvent()
 }
 
 func (c *CollectionSystem) SwapPositionDown() {
-	if len(c.collections)-1 <= c.currPos || c.currPos == 0 {
+	if len(c.collections)-1 <= c.currColl || c.currColl == 0 {
 		//Alert screen
 		log.Print("Unable to swap collection position")
 		return
 	}
 
-	c.collectionRepository.SwapPositions(c.collections[c.currPos], c.collections[c.currPos+1])
-	c.collections[c.currPos], c.collections[c.currPos+1] = c.collections[c.currPos+1], c.collections[c.currPos]
-	if c.currPos == c.selectedPos {
+	c.collections[c.currColl].Position, c.collections[c.currColl+1].Position = c.collections[c.currColl+1].Position, c.collections[c.currColl].Position
+	c.collections[c.currColl], c.collections[c.currColl+1] = c.collections[c.currColl+1], c.collections[c.currColl]
+	c.collectionRepository.UpdatePosition(c.collections[c.currColl])
+	c.collectionRepository.UpdatePosition(c.collections[c.currColl+1])
+
+	if c.currColl == c.selectedPos {
 		c.selectedPos += 1
-	} else if c.currPos+1 == c.selectedPos {
+	} else if c.currColl+1 == c.selectedPos {
 		c.selectedPos -= 1
 	}
-	c.currPos += 1
+	c.currColl += 1
 
-	c.sendEvent()
+	c.sendUpdateCollectionEvent()
+}
+
+func (c *CollectionSystem) CurrentPos() int {
+	return c.currColl
 }
 
 // func (c *CollectionSystem) List() []types.Collection {
@@ -130,8 +147,8 @@ func (c *CollectionSystem) SwapPositionDown() {
 // }
 
 func (c *CollectionSystem) SelectCurrent() {
-	c.selectedPos = c.currPos
-	c.sendEvent()
+	c.selectedPos = c.currColl
+	c.sendUpdateCollectionEvent()
 }
 
 func (c *CollectionSystem) ListNames() []string {
@@ -151,8 +168,22 @@ func (c *CollectionSystem) ListNames() []string {
 	return collectionsList
 }
 
-func (c *CollectionSystem) CurrentPos() int {
-	return c.currPos
+func (c *CollectionSystem) ListRequests() []string {
+	if len(c.requests[c.currColl]) <= 0 {
+		return []string{}
+	}
+
+	requestsList := []string{}
+
+	for _, v := range c.requests[c.currColl] {
+		requestsList = append(requestsList, v.Name)
+	}
+
+	return requestsList
+}
+
+func (c *CollectionSystem) CurrentRequestPosition() int {
+	return c.currReq
 }
 
 // func (c *CollectionSystem) DeleteSelectedRequest() {
@@ -182,57 +213,46 @@ func (c *CollectionSystem) CurrentPos() int {
 // 	c.requestRepository.DeleteRequest(selected.Id)
 // }
 
-// func (c *CollectionSystem) CreateRequest(reqName string) *types.Request {
-// 	saved := c.requestRepository.CreateRequest(reqName)
-//
-// 	if rss.state.collection.tail != nil {
-// 		rss.state.collection.tail.Next = saved
-// 	} else {
-// 		rss.state.collection.head = saved
-// 	}
-// 	saved.Prev = rss.state.collection.tail
-// 	rss.state.collection.selected = saved
-// 	rss.state.collection.tail = saved
-//
-// 	return saved
-// }
-//
-// func (rss RequestStateService) UpdateRequest(r *types.Request) {
-// 	rss.persistance.RequestRepository.UpdateRequest(r)
-// 	rss.state.collection.selected.Body = r.Body
-// }
-//
-// func (rss RequestStateService) SelectNext() bool {
-// 	if rss.state.collection.selected == nil {
-// 		return false
-// 	}
-//
-// 	next := rss.state.collection.selected.Next
-// 	if next == nil {
-// 		return false
-// 	}
-//
-// 	rss.state.collection.selected = next
-// 	return true
-// }
+func (c *CollectionSystem) SubscribeUpdateRequestEvent(obs UpdateRequestObserver) {
+	c.updateRequestObservers = append(c.updateRequestObservers, obs)
+	obs.OnUpdateRequest()
+}
 
-// func (rss RequestStateService) SelectPrev() bool {
-// 	if rss.state.collection.selected == nil {
-// 		return false
-// 	}
-// 	prev := rss.state.collection.selected.Prev
-//
-// 	if prev == nil {
-// 		return false
-// 	}
-//
-// 	rss.state.collection.selected = prev
-// 	return true
-// }
+func (c *CollectionSystem) CreateRequest(reqName string) {
+	saved := c.requestRepository.CreateRequest(reqName, c.collections[c.currColl].Id)
+	c.requests[c.selectedPos] = append(c.requests[c.selectedPos], saved)
+	c.currReq = len(c.requests[c.selectedPos])
+	c.sendUpdateRequestEvent()
+}
 
-// func (c *CollectionSystem) SelectedRequest() *types.Request {
-// 	return c.currentRequest
-// }
+func (c *CollectionSystem) sendUpdateRequestEvent() {
+	for _, v := range c.updateRequestObservers {
+		v.OnUpdateRequest()
+	}
+}
+
+func (c *CollectionSystem) SelectNextRequest() {
+	currRequests, ok := c.requests[c.currColl]
+	if !ok {
+		return
+	}
+
+	c.currReq = min(len(currRequests)-1, c.currReq+1)
+}
+
+func (c *CollectionSystem) SelectPrevRequest() {
+	_, ok := c.requests[c.currColl]
+	if !ok {
+		return
+	}
+
+	c.currReq = max(0, c.currReq-1)
+}
+
+func (c *CollectionSystem) UpdateRequest(r *types.Request) {
+	c.requests[c.currColl][c.currReq].Body = r.Body
+	c.requestRepository.UpdateRequest(r)
+}
 
 // func (c *CollectionSystem) IsEmpty() bool {
 // 	return rss.state.collection.head == nil

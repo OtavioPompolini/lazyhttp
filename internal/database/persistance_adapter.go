@@ -25,7 +25,7 @@ type PersistanceAdapter struct {
 
 type RequestRepository interface {
 	GetRequests() []*types.Request
-	CreateRequest(name string) *types.Request
+	CreateRequest(name string, collectionId int64) *types.Request
 	UpdateRequest(r *types.Request)
 	DeleteRequest(id int64)
 }
@@ -33,8 +33,7 @@ type RequestRepository interface {
 type CollectionRepository interface {
 	GetAll() []*types.Collection
 	Save(c types.Collection) *types.Collection
-	SwapPositions(a, b *types.Collection)
-	// Update(cName string) *types.Collection
+	UpdatePosition(a *types.Collection)
 }
 
 type ResponseRepository interface {

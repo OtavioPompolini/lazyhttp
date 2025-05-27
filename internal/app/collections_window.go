@@ -35,7 +35,6 @@ func NewCollectionWindow(GUI *ui.UI, state *state.State) *ui.Window {
 		true,
 	)
 
-	state.CollectionSystem.Subscribe(collectionsWindow)
 	collectionsWindow.thisWindow = windowRef
 	return windowRef
 }
@@ -50,7 +49,7 @@ func (w *CollectionsWindow) Setup(ui *ui.UI) {
 	w.thisWindow.SetSelectedBgColor(gocui.ColorRed)
 	w.thisWindow.SetHightlight(true)
 
-	w.OnUpdateCollection()
+	w.collectionSystem.SubscribeUpdateCollectionEvent(w)
 }
 
 func (w *CollectionsWindow) Update(ui ui.UI) {
@@ -98,12 +97,12 @@ func (w *CollectionsWindow) SetKeybindings(ui *ui.UI) error {
 		return err
 	}
 
-	// if err := ui.NewKeyBinding(w.Name(), '2', func(g *gocui.Gui, v *gocui.View) error {
-	// 	ui.SelectWindowByName("RequestsWindow")
-	// 	return nil
-	// }); err != nil {
-	// 	return err
-	// }
+	if err := ui.NewKeyBinding(w.Name(), '[', func(g *gocui.Gui, v *gocui.View) error {
+		ui.SelectWindowByName("RequestsWindow")
+		return nil
+	}); err != nil {
+		return err
+	}
 
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
 		w.collectionSystem.SelectCurrent()

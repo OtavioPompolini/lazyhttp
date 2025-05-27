@@ -29,6 +29,7 @@ Migrating from v0.1 will not carry database through v0.2
 
 ## Known issues
     - Not copying to clipboard on linux
+    - Collections swaping position doesnt work correctly. XD
 
 ## Roadmap some day
     - Keybinds configuration file

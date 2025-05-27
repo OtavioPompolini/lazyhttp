@@ -62,7 +62,6 @@ func (cr SqliteCollectionRepository) Save(c types.Collection) *types.Collection 
 	}
 }
 
-func (cr SqliteCollectionRepository) SwapPositions(a, b *types.Collection) {
-	cr.db.Exec("UPDATE collections set position=? WHERE id=?", b.Position, a.Id)
-	cr.db.Exec("UPDATE collections set position=? WHERE id=?", a.Position, b.Id)
+func (cr SqliteCollectionRepository) UpdatePosition(c *types.Collection) {
+	cr.db.Exec("UPDATE collections set position=? WHERE id=?", c.Position, c.Id)
 }

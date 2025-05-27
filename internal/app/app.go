@@ -34,10 +34,10 @@ func NewApp() (*App, error) {
 	app.GUI.StartUI()
 	app.GUI.AddWindow(NewDebuggerWindow(app.state))
 	app.GUI.AddWindow(NewCollectionWindow(userInterface, app.state))
+	app.GUI.AddWindow(NewRequestsWindow(userInterface, app.state))
 	// app.GUI.AddWindow(NewAlertWindow(userInterface, *stateService))
 	// app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, *stateService))
 	// app.GUI.AddWindow(NewCreateRequestWindow(userInterface, stateService))
-	// app.GUI.AddWindow(NewRequestsWindow(userInterface, *stateService))
 	// app.GUI.AddWindow(NewResponseWindow(userInterface, *stateService))
 	// app.GUI.AddWindow(NewVariablesWindow(userInterface, *stateService))
 
