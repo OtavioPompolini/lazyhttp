@@ -12,9 +12,6 @@ type Request struct {
 
 	// Dont like this here too
 	ResponseHistory []*Response
-
-	Next *Request
-	Prev *Request
 }
 
 type Response struct {
