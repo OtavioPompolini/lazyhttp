@@ -19,14 +19,10 @@ type CollectionSystem struct {
 	updateCollectionObservers []UpdateCollectionObserver
 
 	collectionRepository database.CollectionRepository
-	// requestRepository    database.RequestRepository
-	// responseRepository   database.ResponseRepository
 }
 
 func newCollectionSystem(db database.PersistanceAdapter) *CollectionSystem {
 	return &CollectionSystem{
-		// responseRepository:   db.ResponseRepository,
-		// requestRepository:    db.RequestRepository,
 		collectionRepository: db.CollectionRepository,
 		collections:          db.CollectionRepository.GetAll(),
 	}

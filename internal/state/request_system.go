@@ -36,8 +36,8 @@ func (rs *RequestSystem) sendUpdateRequestEvent() {
 	}
 }
 
-func (rs *RequestSystem) CreateRequest(reqName string) {
-	saved := rs.requestRepository.CreateRequest(reqName, int64(rs.selectedCollectionId))
+func (rs *RequestSystem) Create(reqName string) {
+	saved := rs.requestRepository.Create(reqName, int64(rs.selectedCollectionId))
 	currRequests, ok := rs.requests[rs.selectedCollectionId]
 	if !ok {
 		rs.requests[rs.selectedCollectionId] = []*types.Request{saved}

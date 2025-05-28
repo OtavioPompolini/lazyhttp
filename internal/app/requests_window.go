@@ -2,6 +2,8 @@ package app
 
 import (
 	"log"
+	"math/rand/v2"
+	"strconv"
 
 	"github.com/awesome-gocui/gocui"
 
@@ -14,14 +16,14 @@ type RequestsWindow struct {
 	windowPosition ui.WindowPosition
 
 	// requestSystem *state.RequestSystem
-	collectionSystem *state.CollectionSystem
-	thisWindow       *ui.Window
+	requestSystem *state.RequestSystem
+	thisWindow    *ui.Window
 }
 
 func NewRequestsWindow(GUI *ui.UI, state *state.State) *ui.Window {
 	requestsWindow := &RequestsWindow{
-		collectionSystem: state.CollectionSystem,
-		name:             "RequestsWindow",
+		requestSystem: state.RequestSystem,
+		name:          "RequestsWindow",
 		windowPosition: ui.NewWindowPosition(
 			0, 20, 20, 40,
 			ui.RELATIVE, ui.RELATIVE, ui.RELATIVE, ui.RELATIVE,
@@ -41,9 +43,9 @@ func NewRequestsWindow(GUI *ui.UI, state *state.State) *ui.Window {
 func (w *RequestsWindow) OnUpdateRequest() {
 	w.thisWindow.ClearWindow()
 
-	w.thisWindow.WriteLines(w.collectionSystem.ListRequests())
+	w.thisWindow.WriteLines(w.requestSystem.ListNames())
 
-	err := w.thisWindow.SetCursor(0, w.collectionSystem.CurrentRequestPosition())
+	err := w.thisWindow.SetCursor(0, w.requestSystem.CurrentPos())
 	if err != nil {
 		log.Panic(err)
 	}
@@ -59,7 +61,7 @@ func (w *RequestsWindow) Setup(ui *ui.UI) {
 	w.thisWindow.SetSelectedBgColor(gocui.ColorRed)
 	w.thisWindow.SetHightlight(true)
 
-	w.collectionSystem.SubscribeUpdateRequestEvent(w)
+	w.requestSystem.SubscribeUpdateRequestEvent(w)
 }
 
 func (w *RequestsWindow) Update(ui ui.UI) {
@@ -71,7 +73,7 @@ func (w *RequestsWindow) Size() ui.WindowPosition {
 
 func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
-		w.collectionSystem.SelectNextRequest()
+		w.requestSystem.SelectNext()
 		return nil
 	}); err != nil {
 		return err
@@ -99,8 +101,9 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'n', func(g *gocui.Gui, v *gocui.View) error {
-		win, _ := ui.GetWindow("CreateRequestWindow")
-		win.OpenWindow()
+		w.requestSystem.Create("pudim" + strconv.FormatInt(int64(rand.IntN(100)), 10))
+		// win, _ := ui.GetWindow("CreateRequestWindow")
+		// win.OpenWindow()
 		return nil
 	}); err != nil {
 		return err

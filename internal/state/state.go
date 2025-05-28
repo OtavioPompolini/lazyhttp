@@ -27,6 +27,7 @@ import (
 
 type State struct {
 	CollectionSystem   *CollectionSystem
+	RequestSystem      *RequestSystem
 	AppConfig          *AppConfig
 	NotificationSystem *NotificationSystem
 	// WindowsStateManager *WindowsStateManager
@@ -50,6 +51,7 @@ func NewState(db database.PersistanceAdapter) *State {
 	// loadResponses(db, reqs)
 
 	return &State{
+		RequestSystem:      newRequestSystem(db),
 		CollectionSystem:   newCollectionSystem(db),
 		NotificationSystem: newNotificationSystem(),
 		// AppConfig:        NewAppConfig(db),

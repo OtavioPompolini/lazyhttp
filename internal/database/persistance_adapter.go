@@ -25,7 +25,7 @@ type PersistanceAdapter struct {
 
 type RequestRepository interface {
 	GetRequests() []*types.Request
-	CreateRequest(name string, collectionId int64) *types.Request
+	Create(name string, collectionId int64) *types.Request
 	UpdateRequest(r *types.Request)
 	DeleteRequest(id int64)
 }

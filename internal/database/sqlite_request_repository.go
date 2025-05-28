@@ -44,7 +44,7 @@ func (a SqliteRequestRepository) GetRequests() []*types.Request {
 	return requests
 }
 
-func (a SqliteRequestRepository) CreateRequest(name string, collectionId int64) *types.Request {
+func (a SqliteRequestRepository) Create(name string, collectionId int64) *types.Request {
 	res, err := a.db.Exec("INSERT INTO requests(name, collection_id) values (?, ?)", name, collectionId)
 	if err != nil {
 		log.Panic(err)
