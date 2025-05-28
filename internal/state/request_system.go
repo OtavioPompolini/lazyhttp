@@ -10,9 +10,8 @@ type UpdateRequestObserver interface {
 }
 
 type RequestSystem struct {
-	requests             map[int][]*types.Request
-	pos                  int
-	selectedCollectionId int
+	requests map[int64][]*types.Request
+	pos      int
 
 	updateRequestObservers []UpdateRequestObserver
 
@@ -20,9 +19,30 @@ type RequestSystem struct {
 }
 
 func newRequestSystem(db database.PersistanceAdapter) *RequestSystem {
-	return &RequestSystem{
+	requestSystem := &RequestSystem{
+		requests:          make(map[int64][]*types.Request),
 		requestRepository: db.RequestRepository,
 	}
+
+	requestSystem.requests = loadRequests(db)
+
+	return requestSystem
+}
+
+func loadRequests(db database.PersistanceAdapter) map[int64][]*types.Request {
+	requestsMap := make(map[int64][]*types.Request)
+	requestsList := db.RequestRepository.GetRequests()
+
+	for _, v := range requestsList {
+		_, ok := requestsMap[v.CollectionId]
+		if !ok {
+			requestsMap[v.CollectionId] = []*types.Request{v}
+		} else {
+			requestsMap[v.CollectionId] = append(requestsMap[v.CollectionId], v)
+		}
+	}
+
+	return requestsMap
 }
 
 func (rs *RequestSystem) SubscribeUpdateRequestEvent(obs UpdateRequestObserver) {
@@ -37,31 +57,31 @@ func (rs *RequestSystem) sendUpdateRequestEvent() {
 }
 
 func (rs *RequestSystem) Create(reqName string) {
-	saved := rs.requestRepository.Create(reqName, int64(rs.selectedCollectionId))
-	currRequests, ok := rs.requests[rs.selectedCollectionId]
+	saved := rs.requestRepository.Create(reqName, *rs.selectedCollectionId)
+	currRequests, ok := rs.requests[*rs.selectedCollectionId]
+
 	if !ok {
-		rs.requests[rs.selectedCollectionId] = []*types.Request{saved}
-		return
+		rs.requests[*rs.selectedCollectionId] = []*types.Request{saved}
+	} else {
+		rs.requests[*rs.selectedCollectionId] = append(rs.requests[*rs.selectedCollectionId], saved)
 	}
 
-	currRequests = append(currRequests, saved)
-	rs.pos = len(currRequests)
+	rs.pos = len(currRequests) - 1
 	rs.sendUpdateRequestEvent()
 }
 
 func (rs *RequestSystem) ListNames() []string {
-	return []string{}
-	// if len(rs.requests[rs.currColl]) <= 0 {
-	// 	return []string{}
-	// }
-	//
-	// requestsList := []string{}
-	//
-	// for _, v := range rs.requests[rs.currColl] {
-	// 	requestsList = append(requestsList, v.Name)
-	// }
-	//
-	// return requestsList
+	if len(rs.requests[*rs.selectedCollectionId]) <= 0 {
+		return []string{}
+	}
+
+	requestsList := []string{}
+
+	for _, v := range rs.requests[*rs.selectedCollectionId] {
+		requestsList = append(requestsList, v.Name)
+	}
+
+	return requestsList
 }
 
 func (rs *RequestSystem) CurrentPos() int {
@@ -96,7 +116,7 @@ func (rs *RequestSystem) CurrentPos() int {
 // }
 
 func (rs *RequestSystem) SelectNext() {
-	currRequests, ok := rs.requests[rs.selectedCollectionId]
+	currRequests, ok := rs.requests[*rs.selectedCollectionId]
 	if !ok {
 		return
 	}
@@ -105,7 +125,7 @@ func (rs *RequestSystem) SelectNext() {
 }
 
 func (rs *RequestSystem) SelectPrev() {
-	_, ok := rs.requests[rs.selectedCollectionId]
+	_, ok := rs.requests[*rs.selectedCollectionId]
 	if !ok {
 		return
 	}

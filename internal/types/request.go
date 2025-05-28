@@ -8,7 +8,7 @@ type Request struct {
 	Name string
 	Body string
 
-	collectionId int64
+	CollectionId int64
 
 	// Dont like this here too
 	ResponseHistory []*Response

@@ -15,6 +15,7 @@ type CollectionSystem struct {
 	collections []*types.Collection
 	currPos     int
 	selPos      int
+	selId       int64
 
 	updateCollectionObservers []UpdateCollectionObserver
 
@@ -22,10 +23,18 @@ type CollectionSystem struct {
 }
 
 func newCollectionSystem(db database.PersistanceAdapter) *CollectionSystem {
-	return &CollectionSystem{
+	collections := db.CollectionRepository.GetAll()
+
+	collectionSystem := &CollectionSystem{
 		collectionRepository: db.CollectionRepository,
-		collections:          db.CollectionRepository.GetAll(),
+		collections:          collections,
 	}
+
+	if len(collections) > 0 {
+		collectionSystem.selId = collections[0].Id
+	}
+
+	return collectionSystem
 }
 
 func (c *CollectionSystem) NewCollection(collName string) {
@@ -135,6 +144,8 @@ func (c *CollectionSystem) CurrentPos() int {
 
 func (c *CollectionSystem) SelectCurrent() {
 	c.selPos = c.currPos
+	c.selId = c.collections[c.currPos].Id
+	c.currPos = 0
 	c.sendUpdateCollectionEvent()
 }
 

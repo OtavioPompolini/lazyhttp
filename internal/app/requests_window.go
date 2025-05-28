@@ -15,15 +15,16 @@ type RequestsWindow struct {
 	name           string
 	windowPosition ui.WindowPosition
 
-	// requestSystem *state.RequestSystem
-	requestSystem *state.RequestSystem
-	thisWindow    *ui.Window
+	requestSystem    *state.RequestSystem
+	collectionSystem *state.CollectionSystem
+	thisWindow       *ui.Window
 }
 
 func NewRequestsWindow(GUI *ui.UI, state *state.State) *ui.Window {
 	requestsWindow := &RequestsWindow{
-		requestSystem: state.RequestSystem,
-		name:          "RequestsWindow",
+		requestSystem:    state.RequestSystem,
+		collectionSystem: state.CollectionSystem,
+		name:             "RequestsWindow",
 		windowPosition: ui.NewWindowPosition(
 			0, 20, 20, 40,
 			ui.RELATIVE, ui.RELATIVE, ui.RELATIVE, ui.RELATIVE,
@@ -36,15 +37,17 @@ func NewRequestsWindow(GUI *ui.UI, state *state.State) *ui.Window {
 	)
 
 	requestsWindow.thisWindow = windowRef
-
 	return windowRef
+}
+
+func (w *RequestsWindow) OnUpdateCollection() {
+	w.OnUpdateRequest()
 }
 
 func (w *RequestsWindow) OnUpdateRequest() {
 	w.thisWindow.ClearWindow()
 
 	w.thisWindow.WriteLines(w.requestSystem.ListNames())
-
 	err := w.thisWindow.SetCursor(0, w.requestSystem.CurrentPos())
 	if err != nil {
 		log.Panic(err)
@@ -56,12 +59,12 @@ func (w *RequestsWindow) Name() string {
 }
 
 func (w *RequestsWindow) Setup(ui *ui.UI) {
-	// ui.SelectWindow(w.thisWindow)
 	w.thisWindow.SetTitle("Requests")
 	w.thisWindow.SetSelectedBgColor(gocui.ColorRed)
 	w.thisWindow.SetHightlight(true)
 
 	w.requestSystem.SubscribeUpdateRequestEvent(w)
+	w.collectionSystem.SubscribeUpdateCollectionEvent(w)
 }
 
 func (w *RequestsWindow) Update(ui ui.UI) {
@@ -101,7 +104,7 @@ func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), 'n', func(g *gocui.Gui, v *gocui.View) error {
-		w.requestSystem.Create("pudim" + strconv.FormatInt(int64(rand.IntN(100)), 10))
+		w.requestSystem.Create("pudim-request" + strconv.FormatInt(int64(rand.IntN(100)), 10))
 		// win, _ := ui.GetWindow("CreateRequestWindow")
 		// win.OpenWindow()
 		return nil

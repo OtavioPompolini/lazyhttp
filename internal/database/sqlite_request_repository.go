@@ -32,8 +32,9 @@ func (a SqliteRequestRepository) GetRequests() []*types.Request {
 	defer row.Close()
 	for row.Next() {
 		request := &types.Request{}
+		pudim := 0
 
-		err := row.Scan(&request.Id, &request.Name, &request.Body)
+		err := row.Scan(&request.Id, &request.CollectionId, &pudim, &request.Name, &request.Body)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -45,7 +46,8 @@ func (a SqliteRequestRepository) GetRequests() []*types.Request {
 }
 
 func (a SqliteRequestRepository) Create(name string, collectionId int64) *types.Request {
-	res, err := a.db.Exec("INSERT INTO requests(name, collection_id) values (?, ?)", name, collectionId)
+	// No position right now. Yes, Im lazy again...
+	res, err := a.db.Exec("INSERT INTO requests(name, collection_id, position) values (?, ?, 0)", name, collectionId)
 	if err != nil {
 		log.Panic(err)
 	}

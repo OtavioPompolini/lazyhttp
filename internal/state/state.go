@@ -26,10 +26,11 @@ import (
 // }
 
 type State struct {
-	CollectionSystem   *CollectionSystem
-	RequestSystem      *RequestSystem
-	AppConfig          *AppConfig
-	NotificationSystem *NotificationSystem
+	CollectionSystem *CollectionSystem
+	RequestSystem    *RequestSystem
+
+	// AppConfig          *AppConfig
+	// NotificationSystem *NotificationSystem
 	// WindowsStateManager *WindowsStateManager
 
 	// I dont like the name variables, think another name
@@ -49,10 +50,11 @@ type AlertNotificationObserver interface {
 func NewState(db database.PersistanceAdapter) *State {
 	// reqs := db.RequestRepository.GetRequests()
 	// loadResponses(db, reqs)
+	collectionSystem := newCollectionSystem(db)
 
 	return &State{
-		RequestSystem:      newRequestSystem(db),
-		CollectionSystem:   newCollectionSystem(db),
+		CollectionSystem:   collectionSystem,
+		RequestSystem:      newRequestSystem(db, &collectionSystem.selId),
 		NotificationSystem: newNotificationSystem(),
 		// AppConfig:        NewAppConfig(db),
 		// variables:  map[string]types.Variable{},
