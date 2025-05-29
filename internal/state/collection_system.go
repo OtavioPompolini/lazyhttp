@@ -17,8 +17,6 @@ type CollectionSystem struct {
 	selPos      int
 	selId       int64
 
-	updateCollectionObservers []UpdateCollectionObserver
-
 	collectionRepository database.CollectionRepository
 }
 
@@ -45,18 +43,6 @@ func (c *CollectionSystem) NewCollection(collName string) {
 
 	saved := c.collectionRepository.Save(nColl)
 	c.collections = append(c.collections, saved)
-	c.sendUpdateCollectionEvent()
-}
-
-func (c *CollectionSystem) SubscribeUpdateCollectionEvent(co UpdateCollectionObserver) {
-	c.updateCollectionObservers = append(c.updateCollectionObservers, co)
-	co.OnUpdateCollection()
-}
-
-func (c *CollectionSystem) sendUpdateCollectionEvent() {
-	for _, ob := range c.updateCollectionObservers {
-		ob.OnUpdateCollection()
-	}
 }
 
 func (c *CollectionSystem) SelectNext() {
@@ -67,7 +53,6 @@ func (c *CollectionSystem) SelectNext() {
 	}
 
 	c.currPos += 1
-	c.sendUpdateCollectionEvent()
 }
 
 func (c *CollectionSystem) SelectPrev() {
@@ -78,7 +63,6 @@ func (c *CollectionSystem) SelectPrev() {
 	}
 
 	c.currPos -= 1
-	c.sendUpdateCollectionEvent()
 }
 
 // SWAP POSITIONS NOT WORKING CORRECTLY, I DONT CARE RN
@@ -102,8 +86,6 @@ func (c *CollectionSystem) SwapPositionUp() {
 		c.selPos += 1
 	}
 	c.currPos -= 1
-
-	c.sendUpdateCollectionEvent()
 }
 
 func (c *CollectionSystem) SwapPositionDown() {
@@ -124,8 +106,6 @@ func (c *CollectionSystem) SwapPositionDown() {
 		c.selPos -= 1
 	}
 	c.currPos += 1
-
-	c.sendUpdateCollectionEvent()
 }
 
 func (c *CollectionSystem) CurrentPos() int {
@@ -146,7 +126,6 @@ func (c *CollectionSystem) SelectCurrent() {
 	c.selPos = c.currPos
 	c.selId = c.collections[c.currPos].Id
 	c.currPos = 0
-	c.sendUpdateCollectionEvent()
 }
 
 func (c *CollectionSystem) ListNames() []string {

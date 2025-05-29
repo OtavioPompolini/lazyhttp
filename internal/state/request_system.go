@@ -10,18 +10,20 @@ type UpdateRequestObserver interface {
 }
 
 type RequestSystem struct {
-	requests map[int64][]*types.Request
-	pos      int
+	requests             map[int64][]*types.Request
+	selectedCollectionId *int64
+	pos                  int
 
 	updateRequestObservers []UpdateRequestObserver
 
 	requestRepository database.RequestRepository
 }
 
-func newRequestSystem(db database.PersistanceAdapter) *RequestSystem {
+func newRequestSystem(db database.PersistanceAdapter, selCollId *int64) *RequestSystem {
 	requestSystem := &RequestSystem{
-		requests:          make(map[int64][]*types.Request),
-		requestRepository: db.RequestRepository,
+		requests:             make(map[int64][]*types.Request),
+		requestRepository:    db.RequestRepository,
+		selectedCollectionId: selCollId,
 	}
 
 	requestSystem.requests = loadRequests(db)

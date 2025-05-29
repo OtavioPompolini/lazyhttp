@@ -53,9 +53,9 @@ func NewState(db database.PersistanceAdapter) *State {
 	collectionSystem := newCollectionSystem(db)
 
 	return &State{
-		CollectionSystem:   collectionSystem,
-		RequestSystem:      newRequestSystem(db, &collectionSystem.selId),
-		NotificationSystem: newNotificationSystem(),
+		CollectionSystem: collectionSystem,
+		RequestSystem:    newRequestSystem(db, &collectionSystem.selId),
+		// NotificationSystem: newNotificationSystem(),
 		// AppConfig:        NewAppConfig(db),
 		// variables:  map[string]types.Variable{},
 	}
