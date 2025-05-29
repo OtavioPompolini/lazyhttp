@@ -54,6 +54,7 @@ type IWindow interface {
 	Name() string
 
 	//Still dont know if those methods are required in the interface
+	// FROM THE FUTURE: DEFINATELY DONT NEED THIS
 	OnSelect(ui UI, w Window) error
 	OnDeselect(ui UI, w Window) error
 }
@@ -83,6 +84,10 @@ func (w *Window) EnableKeybindingOnEdit(b bool) {
 
 func (w *Window) IsActive() bool {
 	return w.isActive
+}
+
+func (w *Window) Mask(b bool) {
+	w.view.Mask = rune('t')
 }
 
 func (w *Window) OpenWindow() {
@@ -165,6 +170,18 @@ func (v *Window) setView(newView *gocui.View) {
 
 func (v *Window) IsTained() bool {
 	return v.view.IsTainted()
+}
+
+func (v *Window) MoveV2(a int) {
+	ox, oy := v.view.Origin()
+	_, wy := v.view.Size()
+	_, cy := v.view.Cursor()
+
+	if cy > wy-2 {
+		v.view.SetOrigin(ox, oy+a)
+	} else {
+		v.view.SetCursor(0, cy+1)
+	}
 }
 
 func (v *Window) MoveCursorHalfWindowDown() {

@@ -7,8 +7,10 @@ import (
 	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
-type UpdateCollectionObserver interface {
-	OnUpdateCollection()
+type CollectionEvent struct {
+	Collections []*types.Collection
+	CurrPos     int
+	SelPos      int
 }
 
 type CollectionSystem struct {
@@ -17,22 +19,35 @@ type CollectionSystem struct {
 	selPos      int
 	selId       int64
 
+	eventBus             *EventBus
 	collectionRepository database.CollectionRepository
 }
 
-func newCollectionSystem(db database.PersistanceAdapter) *CollectionSystem {
-	collections := db.CollectionRepository.GetAll()
-
-	collectionSystem := &CollectionSystem{
+func newCollectionSystem(db database.PersistanceAdapter, eb *EventBus) *CollectionSystem {
+	return &CollectionSystem{
 		collectionRepository: db.CollectionRepository,
-		collections:          collections,
+		eventBus:             eb,
 	}
+}
 
-	if len(collections) > 0 {
-		collectionSystem.selId = collections[0].Id
+func (c *CollectionSystem) init() {
+	c.collections = c.collectionRepository.GetAll()
+
+	if len(c.collections) > 0 {
+		c.selId = c.collections[0].Id
 	}
+	c.eventBus.Publish(c.getCollectionEvent())
+}
 
-	return collectionSystem
+func (c *CollectionSystem) getCollectionEvent() Event {
+	return Event{
+		Type: "collection:change",
+		Data: CollectionEvent{
+			Collections: c.collections,
+			CurrPos:     c.currPos,
+			SelPos:      c.selPos,
+		},
+	}
 }
 
 func (c *CollectionSystem) NewCollection(collName string) {
@@ -43,6 +58,7 @@ func (c *CollectionSystem) NewCollection(collName string) {
 
 	saved := c.collectionRepository.Save(nColl)
 	c.collections = append(c.collections, saved)
+	c.eventBus.Publish(c.getCollectionEvent())
 }
 
 func (c *CollectionSystem) SelectNext() {
@@ -53,6 +69,7 @@ func (c *CollectionSystem) SelectNext() {
 	}
 
 	c.currPos += 1
+	log.Println("Current collection pos:", c.currPos)
 }
 
 func (c *CollectionSystem) SelectPrev() {
@@ -63,6 +80,7 @@ func (c *CollectionSystem) SelectPrev() {
 	}
 
 	c.currPos -= 1
+	log.Println("Current collection pos:", c.currPos)
 }
 
 // SWAP POSITIONS NOT WORKING CORRECTLY, I DONT CARE RN
@@ -86,6 +104,7 @@ func (c *CollectionSystem) SwapPositionUp() {
 		c.selPos += 1
 	}
 	c.currPos -= 1
+	c.eventBus.Publish(c.getCollectionEvent())
 }
 
 func (c *CollectionSystem) SwapPositionDown() {
@@ -106,10 +125,7 @@ func (c *CollectionSystem) SwapPositionDown() {
 		c.selPos -= 1
 	}
 	c.currPos += 1
-}
-
-func (c *CollectionSystem) CurrentPos() int {
-	return c.currPos
+	c.eventBus.Publish(c.getCollectionEvent())
 }
 
 // func (c *CollectionSystem) List() []types.Collection {
@@ -126,21 +142,4 @@ func (c *CollectionSystem) SelectCurrent() {
 	c.selPos = c.currPos
 	c.selId = c.collections[c.currPos].Id
 	c.currPos = 0
-}
-
-func (c *CollectionSystem) ListNames() []string {
-	if len(c.collections) <= 0 {
-		return []string{}
-	}
-	collectionsList := []string{}
-
-	collectionsList = append(collectionsList, "*"+c.collections[c.selPos].Name)
-
-	for i, v := range c.collections {
-		if i != c.selPos {
-			collectionsList = append(collectionsList, v.Name)
-		}
-	}
-
-	return collectionsList
 }

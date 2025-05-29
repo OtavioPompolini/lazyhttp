@@ -98,7 +98,7 @@ func (ui *UI) StartUI() {
 			for _, win := range ui.windows {
 				if win.IsActive() {
 					if err := ui.renderWindow(win); err != nil {
-						return fmt.Errorf("error rendering window", err)
+						return fmt.Errorf("error rendering window. %s", err)
 					}
 				}
 			}
@@ -187,6 +187,17 @@ func (ui *UI) DeleteWindowByName(wName string) error {
 
 func (ui *UI) Start() error {
 	return ui.g.MainLoop()
+}
+
+func (ui *UI) NewKeyBindingV2(name string, key interface{}, f func()) error {
+	if err := ui.g.SetKeybinding(name, key, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		f()
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (ui *UI) NewKeyBinding(name string, key interface{}, callback func(g *gocui.Gui, v *gocui.View) error) error {

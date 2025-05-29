@@ -4,14 +4,17 @@ import (
 	"sync"
 )
 
+// Internal events are events between States
+// A window should never subscribe to an internal event
 const (
-	CollectionSelected EventType = "collection:selected"
-	CollectionChanged  EventType = "collection:changed"
-	RequestSelected    EventType = "request:selected"
-	RequestChanged     EventType = "request:changed"
-	RequestExecuted    EventType = "request:executed"
-	ResponseReceived   EventType = "response:received"
-	ResponseError      EventType = "response:error"
+	InternalCollectionSellected EventType = "internal:collection:selected"
+	CollectionSelected          EventType = "collection:selected"
+	CollectionChanged           EventType = "collection:changed"
+	RequestSelected             EventType = "request:selected"
+	RequestChanged              EventType = "request:changed"
+	RequestExecuted             EventType = "request:executed"
+	ResponseReceived            EventType = "response:received"
+	ResponseError               EventType = "response:error"
 )
 
 type EventType string

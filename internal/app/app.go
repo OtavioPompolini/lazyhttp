@@ -15,6 +15,7 @@ type App struct {
 }
 
 func NewApp() (*App, error) {
+	eventBus := state.NewEventBus()
 	userInterface, err := ui.NewUI()
 	if err != nil {
 		return nil, err
@@ -28,12 +29,12 @@ func NewApp() (*App, error) {
 	app := &App{
 		persistanceAdapter: db,
 		GUI:                userInterface,
-		state:              state.NewState(db),
+		state:              state.NewState(db, eventBus),
 	}
 
 	app.GUI.StartUI()
 	app.GUI.AddWindow(NewDebuggerWindow(app.state))
-	app.GUI.AddWindow(NewCollectionWindow(userInterface, app.state))
+	app.GUI.AddWindow(NewCollectionWindow(userInterface, app.state, eventBus))
 	// app.GUI.AddWindow(NewRequestsWindow(userInterface, app.state))
 	// app.GUI.AddWindow(NewAlertWindow(userInterface, *stateService))
 	// app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, *stateService))
@@ -44,6 +45,12 @@ func NewApp() (*App, error) {
 	app.GUI.SetHightlight(true)
 	app.GUI.SetFgColor(gocui.ColorGreen)
 	app.GUI.SetSelectedFgColor(gocui.ColorYellow)
+
+	app.GUI.Update(
+		func() {
+			app.state.Init()
+		},
+	)
 
 	if err := app.GUI.SetGlobalKeybindings(); err != nil {
 		return nil, err
@@ -57,6 +64,5 @@ func (app *App) Run() error {
 	if err := app.GUI.Start(); err != nil && err != gocui.ErrQuit {
 		return err
 	}
-
 	return nil
 }

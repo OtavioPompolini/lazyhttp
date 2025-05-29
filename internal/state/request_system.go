@@ -5,35 +5,29 @@ import (
 	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
-type UpdateRequestObserver interface {
-	OnUpdateRequest()
-}
-
 type RequestSystem struct {
 	requests             map[int64][]*types.Request
 	selectedCollectionId *int64
 	pos                  int
 
-	updateRequestObservers []UpdateRequestObserver
-
 	requestRepository database.RequestRepository
 }
 
 func newRequestSystem(db database.PersistanceAdapter, selCollId *int64) *RequestSystem {
-	requestSystem := &RequestSystem{
+	return &RequestSystem{
 		requests:             make(map[int64][]*types.Request),
 		requestRepository:    db.RequestRepository,
 		selectedCollectionId: selCollId,
 	}
-
-	requestSystem.requests = loadRequests(db)
-
-	return requestSystem
 }
 
-func loadRequests(db database.PersistanceAdapter) map[int64][]*types.Request {
+func (rs *RequestSystem) init() {
+	rs.requests = loadRequests(rs.requestRepository)
+}
+
+func loadRequests(requestRpository database.RequestRepository) map[int64][]*types.Request {
 	requestsMap := make(map[int64][]*types.Request)
-	requestsList := db.RequestRepository.GetRequests()
+	requestsList := requestRpository.GetRequests()
 
 	for _, v := range requestsList {
 		_, ok := requestsMap[v.CollectionId]
@@ -47,17 +41,6 @@ func loadRequests(db database.PersistanceAdapter) map[int64][]*types.Request {
 	return requestsMap
 }
 
-func (rs *RequestSystem) SubscribeUpdateRequestEvent(obs UpdateRequestObserver) {
-	rs.updateRequestObservers = append(rs.updateRequestObservers, obs)
-	obs.OnUpdateRequest()
-}
-
-func (rs *RequestSystem) sendUpdateRequestEvent() {
-	for _, v := range rs.updateRequestObservers {
-		v.OnUpdateRequest()
-	}
-}
-
 func (rs *RequestSystem) Create(reqName string) {
 	saved := rs.requestRepository.Create(reqName, *rs.selectedCollectionId)
 	currRequests, ok := rs.requests[*rs.selectedCollectionId]
@@ -69,7 +52,6 @@ func (rs *RequestSystem) Create(reqName string) {
 	}
 
 	rs.pos = len(currRequests) - 1
-	rs.sendUpdateRequestEvent()
 }
 
 func (rs *RequestSystem) ListNames() []string {

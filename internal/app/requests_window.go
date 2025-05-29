@@ -40,10 +40,6 @@ func NewRequestsWindow(GUI *ui.UI, state *state.State) *ui.Window {
 	return windowRef
 }
 
-func (w *RequestsWindow) OnUpdateCollection() {
-	w.OnUpdateRequest()
-}
-
 func (w *RequestsWindow) OnUpdateRequest() {
 	w.thisWindow.ClearWindow()
 
@@ -62,9 +58,6 @@ func (w *RequestsWindow) Setup(ui *ui.UI) {
 	w.thisWindow.SetTitle("Requests")
 	w.thisWindow.SetSelectedBgColor(gocui.ColorRed)
 	w.thisWindow.SetHightlight(true)
-
-	w.requestSystem.SubscribeUpdateRequestEvent(w)
-	w.collectionSystem.SubscribeUpdateCollectionEvent(w)
 }
 
 func (w *RequestsWindow) Update(ui ui.UI) {
@@ -75,19 +68,23 @@ func (w *RequestsWindow) Size() ui.WindowPosition {
 }
 
 func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
+
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
-		w.requestSystem.SelectNext()
 		return nil
 	}); err != nil {
 		return err
 	}
 
-	if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
-		w.navigateUp(ui)
-		return nil
-	}); err != nil {
-		return err
-	}
+	ui.NewKeyBindingV2(w.name, 'k', func() {
+		w.requestSystem.SelectPrev()
+	})
+
+	// if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
+	// 	w.navigateUp(ui)
+	// 	return nil
+	// }); err != nil {
+	// 	return err
+	// }
 
 	if err := ui.NewKeyBinding(w.Name(), 'P', func(g *gocui.Gui, v *gocui.View) error {
 		w.doRequest(ui)
