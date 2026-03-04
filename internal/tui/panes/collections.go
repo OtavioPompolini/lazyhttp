@@ -40,22 +40,27 @@ func (p CollectionsPane) Update(msg tea.Msg) (CollectionsPane, tea.Cmd) {
 		if !p.focused {
 			break
 		}
+		cs := p.collectionSystem
 		switch m.String() {
 		case "j":
-			p.collectionSystem.SelectNext()
+			return p, func() tea.Msg { cs.SelectNext(); return nil }
 		case "k":
-			p.collectionSystem.SelectPrev()
+			return p, func() tea.Msg { cs.SelectPrev(); return nil }
 		case "J":
-			p.collectionSystem.SwapPositionDown()
+			return p, func() tea.Msg { cs.SwapPositionDown(); return nil }
 		case "K":
-			p.collectionSystem.SwapPositionUp()
+			return p, func() tea.Msg { cs.SwapPositionUp(); return nil }
 		case "enter":
 			if len(p.lastEvent.Collections) > 0 {
 				id := p.lastEvent.Collections[p.lastEvent.CurrPos].Id
-				p.eventBus.Publish(state.Event{
-					Type: state.InternalCollectionSelected,
-					Data: id,
-				})
+				eb := p.eventBus
+				return p, func() tea.Msg {
+					eb.Publish(state.Event{
+						Type: state.InternalCollectionSelected,
+						Data: id,
+					})
+					return nil
+				}
 			}
 		case "[":
 			return p, msgs.FocusCmd(msgs.FocusRequests)

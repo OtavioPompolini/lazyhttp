@@ -52,7 +52,7 @@ func NewDebuggerPane() DebuggerPane {
 }
 
 func DebuggerTick() tea.Cmd {
-	return tea.Every(100*time.Millisecond, func(t time.Time) tea.Msg {
+	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
 		return msgs.DebuggerTickMsg{}
 	})
 }

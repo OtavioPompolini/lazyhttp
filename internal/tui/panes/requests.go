@@ -37,11 +37,12 @@ func (p RequestsPane) Update(msg tea.Msg) (RequestsPane, tea.Cmd) {
 		if !p.focused {
 			break
 		}
+		rs := p.requestSystem
 		switch m.String() {
 		case "j":
-			p.requestSystem.SelectNext()
+			return p, func() tea.Msg { rs.SelectNext(); return nil }
 		case "k":
-			p.requestSystem.SelectPrev()
+			return p, func() tea.Msg { rs.SelectPrev(); return nil }
 		case "enter":
 			return p, msgs.FocusCmd(msgs.FocusRequestDetails)
 		case "!":

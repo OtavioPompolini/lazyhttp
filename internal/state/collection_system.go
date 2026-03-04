@@ -102,6 +102,7 @@ func (c *CollectionSystem) SelectNext() {
 
 	c.currPos += 1
 	log.Println("Current collection pos:", c.currPos)
+	c.eventBus.Publish(c.getCollectionEvent())
 }
 
 func (c *CollectionSystem) SelectPrev() {
@@ -113,6 +114,7 @@ func (c *CollectionSystem) SelectPrev() {
 
 	c.currPos -= 1
 	log.Println("Current collection pos:", c.currPos)
+	c.eventBus.Publish(c.getCollectionEvent())
 }
 
 // SWAP POSITIONS NOT WORKING CORRECTLY, I DONT CARE RN

@@ -40,10 +40,14 @@ func (p CreateRequestPane) Update(msg tea.Msg) (CreateRequestPane, tea.Cmd) {
 		switch m.String() {
 		case "enter":
 			name := p.input.Value()
-			if name != "" {
-				p.requestSystem.Create(name)
-			}
 			p.input.SetValue("")
+			if name != "" {
+				rs := p.requestSystem
+				return p, tea.Batch(
+					func() tea.Msg { rs.Create(name); return nil },
+					msgs.CloseModalCmd(),
+				)
+			}
 			return p, msgs.CloseModalCmd()
 		case "esc":
 			p.input.SetValue("")

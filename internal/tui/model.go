@@ -108,6 +108,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loseFocus()
 		m.focus.MoveTo(tm.Target)
 		m.applyFocus()
+		m.distributeSize()
 		return m, nil
 
 	case msgs.OpenModalMsg:
