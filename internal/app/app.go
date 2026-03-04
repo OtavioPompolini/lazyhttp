@@ -1,68 +1,38 @@
 package app
 
 import (
-	"github.com/awesome-gocui/gocui"
+	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/OtavioPompolini/project-postman/internal/database"
 	"github.com/OtavioPompolini/project-postman/internal/state"
-	"github.com/OtavioPompolini/project-postman/internal/ui"
+	"github.com/OtavioPompolini/project-postman/internal/tui"
 )
 
 type App struct {
-	GUI                *ui.UI
-	state              *state.State
-	persistanceAdapter database.PersistanceAdapter
+	program *tea.Program
+	state   *state.State
 }
 
 func NewApp() (*App, error) {
-	eventBus := state.NewEventBus()
-	userInterface, err := ui.NewUI()
-	if err != nil {
-		return nil, err
-	}
-
 	db, err := database.NewPersistanceAdapter()
 	if err != nil {
 		return nil, err
 	}
 
-	app := &App{
-		persistanceAdapter: db,
-		GUI:                userInterface,
-		state:              state.NewState(db, eventBus),
-	}
+	eb := state.NewEventBus()
+	st := state.NewState(db, eb)
 
-	app.GUI.StartUI()
-	app.GUI.AddWindow(NewDebuggerWindow(app.state))
-	app.GUI.AddWindow(NewCollectionWindow(userInterface, app.state, eventBus))
-	app.GUI.AddWindow(NewRequestsWindow(userInterface, app.state, eventBus))
-	app.GUI.AddWindow(NewAlertWindow(userInterface, eventBus))
-	app.GUI.AddWindow(NewRequestDetailsWindow(userInterface, app.state, eventBus))
-	app.GUI.AddWindow(NewCreateRequestWindow(userInterface, app.state))
-	app.GUI.AddWindow(NewResponseWindow(userInterface, app.state, eventBus))
-	app.GUI.AddWindow(NewVariablesWindow(userInterface, app.state))
+	rootModel := tui.NewRootModel(st, eb)
+	p := tea.NewProgram(rootModel, tea.WithAltScreen())
 
-	app.GUI.SetHightlight(true)
-	app.GUI.SetFgColor(gocui.ColorGreen)
-	app.GUI.SetSelectedFgColor(gocui.ColorYellow)
+	tui.NewBridge(p, eb)
 
-	app.GUI.Update(
-		func() {
-			app.state.Init()
-		},
-	)
-
-	if err := app.GUI.SetGlobalKeybindings(); err != nil {
-		return nil, err
-	}
-
-	return app, nil
+	return &App{program: p, state: st}, nil
 }
 
 func (app *App) Run() error {
-	defer app.GUI.Close()
-	if err := app.GUI.Start(); err != nil && err != gocui.ErrQuit {
-		return err
-	}
-	return nil
+	// Run state.Init asynchronously so the program is running before events publish.
+	go app.state.Init()
+	_, err := app.program.Run()
+	return err
 }
