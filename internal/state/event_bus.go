@@ -15,6 +15,7 @@ const (
 	RequestExecuted            EventType = "request:executed"
 	ResponseReceived           EventType = "response:received"
 	ResponseError              EventType = "response:error"
+	AlertMessage               EventType = "alert:message"
 )
 
 type EventType string

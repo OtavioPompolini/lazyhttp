@@ -83,7 +83,8 @@ func (w *CollectionsWindow) Size() ui.WindowPosition {
 func (w *CollectionsWindow) SetKeybindings(ui *ui.UI) error {
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
 		w.collectionSystem.SelectNext()
-		w.thisWindow.MoveV2(1)
+		// w.thisWindow.MoveV2(1)
+		w.thisWindow.CursorDown()
 		return nil
 	}); err != nil {
 		return err

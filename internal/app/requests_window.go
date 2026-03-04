@@ -228,32 +228,6 @@ func (rw *RequestsWindow) doRequest(ui *ui.UI) {
 	// win.Window.ReloadContent(ui, win)
 }
 
-func (rw *RequestsWindow) navigateDown(ui *ui.UI) {
-	// thisWindow, _ := ui.GetWindow(rw.name)
-	//
-	// ok := rw.stateService.SelectNext()
-	// if !ok {
-	// 	return
-	// }
-	//
-	// rw.ReloadContent(ui, thisWindow)
-	// win, _ := ui.GetWindow("ResponseWindow")
-	// win.Window.ReloadContent(ui, win)
-}
-
-func (rw *RequestsWindow) navigateUp(ui *ui.UI) {
-	// thisWindow, _ := ui.GetWindow(rw.name)
-	//
-	// ok := rw.stateService.SelectPrev()
-	// if !ok {
-	// 	return
-	// }
-	//
-	// rw.ReloadContent(ui, thisWindow)
-	// win, _ := ui.GetWindow("ResponseWindow")
-	// win.Window.ReloadContent(ui, win)
-}
-
 func (rw *RequestsWindow) deleteRequest(ui *ui.UI) {
 	// thisWindow, _ := ui.GetWindow(rw.name)
 	//

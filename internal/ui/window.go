@@ -172,17 +172,17 @@ func (v *Window) IsTained() bool {
 	return v.view.IsTainted()
 }
 
-func (v *Window) MoveV2(a int) {
-	ox, oy := v.view.Origin()
-	_, wy := v.view.Size()
-	_, cy := v.view.Cursor()
-
-	if cy > wy-2 {
-		v.view.SetOrigin(ox, oy+a)
-	} else {
-		v.view.SetCursor(0, cy+1)
-	}
-}
+// func (v *Window) MoveV2(a int) {
+// 	ox, oy := v.view.Origin()
+// 	_, wy := v.view.Size()
+// 	_, cy := v.view.Cursor()
+//
+// 	if cy > wy-2 {
+// 		v.view.SetOrigin(ox, oy+a)
+// 	} else {
+// 		v.view.SetCursor(0, cy+a)
+// 	}
+// }
 
 func (v *Window) MoveCursorHalfWindowDown() {
 	// _, _, _, d := v.Window.Size()
