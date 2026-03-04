@@ -117,7 +117,7 @@ func (c *CollectionSystem) SelectPrev() {
 
 // SWAP POSITIONS NOT WORKING CORRECTLY, I DONT CARE RN
 func (c *CollectionSystem) SwapPositionUp() {
-	if c.currPos <= 1 {
+	if c.currPos <= 0 {
 		//Alert screen
 		// Not here, this should return error and then whos calling this should
 		// call alert message
@@ -140,7 +140,7 @@ func (c *CollectionSystem) SwapPositionUp() {
 }
 
 func (c *CollectionSystem) SwapPositionDown() {
-	if len(c.collections)-1 <= c.currPos || c.currPos == 0 {
+	if len(c.collections)-1 <= c.currPos {
 		//Alert screen
 		log.Print("Unable to swap collection position")
 		return
