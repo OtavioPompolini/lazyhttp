@@ -15,12 +15,15 @@ type CollectionsWindow struct {
 	windowPosition ui.WindowPosition
 
 	collectionSystem *state.CollectionSystem
+	eventBus         *state.EventBus
+	lastEvent        state.CollectionEvent
 	thisWindow       *ui.Window
 }
 
-func NewCollectionWindow(GUI *ui.UI, state *state.State, eb *state.EventBus) *ui.Window {
+func NewCollectionWindow(GUI *ui.UI, st *state.State, eb *state.EventBus) *ui.Window {
 	collectionsWindow := &CollectionsWindow{
-		collectionSystem: state.CollectionSystem,
+		collectionSystem: st.CollectionSystem,
+		eventBus:         eb,
 		name:             "CollectionsWindow",
 		windowPosition: ui.NewWindowPosition(
 			0, 0, 20, 20,
@@ -34,7 +37,7 @@ func NewCollectionWindow(GUI *ui.UI, state *state.State, eb *state.EventBus) *ui
 	)
 
 	collectionsWindow.thisWindow = windowRef
-	eb.Subscribe("collection:change", collectionsWindow.onCollectionChange())
+	eb.Subscribe(state.CollectionChanged, collectionsWindow.onCollectionChange())
 	return windowRef
 }
 
@@ -44,6 +47,8 @@ func (cw *CollectionsWindow) onCollectionChange() func(e state.Event) {
 		if !ok {
 			return
 		}
+
+		cw.lastEvent = event
 
 		collectionNames := []string{}
 
@@ -89,13 +94,6 @@ func (w *CollectionsWindow) SetKeybindings(ui *ui.UI) error {
 		w.thisWindow.CursorUp()
 	})
 
-	// if err := ui.NewKeyBinding(w.Name(), 'k', func(g *gocui.Gui, v *gocui.View) error {
-	// 	w.collectionSystem.SelectPrev()
-	// 	return nil
-	// }); err != nil {
-	// 	return err
-	// }
-
 	if err := ui.NewKeyBinding(w.Name(), 'J', func(g *gocui.Gui, v *gocui.View) error {
 		w.collectionSystem.SwapPositionDown()
 		return nil
@@ -127,7 +125,14 @@ func (w *CollectionsWindow) SetKeybindings(ui *ui.UI) error {
 	}
 
 	if err := ui.NewKeyBinding(w.Name(), gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-		w.collectionSystem.SelectCurrent()
+		if len(w.lastEvent.Collections) == 0 {
+			return nil
+		}
+		id := w.lastEvent.Collections[w.lastEvent.CurrPos].Id
+		w.eventBus.Publish(state.Event{
+			Type: state.InternalCollectionSelected,
+			Data: id,
+		})
 		return nil
 	}); err != nil {
 		return err

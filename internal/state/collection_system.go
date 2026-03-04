@@ -13,6 +13,10 @@ type CollectionEvent struct {
 	SelPos      int
 }
 
+type CollectionSelectedEvent struct {
+	Collection *types.Collection
+}
+
 type CollectionSystem struct {
 	collections []*types.Collection
 	currPos     int
@@ -24,10 +28,30 @@ type CollectionSystem struct {
 }
 
 func newCollectionSystem(db database.PersistanceAdapter, eb *EventBus) *CollectionSystem {
-	return &CollectionSystem{
+	cs := &CollectionSystem{
 		collectionRepository: db.CollectionRepository,
 		eventBus:             eb,
 	}
+	cs.wireEvents()
+	return cs
+}
+
+func (c *CollectionSystem) wireEvents() {
+	c.eventBus.Subscribe(InternalCollectionSelected, func(e Event) {
+		id := e.Data.(int64)
+		for i, col := range c.collections {
+			if col.Id == id {
+				c.selId = id
+				c.selPos = i
+				c.currPos = 0
+				break
+			}
+		}
+		c.eventBus.Publish(Event{
+			Type: CollectionSelected,
+			Data: CollectionSelectedEvent{Collection: c.collections[c.selPos]},
+		})
+	})
 }
 
 func (c *CollectionSystem) init() {
@@ -35,13 +59,21 @@ func (c *CollectionSystem) init() {
 
 	if len(c.collections) > 0 {
 		c.selId = c.collections[0].Id
+		c.selPos = 0
 	}
 	c.eventBus.Publish(c.getCollectionEvent())
+
+	if len(c.collections) > 0 {
+		c.eventBus.Publish(Event{
+			Type: CollectionSelected,
+			Data: CollectionSelectedEvent{Collection: c.collections[0]},
+		})
+	}
 }
 
 func (c *CollectionSystem) getCollectionEvent() Event {
 	return Event{
-		Type: "collection:change",
+		Type: CollectionChanged,
 		Data: CollectionEvent{
 			Collections: c.collections,
 			CurrPos:     c.currPos,
@@ -127,16 +159,6 @@ func (c *CollectionSystem) SwapPositionDown() {
 	c.currPos += 1
 	c.eventBus.Publish(c.getCollectionEvent())
 }
-
-// func (c *CollectionSystem) List() []types.Collection {
-// 	collectionsList := []types.Collection{}
-//
-// 	for _, v := range c.collections {
-// 		collectionsList = append(collectionsList, *v)
-// 	}
-//
-// 	return collectionsList
-// }
 
 func (c *CollectionSystem) SelectCurrent() {
 	c.selPos = c.currPos

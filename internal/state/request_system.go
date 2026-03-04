@@ -5,20 +5,51 @@ import (
 	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
+type RequestEvent struct {
+	Requests []*types.Request
+	Pos      int
+}
+
 type RequestSystem struct {
 	requests             map[int64][]*types.Request
 	selectedCollectionId *int64
 	pos                  int
 
+	eventBus          *EventBus
 	requestRepository database.RequestRepository
 }
 
-func newRequestSystem(db database.PersistanceAdapter, selCollId *int64) *RequestSystem {
-	return &RequestSystem{
-		requests:             make(map[int64][]*types.Request),
-		requestRepository:    db.RequestRepository,
-		selectedCollectionId: selCollId,
+func newRequestSystem(db database.PersistanceAdapter, eb *EventBus) *RequestSystem {
+	rs := &RequestSystem{
+		requests:          make(map[int64][]*types.Request),
+		requestRepository: db.RequestRepository,
+		eventBus:          eb,
 	}
+	rs.wireEvents()
+	return rs
+}
+
+func (rs *RequestSystem) wireEvents() {
+	rs.eventBus.Subscribe(CollectionSelected, func(e Event) {
+		event := e.Data.(CollectionSelectedEvent)
+		rs.selectedCollectionId = &event.Collection.Id
+		rs.pos = 0
+		rs.publishRequestChanged()
+	})
+}
+
+func (rs *RequestSystem) publishRequestChanged() {
+	var reqs []*types.Request
+	if rs.selectedCollectionId != nil {
+		reqs = rs.requests[*rs.selectedCollectionId]
+	}
+	rs.eventBus.Publish(Event{
+		Type: RequestChanged,
+		Data: RequestEvent{
+			Requests: reqs,
+			Pos:      rs.pos,
+		},
+	})
 }
 
 func (rs *RequestSystem) init() {
@@ -52,10 +83,11 @@ func (rs *RequestSystem) Create(reqName string) {
 	}
 
 	rs.pos = len(currRequests) - 1
+	rs.publishRequestChanged()
 }
 
 func (rs *RequestSystem) ListNames() []string {
-	if len(rs.requests[*rs.selectedCollectionId]) <= 0 {
+	if rs.selectedCollectionId == nil || len(rs.requests[*rs.selectedCollectionId]) <= 0 {
 		return []string{}
 	}
 
@@ -69,137 +101,36 @@ func (rs *RequestSystem) ListNames() []string {
 }
 
 func (rs *RequestSystem) CurrentPos() int {
-	return 0
+	return rs.pos
 }
 
-// func (c *CollectionSystem) DeleteSelectedRequest() {
-//
-// 	selected := c.currentRequest
-// 	prev := c.currentRequest.Prev
-// 	next := c.currentRequest.Next
-//
-// 	if prev == nil && next == nil {
-// 		c.currentRequest = nil
-// 	}
-//
-// 	if prev != nil {
-// 		prev.Next = selected.Next
-// 		c.currentRequest = prev
-// 	} else {
-// 		c.currentRequest = selected.Next
-// 	}
-//
-// 	if next != nil {
-// 		next.Prev = selected.Prev
-// 		c.currentRequest = next
-// 	} else {
-// 		c.currentRequest = selected.Prev
-// 	}
-//
-// 	c.requestRepository.DeleteRequest(selected.Id)
-// }
-
 func (rs *RequestSystem) SelectNext() {
+	if rs.selectedCollectionId == nil {
+		return
+	}
 	currRequests, ok := rs.requests[*rs.selectedCollectionId]
 	if !ok {
 		return
 	}
 
 	rs.pos = min(len(currRequests)-1, rs.pos+1)
+	rs.publishRequestChanged()
 }
 
 func (rs *RequestSystem) SelectPrev() {
+	if rs.selectedCollectionId == nil {
+		return
+	}
 	_, ok := rs.requests[*rs.selectedCollectionId]
 	if !ok {
 		return
 	}
 
 	rs.pos = max(0, rs.pos-1)
+	rs.publishRequestChanged()
 }
 
 func (rs *RequestSystem) Update(r *types.Request) {
 	// c.requests[c.currColl][c.currReq].Body = r.Body
 	// c.requestRepository.UpdateRequest(r)
 }
-
-// func (c *CollectionSystem) IsEmpty() bool {
-// 	return rss.state.collection.head == nil
-// }
-
-// func (rss RequestStateService) ListNames() []string {
-// 	curr := rss.state.collection.head
-// 	names := []string{}
-//
-// 	for curr != nil {
-// 		names = append(names, curr.Name)
-// 	}
-//
-// 	return names
-// }
-
-// func (rss RequestStateService) Index() int {
-// 	i := 0
-// 	curr := rss.state.collection.head
-// 	for curr != nil {
-// 		if curr.Id == rss.SelectedRequest().Id {
-// 			return i
-// 		}
-//
-// 		curr = curr.Next
-// 		i += 1
-// 	}
-//
-// 	return 0
-// }
-
-// This might not be here. XD
-// func (c *CollectionSystem) ExecuteRequest() error {
-// 	r := c.currentRequest
-//
-// 	httpRequest, err := utils.ParseHttpRequest(r.Body)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	log.Printf("Method = %s", httpRequest.Method)
-// 	log.Printf("Url = %s", httpRequest.URL)
-// 	log.Printf("Body = %s", httpRequest.Body)
-//
-// 	client := http.Client{}
-// 	res, err := client.Do(httpRequest)
-// 	if err != nil {
-// 		log.Print("Error while performing the request", err)
-// 		return err
-// 	}
-//
-// 	responseString := ""
-//
-// 	responseString += res.Proto + " "
-// 	responseString += res.Status
-// 	responseString += "\n"
-//
-// 	for k, v := range res.Header {
-// 		responseString += k + ": "
-// 		responseString += strings.Join(v, "")
-// 		responseString += "\n"
-// 	}
-//
-// 	responseString += "\n"
-// 	s, err := io.ReadAll(res.Body)
-// 	if err != nil {
-// 		log.Print("Error while reading response body", err)
-// 		return err
-// 	}
-//
-// 	// log.Printf("Response body = %s", string(s))
-//
-// 	response := c.responseRepository.Save(&types.Response{
-// 		RequestId: c.currentRequest.Id,
-// 		Info:      responseString,
-// 		Body:      string(s),
-// 	})
-//
-// 	r.ResponseHistory = append([]*types.Response{response}, r.ResponseHistory...)
-//
-// 	return nil
-// }

@@ -20,10 +20,10 @@ type RequestsWindow struct {
 	thisWindow       *ui.Window
 }
 
-func NewRequestsWindow(GUI *ui.UI, state *state.State) *ui.Window {
+func NewRequestsWindow(GUI *ui.UI, st *state.State, eb *state.EventBus) *ui.Window {
 	requestsWindow := &RequestsWindow{
-		requestSystem:    state.RequestSystem,
-		collectionSystem: state.CollectionSystem,
+		requestSystem:    st.RequestSystem,
+		collectionSystem: st.CollectionSystem,
 		name:             "RequestsWindow",
 		windowPosition: ui.NewWindowPosition(
 			0, 20, 20, 40,
@@ -37,7 +37,29 @@ func NewRequestsWindow(GUI *ui.UI, state *state.State) *ui.Window {
 	)
 
 	requestsWindow.thisWindow = windowRef
+	eb.Subscribe(state.RequestChanged, requestsWindow.onRequestChanged())
 	return windowRef
+}
+
+func (w *RequestsWindow) onRequestChanged() func(e state.Event) {
+	return func(e state.Event) {
+		event, ok := e.Data.(state.RequestEvent)
+		if !ok {
+			return
+		}
+
+		names := make([]string, 0, len(event.Requests))
+		for _, r := range event.Requests {
+			names = append(names, r.Name)
+		}
+
+		w.thisWindow.ClearWindow()
+		w.thisWindow.WriteLines(names)
+		err := w.thisWindow.SetCursor(0, event.Pos)
+		if err != nil {
+			log.Panic(err)
+		}
+	}
 }
 
 func (w *RequestsWindow) OnUpdateRequest() {
@@ -70,6 +92,7 @@ func (w *RequestsWindow) Size() ui.WindowPosition {
 func (w *RequestsWindow) SetKeybindings(ui *ui.UI) error {
 
 	if err := ui.NewKeyBinding(w.Name(), 'j', func(g *gocui.Gui, v *gocui.View) error {
+		w.requestSystem.SelectNext()
 		return nil
 	}); err != nil {
 		return err

@@ -48,22 +48,15 @@ type AlertNotificationObserver interface {
 }
 
 func NewState(db database.PersistanceAdapter, eventBus *EventBus) *State {
-	// reqs := db.RequestRepository.GetRequests()
-	// loadResponses(db, reqs)
-	collectionSystem := newCollectionSystem(db, eventBus)
-
 	return &State{
-		CollectionSystem: collectionSystem,
-		// RequestSystem:    newRequestSystem(db, &collectionSystem.selId),
-		// NotificationSystem: newNotificationSystem(),
-		// AppConfig:        NewAppConfig(db),
-		// variables:  map[string]types.Variable{},
+		CollectionSystem: newCollectionSystem(db, eventBus),
+		RequestSystem:    newRequestSystem(db, eventBus),
 	}
 }
 
 func (s *State) Init() {
+	s.RequestSystem.init()
 	s.CollectionSystem.init()
-	// s.RequestSystem.init()
 }
 
 func loadResponses(db database.PersistanceAdapter, reqs []*types.Request) {

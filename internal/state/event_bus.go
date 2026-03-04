@@ -7,14 +7,14 @@ import (
 // Internal events are events between States
 // A window should never subscribe to an internal event
 const (
-	InternalCollectionSellected EventType = "internal:collection:selected"
-	CollectionSelected          EventType = "collection:selected"
-	CollectionChanged           EventType = "collection:changed"
-	RequestSelected             EventType = "request:selected"
-	RequestChanged              EventType = "request:changed"
-	RequestExecuted             EventType = "request:executed"
-	ResponseReceived            EventType = "response:received"
-	ResponseError               EventType = "response:error"
+	InternalCollectionSelected EventType = "internal:collection:selected"
+	CollectionSelected         EventType = "collection:selected"
+	CollectionChanged          EventType = "collection:changed"
+	RequestSelected            EventType = "request:selected"
+	RequestChanged             EventType = "request:changed"
+	RequestExecuted            EventType = "request:executed"
+	ResponseReceived           EventType = "response:received"
+	ResponseError              EventType = "response:error"
 )
 
 type EventType string
@@ -38,11 +38,18 @@ func NewEventBus() *EventBus {
 }
 
 func (b *EventBus) Subscribe(eventType EventType, f func(e Event)) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	b.subscribes[eventType] = append(b.subscribes[eventType], f)
 }
 
 func (b *EventBus) Publish(event Event) {
-	for _, f := range b.subscribes[event.Type] {
+	b.mu.RLock()
+	handlers := make([]func(Event), len(b.subscribes[event.Type]))
+	copy(handlers, b.subscribes[event.Type])
+	b.mu.RUnlock()
+
+	for _, f := range handlers {
 		f(event)
 	}
 }
@@ -68,4 +75,3 @@ func (b *EventBus) PublishAsync(event Event) {
 		}
 	}
 }
-
