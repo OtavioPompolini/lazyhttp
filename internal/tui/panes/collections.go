@@ -63,7 +63,7 @@ func (p CollectionsPane) Update(msg tea.Msg) (CollectionsPane, tea.Cmd) {
 					return nil
 				}
 			}
-		case "[":
+		case "2":
 			return p, msgs.FocusCmd(msgs.FocusRequests)
 		case "a":
 			return p, func() tea.Msg { cs.TestAlert(); return nil }
@@ -86,7 +86,6 @@ func (p CollectionsPane) View() string {
 
 	var sb strings.Builder
 	for i, col := range p.lastEvent.Collections {
-		log.Println("pudim", col)
 		line := col.Name
 		if i == p.lastEvent.CurrPos && i == p.lastEvent.SelPos {
 			line = lipgloss.NewStyle().Foreground(lipgloss.Color("3")).Bold(true).Render("> " + line)

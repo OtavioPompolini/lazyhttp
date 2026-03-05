@@ -43,7 +43,6 @@ func (c *CollectionSystem) wireEvents() {
 			if col.Id == id {
 				c.selId = id
 				c.selPos = i
-				// c.currPos = 0
 				break
 			}
 		}
