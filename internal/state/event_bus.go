@@ -26,28 +26,28 @@ type Event struct {
 }
 
 type EventBus struct {
-	asyncSubs  map[EventType][]chan Event
-	subscribes map[EventType][]func(Event)
-	mu         sync.RWMutex
+	asyncHandlers map[EventType][]chan Event
+	handlers      map[EventType][]func(Event)
+	mu            sync.RWMutex
 }
 
 func NewEventBus() *EventBus {
 	return &EventBus{
-		asyncSubs:  make(map[EventType][]chan Event),
-		subscribes: make(map[EventType][]func(Event)),
+		asyncHandlers: make(map[EventType][]chan Event),
+		handlers:      make(map[EventType][]func(Event)),
 	}
 }
 
 func (b *EventBus) Subscribe(eventType EventType, f func(e Event)) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	b.subscribes[eventType] = append(b.subscribes[eventType], f)
+	b.handlers[eventType] = append(b.handlers[eventType], f)
 }
 
 func (b *EventBus) Publish(event Event) {
 	b.mu.RLock()
-	handlers := make([]func(Event), len(b.subscribes[event.Type]))
-	copy(handlers, b.subscribes[event.Type])
+	handlers := make([]func(Event), len(b.handlers[event.Type]))
+	copy(handlers, b.handlers[event.Type])
 	b.mu.RUnlock()
 
 	for _, f := range handlers {
@@ -60,7 +60,7 @@ func (b *EventBus) SubscribeAsync(eventType EventType) <-chan Event {
 	defer b.mu.Unlock()
 
 	ch := make(chan Event, 10)
-	b.asyncSubs[eventType] = append(b.asyncSubs[eventType], ch)
+	b.asyncHandlers[eventType] = append(b.asyncHandlers[eventType], ch)
 	return ch
 }
 
@@ -68,7 +68,7 @@ func (b *EventBus) PublishAsync(event Event) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
-	if chans, ok := b.asyncSubs[event.Type]; ok {
+	if chans, ok := b.asyncHandlers[event.Type]; ok {
 		for _, ch := range chans {
 			go func(c chan Event) {
 				c <- event

@@ -14,7 +14,7 @@ type App struct {
 }
 
 func NewApp() (*App, error) {
-	db, err := database.NewPersistanceAdapter()
+	db, err := database.NewPersistenceAdapter()
 	if err != nil {
 		return nil, err
 	}

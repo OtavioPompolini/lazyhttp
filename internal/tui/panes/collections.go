@@ -14,14 +14,14 @@ import (
 type CollectionsPane struct {
 	focused          bool
 	width, height    int
-	lastEvent        state.CollectionEvent
-	collectionSystem *state.CollectionSystem
+	lastEvent        state.CollectionsChangedEvent
+	collectionSystem *state.CollectionManager
 	eventBus         *state.EventBus
 }
 
 func NewCollectionsPane(st *state.State, eb *state.EventBus) CollectionsPane {
 	return CollectionsPane{
-		collectionSystem: st.CollectionSystem,
+		collectionSystem: st.CollectionManager,
 		eventBus:         eb,
 	}
 }
@@ -54,8 +54,6 @@ func (p CollectionsPane) Update(msg tea.Msg) (CollectionsPane, tea.Cmd) {
 			return p, func() tea.Msg { cs.SelectCurrent(); return nil }
 		case "2":
 			return p, msgs.FocusCmd(msgs.FocusRequests)
-		case "a":
-			return p, func() tea.Msg { cs.TestAlert(); return nil }
 		}
 	}
 	return p, nil
@@ -76,11 +74,11 @@ func (p CollectionsPane) View() string {
 	var sb strings.Builder
 	for i, col := range p.lastEvent.Collections {
 		line := col.Name
-		if i == p.lastEvent.CurrPos && i == p.lastEvent.SelPos {
+		if i == p.lastEvent.Cursor && i == p.lastEvent.ActivePos {
 			line = lipgloss.NewStyle().Foreground(lipgloss.Color("3")).Bold(true).Render("> " + line)
-		} else if i == p.lastEvent.CurrPos {
+		} else if i == p.lastEvent.Cursor {
 			line = lipgloss.NewStyle().Foreground(lipgloss.Color("2")).Render("> " + line)
-		} else if i == p.lastEvent.SelPos {
+		} else if i == p.lastEvent.ActivePos {
 			line = lipgloss.NewStyle().Foreground(lipgloss.Color("3")).Render("  " + line)
 		} else {
 			line = "  " + line

@@ -13,13 +13,13 @@ import (
 type RequestsPane struct {
 	focused       bool
 	width, height int
-	lastEvent     state.RequestEvent
-	requestSystem *state.RequestSystem
+	lastEvent     state.RequestsChangedEvent
+	requestSystem *state.RequestManager
 }
 
 func NewRequestsPane(st *state.State) RequestsPane {
 	return RequestsPane{
-		requestSystem: st.RequestSystem,
+		requestSystem: st.RequestManager,
 	}
 }
 
@@ -73,7 +73,7 @@ func (p RequestsPane) View() string {
 	var sb strings.Builder
 	for i, req := range p.lastEvent.Requests {
 		line := req.Name
-		if i == p.lastEvent.Pos {
+		if i == p.lastEvent.Cursor {
 			line = lipgloss.NewStyle().Foreground(lipgloss.Color("2")).Render("> " + line)
 		} else {
 			line = "  " + line

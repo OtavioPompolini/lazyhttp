@@ -31,8 +31,8 @@ const (
 )
 
 // EventBus bridge messages
-type CollectionChangedMsg struct{ Event state.CollectionEvent }
-type RequestChangedMsg struct{ Event state.RequestEvent }
+type CollectionChangedMsg struct{ Event state.CollectionsChangedEvent }
+type RequestChangedMsg struct{ Event state.RequestsChangedEvent }
 type CollectionSelectedMsg struct{ Event state.CollectionSelectedEvent }
 type AlertMsg struct{ Message string }
 

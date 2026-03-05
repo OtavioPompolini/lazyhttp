@@ -5,60 +5,60 @@ import (
 	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
-type RequestEvent struct {
+type RequestsChangedEvent struct {
 	Requests []*types.Request
-	Pos      int
+	Cursor   int
 }
 
-type RequestSystem struct {
+type RequestManager struct {
 	requests             map[int64][]*types.Request
 	selectedCollectionId *int64
-	pos                  int
+	cursor               int
 
 	eventBus          *EventBus
 	requestRepository database.RequestRepository
 }
 
-func newRequestSystem(db database.PersistanceAdapter, eb *EventBus) *RequestSystem {
-	rs := &RequestSystem{
+func newRequestManager(db database.PersistenceAdapter, eb *EventBus) *RequestManager {
+	rs := &RequestManager{
 		requests:          make(map[int64][]*types.Request),
 		requestRepository: db.RequestRepository,
 		eventBus:          eb,
 	}
-	rs.wireEvents()
+	rs.subscribeToEvents()
 	return rs
 }
 
-func (rs *RequestSystem) wireEvents() {
+func (rs *RequestManager) subscribeToEvents() {
 	rs.eventBus.Subscribe(CollectionSelected, func(e Event) {
 		event := e.Data.(CollectionSelectedEvent)
 		rs.selectedCollectionId = &event.Collection.Id
-		rs.pos = 0
+		rs.cursor = 0
 		rs.publishRequestChanged()
 	})
 }
 
-func (rs *RequestSystem) publishRequestChanged() {
+func (rs *RequestManager) publishRequestChanged() {
 	var reqs []*types.Request
 	if rs.selectedCollectionId != nil {
 		reqs = rs.requests[*rs.selectedCollectionId]
 	}
 	rs.eventBus.Publish(Event{
 		Type: RequestChanged,
-		Data: RequestEvent{
+		Data: RequestsChangedEvent{
 			Requests: reqs,
-			Pos:      rs.pos,
+			Cursor:   rs.cursor,
 		},
 	})
 }
 
-func (rs *RequestSystem) init() {
+func (rs *RequestManager) init() {
 	rs.requests = loadRequests(rs.requestRepository)
 }
 
-func loadRequests(requestRpository database.RequestRepository) map[int64][]*types.Request {
+func loadRequests(requestRepository database.RequestRepository) map[int64][]*types.Request {
 	requestsMap := make(map[int64][]*types.Request)
-	requestsList := requestRpository.GetRequests()
+	requestsList := requestRepository.GetRequests()
 
 	for _, v := range requestsList {
 		_, ok := requestsMap[v.CollectionId]
@@ -72,7 +72,7 @@ func loadRequests(requestRpository database.RequestRepository) map[int64][]*type
 	return requestsMap
 }
 
-func (rs *RequestSystem) Create(reqName string) {
+func (rs *RequestManager) Create(reqName string) {
 	saved := rs.requestRepository.Create(reqName, *rs.selectedCollectionId)
 	currRequests, ok := rs.requests[*rs.selectedCollectionId]
 
@@ -82,11 +82,11 @@ func (rs *RequestSystem) Create(reqName string) {
 		rs.requests[*rs.selectedCollectionId] = append(rs.requests[*rs.selectedCollectionId], saved)
 	}
 
-	rs.pos = len(currRequests) - 1
+	rs.cursor = len(currRequests) - 1
 	rs.publishRequestChanged()
 }
 
-func (rs *RequestSystem) ListNames() []string {
+func (rs *RequestManager) ListNames() []string {
 	if rs.selectedCollectionId == nil || len(rs.requests[*rs.selectedCollectionId]) <= 0 {
 		return []string{}
 	}
@@ -100,11 +100,11 @@ func (rs *RequestSystem) ListNames() []string {
 	return requestsList
 }
 
-func (rs *RequestSystem) CurrentPos() int {
-	return rs.pos
+func (rs *RequestManager) CurrentPos() int {
+	return rs.cursor
 }
 
-func (rs *RequestSystem) SelectNext() {
+func (rs *RequestManager) SelectNext() {
 	if rs.selectedCollectionId == nil {
 		return
 	}
@@ -113,11 +113,11 @@ func (rs *RequestSystem) SelectNext() {
 		return
 	}
 
-	rs.pos = min(len(currRequests)-1, rs.pos+1)
+	rs.cursor = min(len(currRequests)-1, rs.cursor+1)
 	rs.publishRequestChanged()
 }
 
-func (rs *RequestSystem) SelectPrev() {
+func (rs *RequestManager) SelectPrev() {
 	if rs.selectedCollectionId == nil {
 		return
 	}
@@ -126,11 +126,11 @@ func (rs *RequestSystem) SelectPrev() {
 		return
 	}
 
-	rs.pos = max(0, rs.pos-1)
+	rs.cursor = max(0, rs.cursor-1)
 	rs.publishRequestChanged()
 }
 
-func (rs *RequestSystem) Update(r *types.Request) {
+func (rs *RequestManager) Update(r *types.Request) {
 	// c.requests[c.currColl][c.currReq].Body = r.Body
 	// c.requestRepository.UpdateRequest(r)
 }

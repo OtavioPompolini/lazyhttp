@@ -23,7 +23,7 @@ type RequestDetailsPane struct {
 	mode           vimMode
 	textarea       textarea.Model
 	currentRequest *types.Request
-	requestSystem  *state.RequestSystem
+	requestSystem  *state.RequestManager
 }
 
 func NewRequestDetailsPane(st *state.State) RequestDetailsPane {
@@ -35,7 +35,7 @@ func NewRequestDetailsPane(st *state.State) RequestDetailsPane {
 
 	return RequestDetailsPane{
 		textarea:      ta,
-		requestSystem: st.RequestSystem,
+		requestSystem: st.RequestManager,
 		mode:          vimNormal,
 	}
 }
@@ -47,8 +47,8 @@ func (p RequestDetailsPane) Update(msg tea.Msg) (RequestDetailsPane, tea.Cmd) {
 	case msgs.RequestChangedMsg:
 		if !p.focused {
 			p.currentRequest = nil
-			if len(m.Event.Requests) > 0 && m.Event.Pos >= 0 && m.Event.Pos < len(m.Event.Requests) {
-				p.currentRequest = m.Event.Requests[m.Event.Pos]
+			if len(m.Event.Requests) > 0 && m.Event.Cursor >= 0 && m.Event.Cursor < len(m.Event.Requests) {
+				p.currentRequest = m.Event.Requests[m.Event.Cursor]
 			}
 			body := ""
 			if p.currentRequest != nil {

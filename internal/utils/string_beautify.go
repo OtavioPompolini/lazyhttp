@@ -21,16 +21,16 @@ func IsJSON(str string) bool {
 	return json.Unmarshal([]byte(str), &js) == nil
 }
 
-func IsXml(str string) bool {
+func IsXML(str string) bool {
 	var js string
 	return xml.Unmarshal([]byte(str), &js) == nil
 }
 
-func StringBeautify(str string) func(io.Writer) error {
+func FormatAndHighlight(str string) func(io.Writer) error {
 	return func(wr io.Writer) error {
 		// log.Printf("Beautifying string = %s", str)
 		isJson := IsJSON(str)
-		isXml := IsXml(str)
+		isXml := IsXML(str)
 		var lexer chroma.Lexer
 
 		if isJson {

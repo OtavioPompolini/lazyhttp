@@ -32,9 +32,9 @@ func (a SqliteRequestRepository) GetRequests() []*types.Request {
 	defer row.Close()
 	for row.Next() {
 		request := &types.Request{}
-		pudim := 0
+		_position := 0
 
-		err := row.Scan(&request.Id, &request.CollectionId, &pudim, &request.Name, &request.Body)
+		err := row.Scan(&request.Id, &request.CollectionId, &_position, &request.Name, &request.Body)
 		if err != nil {
 			log.Panic(err)
 		}

@@ -17,7 +17,7 @@ func NewBridge(p *tea.Program, eb *state.EventBus) *Bridge {
 	b := &Bridge{program: p}
 
 	eb.Subscribe(state.CollectionChanged, func(e state.Event) {
-		go b.program.Send(msgs.CollectionChangedMsg{Event: e.Data.(state.CollectionEvent)})
+		go b.program.Send(msgs.CollectionChangedMsg{Event: e.Data.(state.CollectionsChangedEvent)})
 	})
 
 	eb.Subscribe(state.CollectionSelected, func(e state.Event) {
@@ -25,7 +25,7 @@ func NewBridge(p *tea.Program, eb *state.EventBus) *Bridge {
 	})
 
 	eb.Subscribe(state.RequestChanged, func(e state.Event) {
-		go b.program.Send(msgs.RequestChangedMsg{Event: e.Data.(state.RequestEvent)})
+		go b.program.Send(msgs.RequestChangedMsg{Event: e.Data.(state.RequestsChangedEvent)})
 	})
 
 	eb.Subscribe(state.AlertMessage, func(e state.Event) {

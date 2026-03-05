@@ -15,7 +15,7 @@ import (
 	"github.com/OtavioPompolini/project-postman/internal/types"
 )
 
-type PersistanceAdapter struct {
+type PersistenceAdapter struct {
 	RequestRepository    RequestRepository
 	ResponseRepository   ResponseRepository
 	VariablesRepository  VariablesRepository
@@ -54,15 +54,15 @@ type VariablesRepository interface {
 }
 
 // Only sqlite for now
-func NewPersistanceAdapter() (PersistanceAdapter, error) {
-	storagePath, err := getDBPath()
+func NewPersistenceAdapter() (PersistenceAdapter, error) {
+	storagePath, err := dbPath()
 	if err != nil {
-		return PersistanceAdapter{}, errors.New("Failed to create sqlite database file")
+		return PersistenceAdapter{}, errors.New("Failed to create sqlite database file")
 	}
 
 	db, err := sql.Open("sqlite3", storagePath)
 	if err != nil {
-		return PersistanceAdapter{}, err
+		return PersistenceAdapter{}, err
 	}
 
 	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
@@ -71,7 +71,7 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 		"sqlite3", driver)
 	m.Up()
 
-	return PersistanceAdapter{
+	return PersistenceAdapter{
 		RequestRepository:    newRequestRepository(db),
 		ResponseRepository:   newResponseRepository(db),
 		VariablesRepository:  newVariablesRepository(db),
@@ -80,7 +80,7 @@ func NewPersistanceAdapter() (PersistanceAdapter, error) {
 	}, nil
 }
 
-func getDBPath() (string, error) {
+func dbPath() (string, error) {
 	appDir := filepath.Join(xdg.DataHome, "LazyHttp")
 	if err := os.MkdirAll(appDir, 0755); err != nil {
 		return "", err

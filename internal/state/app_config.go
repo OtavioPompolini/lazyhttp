@@ -17,7 +17,7 @@ type AppConfig struct {
 	configRepo database.ConfigRepository
 }
 
-func NewAppConfig(db database.PersistanceAdapter) *AppConfig {
+func NewAppConfig(db database.PersistenceAdapter) *AppConfig {
 	configMap := db.ConfigRepository.GetConfig()
 	srh, _ := strconv.ParseBool(configMap[SHOW_RESPONSE_HEADERS])
 

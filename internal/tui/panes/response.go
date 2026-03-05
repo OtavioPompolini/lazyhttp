@@ -31,8 +31,8 @@ func (p ResponsePane) Update(msg tea.Msg) (ResponsePane, tea.Cmd) {
 	switch m := msg.(type) {
 	case msgs.RequestChangedMsg:
 		p.currentRequest = nil
-		if len(m.Event.Requests) > 0 && m.Event.Pos >= 0 && m.Event.Pos < len(m.Event.Requests) {
-			p.currentRequest = m.Event.Requests[m.Event.Pos]
+		if len(m.Event.Requests) > 0 && m.Event.Cursor >= 0 && m.Event.Cursor < len(m.Event.Requests) {
+			p.currentRequest = m.Event.Requests[m.Event.Cursor]
 		}
 		p.viewport.SetContent(p.buildContent())
 
@@ -63,7 +63,7 @@ func (p ResponsePane) buildContent() string {
 	var buf bytes.Buffer
 	buf.WriteString(resp.Info)
 	buf.WriteString("\n")
-	if err := utils.StringBeautify(resp.Body)(&buf); err != nil {
+	if err := utils.FormatAndHighlight(resp.Body)(&buf); err != nil {
 		log.Print("Error while highlighting response body:", err)
 		buf.WriteString(resp.Body)
 	}

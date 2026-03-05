@@ -12,7 +12,7 @@ import (
 type CreateRequestPane struct {
 	width, height int
 	input         textinput.Model
-	requestSystem *state.RequestSystem
+	requestSystem *state.RequestManager
 }
 
 func NewCreateRequestPane(st *state.State) CreateRequestPane {
@@ -22,7 +22,7 @@ func NewCreateRequestPane(st *state.State) CreateRequestPane {
 	ti.CharLimit = 128
 	return CreateRequestPane{
 		input:         ti,
-		requestSystem: st.RequestSystem,
+		requestSystem: st.RequestManager,
 	}
 }
 

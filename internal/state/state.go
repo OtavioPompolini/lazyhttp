@@ -26,8 +26,8 @@ import (
 // }
 
 type State struct {
-	CollectionSystem *CollectionSystem
-	RequestSystem    *RequestSystem
+	CollectionManager *CollectionManager
+	RequestManager    *RequestManager
 
 	// AppConfig          *AppConfig
 	// NotificationSystem *NotificationSystem
@@ -47,19 +47,19 @@ type AlertNotificationObserver interface {
 	SendAlertNotification(message string)
 }
 
-func NewState(db database.PersistanceAdapter, eventBus *EventBus) *State {
+func NewState(db database.PersistenceAdapter, eventBus *EventBus) *State {
 	return &State{
-		CollectionSystem: newCollectionSystem(db, eventBus),
-		RequestSystem:    newRequestSystem(db, eventBus),
+		CollectionManager: newCollectionManager(db, eventBus),
+		RequestManager:    newRequestManager(db, eventBus),
 	}
 }
 
 func (s *State) Init() {
-	s.RequestSystem.init()
-	s.CollectionSystem.init()
+	s.RequestManager.init()
+	s.CollectionManager.init()
 }
 
-func loadResponses(db database.PersistanceAdapter, reqs []*types.Request) {
+func loadResponses(db database.PersistenceAdapter, reqs []*types.Request) {
 	responses := db.ResponseRepository.GetAll()
 	for _, v := range reqs {
 		r, ok := responses[v.Id]
