@@ -45,7 +45,7 @@ func (p RequestsPane) Update(msg tea.Msg) (RequestsPane, tea.Cmd) {
 			return p, func() tea.Msg { rs.SelectPrev(); return nil }
 		case "enter":
 			return p, msgs.FocusCmd(msgs.FocusRequestDetails)
-		case "!":
+		case "1":
 			return p, msgs.FocusCmd(msgs.FocusCollections)
 		case "r":
 			return p, msgs.FocusCmd(msgs.FocusResponse)

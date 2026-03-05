@@ -43,7 +43,7 @@ func (c *CollectionSystem) wireEvents() {
 			if col.Id == id {
 				c.selId = id
 				c.selPos = i
-				c.currPos = 0
+				// c.currPos = 0
 				break
 			}
 		}
@@ -166,4 +166,13 @@ func (c *CollectionSystem) SelectCurrent() {
 	c.selPos = c.currPos
 	c.selId = c.collections[c.currPos].Id
 	c.currPos = 0
+}
+
+func (c *CollectionSystem) TestAlert() {
+	e := Event{
+		Type: AlertMessage,
+		Data: "pudim 123",
+	}
+
+	c.eventBus.Publish(e)
 }

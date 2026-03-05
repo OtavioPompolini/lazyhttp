@@ -2,6 +2,7 @@ package panes
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -64,6 +65,8 @@ func (p CollectionsPane) Update(msg tea.Msg) (CollectionsPane, tea.Cmd) {
 			}
 		case "[":
 			return p, msgs.FocusCmd(msgs.FocusRequests)
+		case "a":
+			return p, func() tea.Msg { cs.TestAlert(); return nil }
 		}
 	}
 	return p, nil
@@ -83,6 +86,7 @@ func (p CollectionsPane) View() string {
 
 	var sb strings.Builder
 	for i, col := range p.lastEvent.Collections {
+		log.Println("pudim", col)
 		line := col.Name
 		if i == p.lastEvent.CurrPos && i == p.lastEvent.SelPos {
 			line = lipgloss.NewStyle().Foreground(lipgloss.Color("3")).Bold(true).Render("> " + line)

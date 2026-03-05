@@ -173,6 +173,25 @@ func (m *RootModel) applyFocus() {
 	m.debugger.SetFocused(m.focus.Current() == msgs.FocusDebugger)
 }
 
+func (m RootModel) leftColHeights() (collH, reqH, varH int) {
+	debugH := m.height * 20 / 100
+	mainH := m.height - debugH
+
+	switch m.focus.Current() {
+	case msgs.FocusCollections:
+		collH = mainH * 55 / 100
+		reqH = mainH * 25 / 100
+	case msgs.FocusRequests:
+		collH = mainH * 25 / 100
+		reqH = mainH * 55 / 100
+	default:
+		collH = mainH * 45 / 100
+		reqH = mainH * 30 / 100
+	}
+	varH = mainH - collH - reqH
+	return
+}
+
 func (m *RootModel) distributeSize() {
 	leftW := m.width * 20 / 100
 	midW := m.width * 40 / 100
@@ -181,9 +200,7 @@ func (m *RootModel) distributeSize() {
 	debugH := m.height * 20 / 100
 	mainH := m.height - debugH
 
-	collH := mainH * 50 / 100
-	reqH := mainH * 25 / 100
-	varH := mainH - collH - reqH
+	collH, reqH, varH := m.leftColHeights()
 
 	m.collections.SetSize(leftW, collH)
 	m.requests.SetSize(leftW, reqH)
@@ -204,12 +221,8 @@ func (m RootModel) View() string {
 	rightW := m.width - leftW - midW
 	debugH := m.height * 20 / 100
 	mainH := m.height - debugH
+	collH, reqH, varH := m.leftColHeights()
 
-	collH := mainH * 50 / 100
-	reqH := mainH * 25 / 100
-	varH := mainH - collH - reqH
-
-	// Ensure sizes are consistent with view
 	m.collections.SetSize(leftW, collH)
 	m.requests.SetSize(leftW, reqH)
 	m.variables.SetSize(leftW, varH)
