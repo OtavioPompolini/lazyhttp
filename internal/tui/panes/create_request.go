@@ -1,9 +1,9 @@
 package panes
 
 import (
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/tui/msgs"
@@ -36,7 +36,7 @@ func (p CreateRequestPane) Update(msg tea.Msg) (CreateRequestPane, tea.Cmd) {
 			p.input.Focus()
 		}
 
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch m.String() {
 		case "enter":
 			name := p.input.Value()

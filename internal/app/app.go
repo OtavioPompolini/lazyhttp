@@ -1,7 +1,7 @@
 package app
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/OtavioPompolini/project-postman/internal/database"
 	"github.com/OtavioPompolini/project-postman/internal/state"
@@ -23,7 +23,7 @@ func NewApp() (*App, error) {
 	st := state.NewState(db, eb)
 
 	rootModel := tui.NewRootModel(st, eb)
-	p := tea.NewProgram(rootModel, tea.WithAltScreen())
+	p := tea.NewProgram(rootModel)
 
 	tui.NewBridge(p, eb)
 

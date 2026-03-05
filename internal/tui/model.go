@@ -3,8 +3,8 @@ package tui
 import (
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/tui/msgs"
@@ -54,7 +54,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.distributeSize()
 		return m, nil
 
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		// Global quit
 		if tm.String() == "ctrl+c" {
 			return m, tea.Quit
@@ -211,9 +211,11 @@ func (m *RootModel) distributeSize() {
 	m.createRequest.SetSize(m.width, m.height)
 }
 
-func (m RootModel) View() string {
+func (m RootModel) View() tea.View {
 	if m.width == 0 {
-		return "Loading..."
+		v := tea.NewView("Loading...")
+		v.AltScreen = true
+		return v
 	}
 
 	leftW := m.width * 20 / 100
@@ -260,7 +262,9 @@ func (m RootModel) View() string {
 		base = placeOverlay(m.width/2-26, m.height/2-3, overlay, base)
 	}
 
-	return base
+	v := tea.NewView(base)
+	v.AltScreen = true
+	return v
 }
 
 // placeOverlay places overlay text on top of background text at position (cx, cy).

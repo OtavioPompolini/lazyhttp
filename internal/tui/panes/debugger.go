@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/viewport"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/OtavioPompolini/project-postman/internal/tui/msgs"
 )
@@ -44,7 +44,7 @@ func NewDebuggerPane() DebuggerPane {
 	log.SetPrefix("INFO: ")
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	vp := viewport.New(80, 5)
+	vp := viewport.New(viewport.WithWidth(80), viewport.WithHeight(5))
 	return DebuggerPane{
 		viewport: vp,
 		logBuf:   buf,
@@ -70,7 +70,7 @@ func (p DebuggerPane) Update(msg tea.Msg) (DebuggerPane, tea.Cmd) {
 	case msgs.FocusLostMsg:
 		p.focused = false
 
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		if p.focused {
 			var cmd tea.Cmd
 			p.viewport, cmd = p.viewport.Update(msg)
@@ -93,8 +93,8 @@ func (p DebuggerPane) View() string {
 	}
 
 	title := lipgloss.NewStyle().Bold(true).Render("Debugger")
-	p.viewport.Width = p.width - 4
-	p.viewport.Height = p.height - 4
+	p.viewport.SetWidth(p.width - 4)
+	p.viewport.SetHeight(p.height - 4)
 
 	content := title + "\n" + p.viewport.View()
 	return border.Render(content)
@@ -103,8 +103,8 @@ func (p DebuggerPane) View() string {
 func (p *DebuggerPane) SetSize(w, h int) {
 	p.width = w
 	p.height = h
-	p.viewport.Width = w - 4
-	p.viewport.Height = h - 4
+	p.viewport.SetWidth(w - 4)
+	p.viewport.SetHeight(h - 4)
 }
 
 func (p *DebuggerPane) SetFocused(f bool) {

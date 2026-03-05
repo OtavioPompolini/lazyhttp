@@ -1,9 +1,9 @@
 package panes
 
 import (
-	"github.com/charmbracelet/bubbles/textarea"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/textarea"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/tui/msgs"
@@ -21,6 +21,7 @@ type RequestDetailsPane struct {
 	focused        bool
 	width, height  int
 	mode           vimMode
+	pendingG       bool
 	textarea       textarea.Model
 	currentRequest *types.Request
 	requestSystem  *state.RequestManager
@@ -68,25 +69,52 @@ func (p RequestDetailsPane) Update(msg tea.Msg) (RequestDetailsPane, tea.Cmd) {
 			})
 		}
 
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		if !p.focused {
 			break
 		}
 		switch p.mode {
 		case vimNormal:
-			switch m.String() {
-			case "i":
+			key := m.String()
+			if key != "g" {
+				p.pendingG = false
+			}
+			switch key {
+			case "i", "a":
 				p.mode = vimInsert
-				p.textarea.Focus()
+				return p, textarea.Blink
+			case "I":
+				p.textarea, _ = p.textarea.Update(tea.KeyPressMsg{Code: 'a', Mod: tea.ModCtrl})
+				p.mode = vimInsert
+				return p, textarea.Blink
+			case "A":
+				p.textarea, _ = p.textarea.Update(tea.KeyPressMsg{Code: 'e', Mod: tea.ModCtrl})
+				p.mode = vimInsert
+				return p, textarea.Blink
+			case "o":
+				p.textarea, _ = p.textarea.Update(tea.KeyPressMsg{Code: 'e', Mod: tea.ModCtrl})
+				p.textarea, _ = p.textarea.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+				p.mode = vimInsert
+				return p, textarea.Blink
+			case "O":
+				p.textarea, _ = p.textarea.Update(tea.KeyPressMsg{Code: 'a', Mod: tea.ModCtrl})
+				p.textarea, _ = p.textarea.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+				p.textarea, _ = p.textarea.Update(tea.KeyPressMsg{Code: tea.KeyUp})
+				p.mode = vimInsert
 				return p, textarea.Blink
 			case "esc":
 				return p, msgs.FocusCmd(msgs.FocusRequests)
+			default:
+				if synth, ok := motionToKey(key, &p.pendingG); ok {
+					var cmd tea.Cmd
+					p.textarea, cmd = p.textarea.Update(synth)
+					return p, cmd
+				}
 			}
 		case vimInsert:
 			switch m.String() {
 			case "esc":
 				p.mode = vimNormal
-				p.textarea.Blur()
 			default:
 				var cmd tea.Cmd
 				p.textarea, cmd = p.textarea.Update(msg)
@@ -129,8 +157,47 @@ func (p *RequestDetailsPane) SetSize(w, h int) {
 
 func (p *RequestDetailsPane) SetFocused(f bool) {
 	p.focused = f
-	if !f {
+	if f {
+		p.mode = vimNormal
+		p.pendingG = false
+		p.textarea.Focus()
+	} else {
 		p.mode = vimNormal
 		p.textarea.Blur()
 	}
+}
+
+// motionToKey translates a vim normal-mode motion key into a synthetic
+// tea.KeyPressMsg the textarea can process. Returns (msg, true) if a motion
+// was produced, or (_, false) if the key was consumed but produced no motion
+// (e.g. the first 'g' of 'gg').
+func motionToKey(key string, pendingG *bool) (tea.KeyPressMsg, bool) {
+	switch key {
+	case "h":
+		return tea.KeyPressMsg{Code: tea.KeyLeft}, true
+	case "l":
+		return tea.KeyPressMsg{Code: tea.KeyRight}, true
+	case "j":
+		return tea.KeyPressMsg{Code: tea.KeyDown}, true
+	case "k":
+		return tea.KeyPressMsg{Code: tea.KeyUp}, true
+	case "w", "e", "E":
+		return tea.KeyPressMsg{Code: tea.KeyRight, Mod: tea.ModAlt}, true
+	case "b", "B":
+		return tea.KeyPressMsg{Code: tea.KeyLeft, Mod: tea.ModAlt}, true
+	case "0":
+		return tea.KeyPressMsg{Code: 'a', Mod: tea.ModCtrl}, true
+	case "$":
+		return tea.KeyPressMsg{Code: 'e', Mod: tea.ModCtrl}, true
+	case "G":
+		return tea.KeyPressMsg{Code: tea.KeyEnd, Mod: tea.ModCtrl}, true
+	case "g":
+		if *pendingG {
+			*pendingG = false
+			return tea.KeyPressMsg{Code: tea.KeyHome, Mod: tea.ModCtrl}, true
+		}
+		*pendingG = true
+		return tea.KeyPressMsg{}, false
+	}
+	return tea.KeyPressMsg{}, false
 }

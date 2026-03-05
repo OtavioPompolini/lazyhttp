@@ -3,8 +3,8 @@ package panes
 import (
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/tui/msgs"
@@ -33,7 +33,7 @@ func (p RequestsPane) Update(msg tea.Msg) (RequestsPane, tea.Cmd) {
 	case msgs.FocusLostMsg:
 		p.focused = false
 
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		if !p.focused {
 			break
 		}
