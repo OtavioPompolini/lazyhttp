@@ -2,7 +2,6 @@ package panes
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -52,17 +51,7 @@ func (p CollectionsPane) Update(msg tea.Msg) (CollectionsPane, tea.Cmd) {
 		case "K":
 			return p, func() tea.Msg { cs.SwapPositionUp(); return nil }
 		case "enter":
-			if len(p.lastEvent.Collections) > 0 {
-				id := p.lastEvent.Collections[p.lastEvent.CurrPos].Id
-				eb := p.eventBus
-				return p, func() tea.Msg {
-					eb.Publish(state.Event{
-						Type: state.InternalCollectionSelected,
-						Data: id,
-					})
-					return nil
-				}
-			}
+			return p, func() tea.Msg { cs.SelectCurrent(); return nil }
 		case "2":
 			return p, msgs.FocusCmd(msgs.FocusRequests)
 		case "a":

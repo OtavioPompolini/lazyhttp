@@ -32,25 +32,7 @@ func newCollectionSystem(db database.PersistanceAdapter, eb *EventBus) *Collecti
 		collectionRepository: db.CollectionRepository,
 		eventBus:             eb,
 	}
-	cs.wireEvents()
 	return cs
-}
-
-func (c *CollectionSystem) wireEvents() {
-	c.eventBus.Subscribe(InternalCollectionSelected, func(e Event) {
-		id := e.Data.(int64)
-		for i, col := range c.collections {
-			if col.Id == id {
-				c.selId = id
-				c.selPos = i
-				break
-			}
-		}
-		c.eventBus.Publish(Event{
-			Type: CollectionSelected,
-			Data: CollectionSelectedEvent{Collection: c.collections[c.selPos]},
-		})
-	})
 }
 
 func (c *CollectionSystem) init() {
@@ -60,8 +42,8 @@ func (c *CollectionSystem) init() {
 		c.selId = c.collections[0].Id
 		c.selPos = 0
 	}
-	c.eventBus.Publish(c.getCollectionEvent())
 
+	c.eventBus.Publish(c.getCollectionEvent())
 	if len(c.collections) > 0 {
 		c.eventBus.Publish(Event{
 			Type: CollectionSelected,
@@ -164,7 +146,7 @@ func (c *CollectionSystem) SwapPositionDown() {
 func (c *CollectionSystem) SelectCurrent() {
 	c.selPos = c.currPos
 	c.selId = c.collections[c.currPos].Id
-	c.currPos = 0
+	c.eventBus.Publish(c.getCollectionEvent())
 }
 
 func (c *CollectionSystem) TestAlert() {
