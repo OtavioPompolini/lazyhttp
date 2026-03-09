@@ -9,6 +9,7 @@ import (
 	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/tui/msgs"
 	"github.com/OtavioPompolini/project-postman/internal/tui/panes"
+	"github.com/OtavioPompolini/project-postman/internal/vim"
 )
 
 type RootModel struct {
@@ -27,12 +28,12 @@ type RootModel struct {
 	createRequest  panes.CreateRequestPane
 }
 
-func NewRootModel(st *state.State, eb *state.EventBus) RootModel {
+func NewRootModel(st *state.State, eb *state.EventBus, engine vim.Engine) RootModel {
 	m := RootModel{
 		focus:          newFocusManager(),
 		collections:    panes.NewCollectionsPane(st, eb),
 		requests:       panes.NewRequestsPane(st),
-		requestDetails: panes.NewRequestDetailsPane(st),
+		requestDetails: panes.NewRequestDetailsPane(st, engine),
 		response:       panes.NewResponsePane(),
 		variables:      panes.NewVariablesPane(),
 		debugger:       panes.NewDebuggerPane(),

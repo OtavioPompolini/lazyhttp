@@ -1,11 +1,16 @@
 package app
 
 import (
+	"log"
+	"path/filepath"
+
 	tea "charm.land/bubbletea/v2"
+	"github.com/adrg/xdg"
 
 	"github.com/OtavioPompolini/project-postman/internal/database"
 	"github.com/OtavioPompolini/project-postman/internal/state"
 	"github.com/OtavioPompolini/project-postman/internal/tui"
+	"github.com/OtavioPompolini/project-postman/internal/vim"
 )
 
 type App struct {
@@ -22,7 +27,13 @@ func NewApp() (*App, error) {
 	eb := state.NewEventBus()
 	st := state.NewState(db, eb)
 
-	rootModel := tui.NewRootModel(st, eb)
+	engine := vim.NewEngine()
+	configPath := filepath.Join(xdg.ConfigHome, "lazyhttp", "init.lua")
+	if err := vim.LoadConfig(configPath, &engine); err != nil {
+		log.Printf("warn: vim config: %v", err)
+	}
+
+	rootModel := tui.NewRootModel(st, eb, engine)
 	p := tea.NewProgram(rootModel)
 
 	tui.NewBridge(p, eb)
